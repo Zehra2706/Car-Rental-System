@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "FIbWMqeGgiY=",
+  "dgSpecHash": "2lXv6ESNZcQ=",
   "success": true,
-  "projectFilePath": "c:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj",
+  "projectFilePath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\demir\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\demir\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",
@@ -82,6 +82,7 @@
     "C:\\Users\\demir\\.nuget\\packages\\microsoft.entityframeworkcore.design\\10.0.3\\microsoft.entityframeworkcore.design.10.0.3.nupkg.sha512",
     "C:\\Users\\demir\\.nuget\\packages\\microsoft.entityframeworkcore.relational\\10.0.3\\microsoft.entityframeworkcore.relational.10.0.3.nupkg.sha512",
     "C:\\Users\\demir\\.nuget\\packages\\microsoft.entityframeworkcore.sqlserver\\10.0.3\\microsoft.entityframeworkcore.sqlserver.10.0.3.nupkg.sha512",
+    "C:\\Users\\demir\\.nuget\\packages\\microsoft.entityframeworkcore.tools\\10.0.3\\microsoft.entityframeworkcore.tools.10.0.3.nupkg.sha512",
     "C:\\Users\\demir\\.nuget\\packages\\microsoft.extensions.dependencymodel\\10.0.3\\microsoft.extensions.dependencymodel.10.0.3.nupkg.sha512",
     "C:\\Users\\demir\\.nuget\\packages\\microsoft.identity.client\\4.73.1\\microsoft.identity.client.4.73.1.nupkg.sha512",
     "C:\\Users\\demir\\.nuget\\packages\\microsoft.identity.client.extensions.msal\\4.73.1\\microsoft.identity.client.extensions.msal.4.73.1.nupkg.sha512",

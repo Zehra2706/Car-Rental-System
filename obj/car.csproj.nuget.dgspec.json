@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj": {}
+    "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj": {}
   },
   "projects": {
-    "c:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj": {
+    "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj",
+        "projectUniqueName": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj",
         "projectName": "car",
-        "projectPath": "c:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj",
+        "projectPath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj",
         "packagesPath": "C:\\Users\\demir\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\obj\\",
+        "outputPath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -65,6 +65,12 @@
               "version": "[10.0.3, )"
             },
             "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[10.0.3, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
               "target": "Package",
               "version": "[10.0.3, )"
             },
