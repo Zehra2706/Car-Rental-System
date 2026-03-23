@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using car.Models; // <<-- BU SATIR ÇOK KRİTİK, EKSİKSE HATA VERİR
 
 namespace car.Data
 {
@@ -8,5 +9,9 @@ namespace car.Data
             : base(options)
         {
         }
+
+        // Tablolar buraya:
+      
+        public DbSet<Car> Cars { get; set; }
     }
 }
