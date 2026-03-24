@@ -10,7 +10,7 @@ using price.Models;
 using userInfo.Models;
 using userConnection.Models;
 using user.Models;
-using rental.Models; // <<-- BU SATIR ÇOK KRİTİK, EKSİKSE HATA VERİR
+using rental.Models;
 
 namespace car.Data
 {
@@ -21,8 +21,6 @@ namespace car.Data
         {
         }
 
-        // Tablolar buraya:
-      
         public DbSet<Car> Cars { get; set; }
         public DbSet<Ad> Ads { get; set; }
         public DbSet<CarFeature> CarFeatures { get; set; }
@@ -36,5 +34,27 @@ namespace car.Data
         public DbSet<UserConnection> UserConnections { get; set; }
         public DbSet<UserInfo> UserInfo { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            {
+                relationship.DeleteBehavior = DeleteBehavior.NoAction;
+            }
+
+
+            modelBuilder.Entity<User>().HasData(
+                new User { Id = 1, Name = "deneme", Surname = "deneme", UserRole = User.Role.Customer, Date = new DateTime(2024, 6, 25) }
+            );
+
+            modelBuilder.Entity<UserInfo>().HasData(
+                new UserInfo { Id = 1, UserId = 1, Email = "deneme@deneme.com", Password = "deneme123" }
+            );
+
+            modelBuilder.Entity<UserConnection>().HasData(
+                new UserConnection { Id = 1, UserId = 1, Number = "1234567890", Adress = "Deneme Adres" }
+            );
+        }
     }
 }

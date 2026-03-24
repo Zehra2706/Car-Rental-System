@@ -1,24 +1,29 @@
 using System.ComponentModel.DataAnnotations;
+using car.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace carFeature.Models 
+namespace carFeature.Models
 {
     public class CarFeature
     {
         [Key] // Bu birincil anahtar (Primary Key)
         public int Id { get; set; }
-        public int AracId { get; set; } // (Foreign Key)
+        public int CarId { get; set; } // Bu sadece sayı (Veritabanındaki sütun)
 
-        public double engineSize { get; set; } 
+        [ForeignKey("CarId")] // 2. "Yukarıdaki CarId, Car tablosuna gider" diyoruz.
+        public Car? Car { get; set; } // Bu da o arabanın kendisi (Java'daki nesne referansı)
 
-        public enum transmission { Automatic, Manual }
-        public transmission Transmission { get; set; }
+        public double engineSize { get; set; }
 
-        public enum FuelType { Gasoline, Diesel, Electric } 
-        public FuelType fuelType { get; set; }
+        public enum TransmissionType { Automatic, Manual }
+        public TransmissionType Transmission { get; set; }
 
-        public string motorInsurance { get; set; }
+        public enum FuelType { Gasoline, Diesel, Electric }
+        public required FuelType fuelType { get; set; }
 
-        public bool IsChauffeured { get; set; } // Şoförlü mü?
+        public required string motorInsurance { get; set; }
+
+        public required bool IsChauffeured { get; set; } // Şoförlü mü?
 
 
     }

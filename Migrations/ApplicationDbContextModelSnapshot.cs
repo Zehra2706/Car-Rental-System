@@ -48,6 +48,10 @@ namespace car.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CarId");
+
+                    b.HasIndex("UserId");
+
                     b.ToTable("Ads");
                 });
 
@@ -63,8 +67,9 @@ namespace car.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Color")
-                        .HasColumnType("int");
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -97,7 +102,7 @@ namespace car.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AracId")
+                    b.Property<int>("CarId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsChauffeured")
@@ -117,6 +122,8 @@ namespace car.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CarId");
 
                     b.ToTable("CarFeatures");
                 });
@@ -147,6 +154,12 @@ namespace car.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CarId");
+
+                    b.HasIndex("RentId");
+
+                    b.HasIndex("UserId");
+
                     b.ToTable("Comments");
                 });
 
@@ -171,6 +184,10 @@ namespace car.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CarId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Deposits");
                 });
@@ -198,6 +215,8 @@ namespace car.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("Licences");
                 });
 
@@ -223,6 +242,10 @@ namespace car.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CarId");
+
+                    b.HasIndex("UserId");
+
                     b.ToTable("Payments");
                 });
 
@@ -247,6 +270,8 @@ namespace car.Migrations
                         .HasColumnType("float");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AracId");
 
                     b.ToTable("Prices");
                 });
@@ -285,6 +310,10 @@ namespace car.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CarId");
+
+                    b.HasIndex("UserId");
+
                     b.ToTable("Rentals");
                 });
 
@@ -313,6 +342,16 @@ namespace car.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Date = new DateTime(2024, 6, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "deneme",
+                            Surname = "deneme",
+                            UserRole = 0
+                        });
                 });
 
             modelBuilder.Entity("userConnection.Models.UserConnection", b =>
@@ -336,7 +375,18 @@ namespace car.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("UserConnections");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Adress = "Deneme Adres",
+                            Number = "1234567890",
+                            UserId = 1
+                        });
                 });
 
             modelBuilder.Entity("userInfo.Models.UserInfo", b =>
@@ -360,7 +410,176 @@ namespace car.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("UserInfo");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "deneme@deneme.com",
+                            Password = "deneme123",
+                            UserId = 1
+                        });
+                });
+
+            modelBuilder.Entity("ad.Models.Ad", b =>
+                {
+                    b.HasOne("car.Models.Car", "Car")
+                        .WithMany()
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("user.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Car");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("carFeature.Models.CarFeature", b =>
+                {
+                    b.HasOne("car.Models.Car", "Car")
+                        .WithMany()
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Car");
+                });
+
+            modelBuilder.Entity("comment.Models.Comment", b =>
+                {
+                    b.HasOne("car.Models.Car", "Car")
+                        .WithMany()
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("rental.Models.Rental", "Rental")
+                        .WithMany()
+                        .HasForeignKey("RentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("user.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Car");
+
+                    b.Navigation("Rental");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("deposit.Models.Deposit", b =>
+                {
+                    b.HasOne("car.Models.Car", "Car")
+                        .WithMany()
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("user.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Car");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("licence.Models.Licence", b =>
+                {
+                    b.HasOne("user.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("payment.Models.Payment", b =>
+                {
+                    b.HasOne("car.Models.Car", "Car")
+                        .WithMany()
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("user.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Car");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("price.Models.Price", b =>
+                {
+                    b.HasOne("car.Models.Car", "Car")
+                        .WithMany()
+                        .HasForeignKey("AracId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Car");
+                });
+
+            modelBuilder.Entity("rental.Models.Rental", b =>
+                {
+                    b.HasOne("car.Models.Car", "Car")
+                        .WithMany()
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("user.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Car");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("userConnection.Models.UserConnection", b =>
+                {
+                    b.HasOne("user.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("userInfo.Models.UserInfo", b =>
+                {
+                    b.HasOne("user.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
