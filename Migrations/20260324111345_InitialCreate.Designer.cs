@@ -11,8 +11,8 @@ using car.Data;
 namespace car.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260324090050_UpdateTables")]
-    partial class UpdateTables
+    [Migration("20260324111345_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
