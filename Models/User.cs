@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-
+using userInfo.Models;
+using userConnection.Models;
 namespace user.Models
 {
     public class User
@@ -12,6 +13,8 @@ namespace user.Models
         public enum Role { Customer, Admin }
         public required Role UserRole { get; set; }
         public required DateTime Date { get; set; }
-
+        
+       public UserInfo UserInfo { get; set; }
+       public UserConnection UserConnection { get; set; }
     }
 }

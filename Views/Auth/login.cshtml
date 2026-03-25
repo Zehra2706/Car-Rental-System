@@ -1,0 +1,23 @@
+@using Car_reservation_automation_system.ViewModels
+@model LoginViewModel
+
+<h2>Giriş Yap</h2>
+
+<form method="post">
+    <div>
+        <label>Email</label>
+        <input asp-for="Email" />
+    </div>
+
+    <div>
+        <label>Şifre</label>
+        <input asp-for="Password" type="password" />
+    </div>
+
+    <button type="submit">Giriş</button>
+</form>
+
+@if(ViewBag.Error != null)
+{
+    <p style="color:red">@ViewBag.Error</p>
+}
