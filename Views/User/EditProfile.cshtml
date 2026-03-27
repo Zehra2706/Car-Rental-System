@@ -1,0 +1,56 @@
+@model car.ViewModels.EditProfileViewModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Profil Bilgilerimi Güncelle</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form action="/User/EditProfile" method="post">
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Ad</label>
+                                <input type="text" name="Name" class="form-control" value="@Model?.Name"
+                                       placeholder="Adınız" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Soyad</label>
+                                <input type="text" name="Surname" class="form-control" value="@Model?.Surname"
+                                       placeholder="Soyadınız" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">E-posta (Değiştirilemez)</label>
+                            <input type="email" name="Email" class="form-control bg-light"
+                                   value="@Context.Session.GetString("UserEmail")" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Telefon Numarası</label>
+                            <input type="tel" name="PhoneNumber" class="form-control" value="@Model?.PhoneNumber"
+                                   placeholder="05xx xxx xx xx" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Adres Bilgisi</label>
+                            <textarea name="Address" class="form-control" rows="3" placeholder="Açık adresiniz..."
+                                      required>@Model?.Address</textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">Değişiklikleri Kaydet</button>
+                            <a href="/User/Index" class="btn btn-outline-secondary">İptal Et ve Dön</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -31,7 +31,7 @@ public class AuthController : Controller
 
         HttpContext.Session.SetString("UserEmail", user.UserInfo.Email);
 
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "User");
     }
 
     // 🔹 REGISTER GET
@@ -42,24 +42,24 @@ public class AuthController : Controller
     }
 
     // 🔹 REGISTER POST
-[HttpPost]
-public IActionResult Register(RegisterViewModel model)
-{
-    if (model.Password != model.ConfirmPassword)
+    [HttpPost]
+    public IActionResult Register(RegisterViewModel model)
     {
-        ViewBag.Error = "Şifreler uyuşmuyor!";
-        return View(model);
-    }
+        if (model.Password != model.ConfirmPassword)
+        {
+            ViewBag.Error = "Şifreler uyuşmuyor!";
+            return View(model);
+        }
 
-    try
-    {
-        _userService.Register(model);
-        return RedirectToAction("Login");
+        try
+        {
+            _userService.Register(model);
+            return RedirectToAction("Login");
+        }
+        catch (Exception ex)
+        {
+            ViewBag.Error = ex.Message;
+            return View(model);
+        }
     }
-    catch (Exception ex)
-    {
-        ViewBag.Error = ex.Message;
-        return View(model);
-    }
-}
 }

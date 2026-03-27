@@ -9,6 +9,10 @@ public interface IUserRepository
     User GetById(int id);
     User GetByEmail(string email);
     bool EmailExists(string email);
-bool PhoneExists(string phone);
-bool LicenseExists(string license);
+    bool PhoneExists(string phone);
+    bool LicenseExists(string license);
+    User GetUserWithDetails(string email); // UserInfo ve Connection ile birlikte getirir
+    void Update(User user);
+    void Save();
+
 }
