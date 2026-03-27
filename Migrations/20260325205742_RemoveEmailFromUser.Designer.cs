@@ -357,7 +357,7 @@ namespace car.Migrations
                         });
                 });
 
-            modelBuilder.Entity("userConnection.Models.UserConnection", b =>
+            modelBuilder.Entity("userConnections.Models.UserConnections", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -565,11 +565,11 @@ namespace car.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("userConnection.Models.UserConnection", b =>
+            modelBuilder.Entity("userConnections.Models.UserConnections", b =>
                 {
                     b.HasOne("user.Models.User", "User")
-                        .WithOne("UserConnection")
-                        .HasForeignKey("userConnection.Models.UserConnection", "UserId")
+                        .WithOne("UserConnections")
+                        .HasForeignKey("userConnections.Models.UserConnections", "UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -589,7 +589,7 @@ namespace car.Migrations
 
             modelBuilder.Entity("user.Models.User", b =>
                 {
-                    b.Navigation("UserConnection")
+                    b.Navigation("UserConnections")
                         .IsRequired();
 
                     b.Navigation("UserInfo")

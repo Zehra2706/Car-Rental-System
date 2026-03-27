@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using car.Data;
 
@@ -11,9 +12,11 @@ using car.Data;
 namespace car.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260327000036_FixUserTables")]
+    partial class FixUserTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -219,16 +222,6 @@ namespace car.Migrations
                         .IsUnique();
 
                     b.ToTable("Licences");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Date = new DateTime(2024, 6, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            LicenceNumber = "L123456789",
-                            Score = 100,
-                            UserId = 1
-                        });
                 });
 
             modelBuilder.Entity("payment.Models.Payment", b =>
@@ -575,20 +568,24 @@ namespace car.Migrations
 
             modelBuilder.Entity("userConnections.Models.UserConnections", b =>
                 {
-                    b.HasOne("user.Models.User", null)
+                    b.HasOne("user.Models.User", "User")
                         .WithOne("UserConnections")
                         .HasForeignKey("userConnections.Models.UserConnections", "UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("userInfo.Models.UserInfo", b =>
                 {
-                    b.HasOne("user.Models.User", null)
+                    b.HasOne("user.Models.User", "User")
                         .WithOne("UserInfo")
                         .HasForeignKey("userInfo.Models.UserInfo", "UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("user.Models.User", b =>

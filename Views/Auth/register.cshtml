@@ -1,0 +1,21 @@
+@model RegisterViewModel
+
+
+<form asp-action="Register" method="post">
+    <input asp-for="Name" placeholder="Ad" />
+    <input asp-for="Surname" placeholder="Soyad" />
+    <input asp-for="Email" placeholder="Email" />
+    <input asp-for="Address" placeholder="Adres" />
+    <input asp-for="PhoneNumber" placeholder="Telefon Numarası" />
+    <input asp-for="LicenseNumber" placeholder="Ehliyet Numarası" />
+    <input asp-for="Password" type="password" placeholder="Şifre" />
+    <input asp-for="ConfirmPassword" type="password" placeholder="Şifre Tekrar" />
+
+    <button type="submit">Kayıt Ol</button>
+</form>
+@if (ViewBag.Error != null)
+{
+    <div style="color:red">
+        @ViewBag.Error
+    </div>
+}

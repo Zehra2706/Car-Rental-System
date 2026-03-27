@@ -4,7 +4,11 @@ using userInfo.Models;
 
 public interface IUserRepository
 {
-    void Add(User user);
+    void AddUser(User user);
+    // void AddUserInfo(UserInfo userInfo);
     User GetById(int id);
-    UserInfo GetByEmail(string email);
+    User GetByEmail(string email);
+    bool EmailExists(string email);
+bool PhoneExists(string phone);
+bool LicenseExists(string license);
 }

@@ -9,10 +9,9 @@ namespace userInfo.Models
         public int Id { get; set; }
         public int UserId { get; set; } // (Foreign Key)
         [ForeignKey("UserId")]
-        public User? User { get; set; }
+        // public User? User { get; set; }
         public required string Email { get; set; }
         public required string Password { get; set; }
-
 
     }
 }

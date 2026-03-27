@@ -12,8 +12,8 @@ namespace licence.Models
         [ForeignKey("UserId")]
         public User? User { get; set; }
         public required string LicenceNumber { get; set; }
-        public required DateTime Date { get; set; } // (Foreign Key)
-        public required int Score { get; set; }
+        public DateTime Date { get; set; } // (Foreign Key)
+        public int Score { get; set; }
 
     }
 }

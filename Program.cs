@@ -10,6 +10,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<car.Data.ApplicationDbContext>(options =>
@@ -31,6 +32,10 @@ app.UseSession();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+// app.MapControllerRoute(
+//     name: "default",
+//     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",

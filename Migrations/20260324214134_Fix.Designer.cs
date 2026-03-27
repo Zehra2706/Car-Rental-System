@@ -357,7 +357,7 @@ namespace car.Migrations
                         });
                 });
 
-            modelBuilder.Entity("userConnection.Models.UserConnection", b =>
+            modelBuilder.Entity("userConnections.Models.UserConnection", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -563,7 +563,7 @@ namespace car.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("userConnection.Models.UserConnection", b =>
+            modelBuilder.Entity("userConnections.Models.UserConnections", b =>
                 {
                     b.HasOne("user.Models.User", "User")
                         .WithMany()

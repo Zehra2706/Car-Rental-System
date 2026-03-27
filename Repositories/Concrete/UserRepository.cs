@@ -12,28 +12,45 @@ public class UserRepository : IUserRepository
         _context = context;
     }
 
-
-    public void Add(User user)
+    public void AddUser(User user)
     {
         _context.Users.Add(user);
         _context.SaveChanges();
     }
 
-    public User GetById(int id)
+
+    // public void AddUserInfo(UserInfo userInfo)
+    // {
+    //     throw new NotImplementedException();
+    // }
+
+    public User GetByEmail(string email)
     {
-        return _context.Users.Find(id);
+        return _context.Users
+            .Include(x => x.UserInfo)
+            .Include(x => x.UserConnections)
+            .FirstOrDefault(x => x.UserInfo.Email == email);
     }
 
-    public UserInfo GetByEmail(string email)
-    {
-        return _context.UserInfo
-            .Include(x => x.User) // User tablosunu da çekiyoruz
-            .FirstOrDefault(x => x.Email == email);
-    }
+  public User GetById(int id)
+{
+    return _context.Users
+        .Include(x => x.UserInfo)
+        .FirstOrDefault(x => x.Id == id);
+}
+public bool EmailExists(string email)
+{
+    return _context.UserInfo.Any(x => x.Email == email);
+}
 
+public bool PhoneExists(string phone)
+{
+    return _context.UserConnections.Any(x => x.Number == phone);
+}
 
-    User IUserRepository.GetById(int id)
-    {
-        throw new NotImplementedException();
-    }
+public bool LicenseExists(string license)
+{
+    return _context.Licences.Any(x => x.LicenceNumber == license);
+}
+
 }
