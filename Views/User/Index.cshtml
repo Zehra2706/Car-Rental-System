@@ -7,44 +7,55 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2>Hoş Geldin, <span class="text-primary">@userEmail</span>!</h2>
-            <p class="text-muted">Hesabını buradan yönetebilir ve araç kiralama işlemlerini takip edebilirsin.</p>
+            <p class="text-muted">Hesabını buradan yönetebilir ve işlemlerini takip edebilirsin.</p>
         </div>
-        <img src="https://ui-avatars.com/api/?name=Melisa&background=0D6EFD&color=fff" class="rounded-circle shadow"
+        <img src="https://ui-avatars.com/api/?name=User&background=0D6EFD&color=fff" class="rounded-circle shadow"
              width="60" alt="Profil">
     </div>
 
     <hr>
 
-    <div class="row g-4">
+    <div class="row g-4 row-cols-1 row-cols-md-2 row-cols-lg-4">
         
-        <div class="col-md-4">
+        <div class="col">
             <div class="card h-100 border-0 shadow-sm text-center p-3">
                 <div class="card-body">
                     <i class="bi bi-person-gear display-4 text-primary"></i>
-                    <h5 class="card-title mt-3">Profilimi Düzenle</h5>
-                    <p class="card-text text-muted small">Kişisel bilgilerini ve iletişim tercihlerini güncelle.</p>
+                    <h5 class="card-title mt-3">Profilim</h5>
+                    <p class="card-text text-muted small">Kişisel bilgilerini güncelle.</p>
                     <a href="/User/EditProfile" class="btn btn-primary w-100">Düzenle</a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col">
             <div class="card h-100 border-0 shadow-sm text-center p-3">
                 <div class="card-body">
                     <i class="bi bi-plus-circle display-4 text-success"></i>
                     <h5 class="card-title mt-3">Yeni Araç Ekle</h5>
-                    <p class="card-text text-muted small">Sisteme yeni bir kiralık araç tanımla (Admin Yetkisi).</p>
+                    <p class="card-text text-muted small">Sisteme yeni kiralık araç ekle.</p>
                     <a href="/Car/Create" class="btn btn-success w-100">Araç Ekle</a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm text-center p-3 bg-light">
+                <div class="card-body">
+                    <i class="bi bi-collection display-4 text-info"></i>
+                    <h5 class="card-title mt-3">Benim Araçlarım</h5>
+                    <p class="card-text text-muted small">İlanlarını yönet ve takip et.</p>
+                    <a href="/Car/MyCars" class="btn btn-info text-white w-100">İlanlarımı Gör</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
             <div class="card h-100 border-0 shadow-sm text-center p-3">
                 <div class="card-body">
                     <i class="bi bi-car-front display-4 text-warning"></i>
                     <h5 class="card-title mt-3">Kiralamalarım</h5>
-                    <p class="card-text text-muted small">Geçmiş ve aktif araç kiralama kayıtlarını incele.</p>
+                    <p class="card-text text-muted small">Geçmiş kiralama kayıtların.</p>
                     <a href="/User/MyRentals" class="btn btn-warning text-white w-100">Görüntüle</a>
                 </div>
             </div>
@@ -54,12 +65,12 @@
 
     <div class="row mt-5">
         <div class="col-12">
-            <div class="p-4 bg-light rounded-3 border">
-                <h5>Hızlı Bakış</h5>
-                <div class="d-flex gap-4 mt-2">
-                    <span class="badge bg-secondary">Aktif Kiralama: 1</span>
-                    <span class="badge bg-info">Tamamlanan: 5</span>
-                    <span class="badge bg-dark">Cüzdan: 450 ₺</span>
+            <div class="p-4 bg-light rounded-3 border shadow-sm">
+                <h5 class="mb-3"><i class="bi bi-lightning-charge"></i> Hızlı Bakış</h5>
+                <div class="d-flex flex-wrap gap-4">
+                    <span class="badge bg-secondary p-2 px-3">Aktif Kiralama: 1</span>
+                    <span class="badge bg-info p-2 px-3">Yayındaki İlan: @(ViewBag.CarCount ?? 0)</span>
+                    <span class="badge bg-dark p-2 px-3">Cüzdan: 450 ₺</span>
                 </div>
             </div>
         </div>

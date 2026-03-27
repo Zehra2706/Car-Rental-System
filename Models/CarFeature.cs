@@ -6,12 +6,12 @@ namespace carFeature.Models
 {
     public class CarFeature
     {
-        [Key] // Bu birincil anahtar (Primary Key)
+        [Key]
         public int Id { get; set; }
-        public int CarId { get; set; } // Bu sadece sayı (Veritabanındaki sütun)
+        public int CarId { get; set; }
 
-        [ForeignKey("CarId")] // 2. "Yukarıdaki CarId, Car tablosuna gider" diyoruz.
-        public Car? Car { get; set; } // Bu da o arabanın kendisi (Java'daki nesne referansı)
+        [ForeignKey("CarId")]
+        public Car? Car { get; set; }
 
         public double engineSize { get; set; }
 
@@ -23,7 +23,7 @@ namespace carFeature.Models
 
         public required string motorInsurance { get; set; }
 
-        public required bool IsChauffeured { get; set; } // Şoförlü mü?
+        public required bool IsChauffeured { get; set; }
 
 
     }

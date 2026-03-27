@@ -10,15 +10,15 @@ namespace ad.Models
         public int Id { get; set; }
         public DateTime Date { get; set; }
 
-        public int CarId { get; set; } // Bu sadece sayı (Veritabanındaki sütun)
+        public int CarId { get; set; }
 
-        [ForeignKey("CarId")] // 2. "Yukarıdaki CarId, Car tablosuna gider" diyoruz.
-        public Car? Car { get; set; } // Bu da o arabanın kendisi (Java'daki nesne referansı)
+        [ForeignKey("CarId")]
+        public Car? Car { get; set; }
 
-        public int UserId { get; set; } // Bu sadece sayı
+        public int UserId { get; set; }
 
-        [ForeignKey("UserId")] // 3. "Bu sayı User tablosundaki anahtardır" diyoruz.
-        public User? User { get; set; } // Bu da o kullanıcının kendisi
+        [ForeignKey("UserId")]
+        public User? User { get; set; }
 
         public required string ConnectionNumber { get; set; }
         public bool IsAvailable { get; set; }

@@ -6,14 +6,14 @@ namespace deposit.Models
 {
     public class Deposit
     {
-        [Key] // Bu birincil anahtar (Primary Key)
+        [Key]
         public int Id { get; set; }
-        public int CarId { get; set; } //  (Foreign Key),
+        public int CarId { get; set; }
         [ForeignKey("CarId")]
-        public Car? Car { get; set; } // Bu da o arabanın kendisi (Java'daki nesne referansı)
-        public int UserId { get; set; } // (Foreign Key)
+        public Car? Car { get; set; }
+        public int UserId { get; set; }
         [ForeignKey("UserId")]
-        public User? User { get; set; } // Bu da o kullanıcının kendisi (Java'daki nesne referansı)
+        public User? User { get; set; }
         public required double Amount { get; set; }
         public required bool IsPaid { get; set; }
 

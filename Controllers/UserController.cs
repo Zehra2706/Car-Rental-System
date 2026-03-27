@@ -5,7 +5,7 @@ namespace car.Controllers
 {
     public class UserController : Controller
     {
-        // 1. Servisi buraya tanıtıyoruz (Aşçıyı mutfağa çağırdık)
+
         private readonly IUserService _userService;
 
         public UserController(IUserService userService)
@@ -13,7 +13,6 @@ namespace car.Controllers
             _userService = userService;
         }
 
-        // --- Sayfalar ---
 
         public IActionResult Index()
         {
@@ -42,7 +41,6 @@ namespace car.Controllers
 
             if (ModelState.IsValid)
             {
-                // Bilgileri servise gönderip güncelletiyoruz
                 _userService.UpdateProfile(model, email);
                 TempData["Success"] = "Profiliniz başarıyla güncellendi!";
                 return RedirectToAction("Index");

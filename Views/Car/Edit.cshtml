@@ -1,0 +1,86 @@
+@model car.ViewModels.CarCreateViewModel
+
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <form action="/Car/Edit" method="post" enctype="multipart/form-data">
+        @* KRİTİK: Hangi aracı güncellediğimizi anlamak için Id'yi gizli gönderiyoruz *@
+        <input type="hidden" name="Id" value="@Model.Id" />
+        <input type="hidden" name="ImagePath" value="@Model.ImagePath" />
+
+        <div class="card p-4 shadow-sm border-0">
+            <h4 class="mb-4 text-primary"><i class="bi bi-pencil-square"></i> Aracı Düzenle</h4>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Marka</label>
+                    <input type="text" name="Brand" value="@Model.Brand" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Model</label>
+                    <input type="text" name="ModelName" value="@Model.ModelName" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Model Yılı</label>
+                    <input type="number" name="ModelYear" value="@Model.ModelYear" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Renk</label>
+                    <input type="text" name="Color" value="@Model.Color" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Konum</label>
+                    <input type="text" name="Location" value="@Model.Location" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Araç Fotoğrafı</label>
+                @if (!string.IsNullOrEmpty(Model.ImagePath))
+                {
+                    <div class="mb-2">
+                        <img src="@Model.ImagePath" width="150" class="rounded shadow-sm" />
+                        <small class="text-muted d-block">Mevcut fotoğraf (Değiştirmek istemiyorsanız boş bırakın)</small>
+                    </div>
+                }
+                <input type="file" name="ImageFile" class="form-control" accept="image/*">
+            </div>
+
+            <div class="p-3 mb-4 bg-light rounded border border-primary border-opacity-10">
+                <h6 class="text-primary mb-3"><i class="bi bi-currency-exchange"></i> Fiyatları Güncelle</h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold">Günlük (₺)</label>
+                        <input type="number" step="0.01" name="DailyPrice" value="@Model.DailyPrice"
+                               class="form-control" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold">Haftalık (₺)</label>
+                        <input type="number" step="0.01" name="WeeklyPrice" value="@Model.WeeklyPrice"
+                               class="form-control" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold">Aylık (₺)</label>
+                        <input type="number" step="0.01" name="MonthlyPrice" value="@Model.MonthlyPrice"
+                               class="form-control" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Açıklama</label>
+                <textarea name="Description" class="form-control" rows="3" required>@Model.Description</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
+                <i class="bi bi-save"></i> Değişiklikleri Kaydet
+            </button>
+            <a href="/Car/MyCars" class="btn btn-link w-100 mt-2 text-decoration-none text-muted">Vazgeç</a>
+        </div>
+    </form>
+</div>

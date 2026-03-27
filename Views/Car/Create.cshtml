@@ -1,0 +1,102 @@
+<form action="/Car/Create" method="post" enctype="multipart/form-data">
+    <div class="card p-4 shadow-sm border-0">
+        <h4 class="mb-4 text-primary"><i class="bi bi-car-front-fill"></i> Yeni Araç Tanımlama</h4>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Marka</label>
+                <input type="text" name="Brand" placeholder="Örn: BMW" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Model</label>
+                <input type="text" name="ModelName" placeholder="Örn: 3.20i" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label class="form-label">Model Yılı</label>
+                <input type="number" name="ModelYear" class="form-control" placeholder="2024" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Renk</label>
+                <input type="text" name="Color" class="form-control" placeholder="Beyaz" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Konum (Şehir)</label>
+                <input type="text" name="Location" class="form-control" placeholder="Ankara" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold text-success">Araç Fotoğrafı</label>
+            <input type="file" name="ImageFile" class="form-control" accept="image/*" required>
+            <div class="form-text text-muted">Lütfen aracın net bir fotoğrafını yükleyin.</div>
+        </div>
+
+        <div class="p-3 mb-4 bg-light rounded border border-success border-opacity-25">
+            <h6 class="text-success mb-3"><i class="bi bi-currency-exchange"></i> Kiralama Ücretleri</h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">Günlük Ücret (₺)</label>
+                    <input type="number" step="0.01" name="DailyPrice" class="form-control" placeholder="0.00" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">Haftalık Ücret (₺)</label>
+                    <input type="number" step="0.01" name="WeeklyPrice" class="form-control" placeholder="0.00"
+                           required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">Aylık Ücret (₺)</label>
+                    <input type="number" step="0.01" name="MonthlyPrice" class="form-control" placeholder="0.00"
+                           required>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Vites Tipi</label>
+                <select name="Transmission" class="form-select">
+                    <option value="0">Automatic</option>
+                    <option value="1">Manual</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Yakıt Tipi</label>
+                <select name="FuelType" class="form-select">
+                    <option value="0">Gasoline</option>
+                    <option value="1">Diesel</option>
+                    <option value="2">Electric</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Motor Hacmi</label>
+                <input type="number" step="0.1" name="EngineSize" class="form-control" placeholder="1.6" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Sigorta Poliçe No</label>
+                <input type="text" name="MotorInsurance" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Araç Açıklaması</label>
+            <textarea name="Description" class="form-control" rows="3"
+                      placeholder="Aracın durumu hakkında bilgi yazın..." required></textarea>
+        </div>
+
+        <div class="form-check form-switch mb-4">
+            <input type="checkbox" name="IsChauffeured" class="form-check-input" value="true">
+            <input type="hidden" name="IsChauffeured" value="false" /> <label class="form-check-label">Şoförlü
+            mü?</label>
+        </div>
+
+        <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm">
+            <i class="bi bi-cloud-arrow-up"></i> Aracı Sisteme Kaydet
+        </button>
+    </div>
+</form>

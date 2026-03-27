@@ -1,15 +1,24 @@
+using Car_reservation_automation_system.Repositories.Interfaces;
+using Car_reservation_automation_system.Service.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using car.Service.Concrete;      // CarService'in gerçek adresi
+using Car_reservation_automation_system.Service.Interfaces;
+using Car_reservation_automation_system.Repositories.Interfaces;
+using car.Service.Concrete;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
+
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddScoped<ICarRepository, CarRepository>();
+builder.Services.AddScoped<ICarService, CarService>();
+
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
-
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -18,7 +27,7 @@ builder.Services.AddDbContext<car.Data.ApplicationDbContext>(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -33,9 +42,6 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
-// app.MapControllerRoute(
-//     name: "default",
-//     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",

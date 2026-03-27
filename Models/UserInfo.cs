@@ -5,11 +5,10 @@ namespace userInfo.Models
 {
     public class UserInfo
     {
-        [Key] // Bu birincil anahtar (Primary Key)
+        [Key]
         public int Id { get; set; }
-        public int UserId { get; set; } // (Foreign Key)
+        public int UserId { get; set; }
         [ForeignKey("UserId")]
-        // public User? User { get; set; }
         public required string Email { get; set; }
         public required string Password { get; set; }
 

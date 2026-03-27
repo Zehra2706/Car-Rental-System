@@ -5,18 +5,18 @@ namespace price.Models
 {
     public class Price
     {
-        [Key] // Bu birincil anahtar (Primary Key)
+        [Key]
         public int Id { get; set; }
-        public int AracId { get; set; } // (Foreign Key)
+        public int AracId { get; set; }
         [ForeignKey("AracId")]
         public Car? Car { get; set; }
 
 
-        public required double daily { get; set; } // Hangi markaya ait? (Foreign Key)
+        public required double daily { get; set; }
 
-        public required double weekly { get; set; } // Hangi markaya ait? (Foreign Key)
+        public required double weekly { get; set; }
 
-        public required double monthly { get; set; } // Hangi markaya ait? (Foreign Key)
+        public required double monthly { get; set; }
 
 
     }

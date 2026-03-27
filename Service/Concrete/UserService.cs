@@ -2,7 +2,7 @@ using licence.Models;
 using user.Models;
 using userConnections.Models;
 using userInfo.Models;
-using car.ViewModels; // 🔥 ViewModel klasörünü buraya ekledik
+using car.ViewModels;
 using static user.Models.User;
 
 public class UserService : IUserService
@@ -14,7 +14,7 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
 
-    // 🔹 LOGIN
+
     public User? Login(string email, string password)
     {
         // Detaylı getiriyoruz ki UserInfo.Password'e erişebilelim
@@ -28,7 +28,7 @@ public class UserService : IUserService
         return user;
     }
 
-    // 🔹 REGISTER
+
     public void Register(RegisterViewModel model)
     {
         if (_userRepository.EmailExists(model.Email))
@@ -68,7 +68,7 @@ public class UserService : IUserService
         _userRepository.AddUser(user);
     }
 
-    // 🔹 GET PROFILE FOR EDIT
+
     public EditProfileViewModel GetProfileForEdit(string email)
     {
         var user = _userRepository.GetUserWithDetails(email);
@@ -85,15 +85,14 @@ public class UserService : IUserService
         };
     }
 
-    // 🔹 UPDATE PROFILE
     public void UpdateProfile(EditProfileViewModel model, string email)
     {
-        // 1. Önce veritabanındaki ASIL kullanıcıyı bul (ID'siyle beraber gelir)
+
         var existingUser = _userRepository.GetByEmail(email);
 
         if (existingUser != null)
         {
-            // 2. Sadece değişen alanları üzerine yaz
+
             existingUser.Name = model.Name;
             existingUser.Surname = model.Surname;
 
@@ -103,7 +102,7 @@ public class UserService : IUserService
                 existingUser.UserConnections.Number = model.PhoneNumber;
             }
 
-            // 3. Repository'deki Update'e gönder
+
             _userRepository.Update(existingUser);
         }
     }

@@ -5,11 +5,10 @@ namespace userConnections.Models
 {
     public class UserConnections
     {
-        [Key] // Bu birincil anahtar (Primary Key)
+        [Key]
         public int Id { get; set; }
-        public int UserId { get; set; } //  (Foreign Key)
+        public int UserId { get; set; }
         [ForeignKey("UserId")]
-        // public User? User { get; set; }
         public required string Adress { get; set; }
         public required string Number { get; set; }
 

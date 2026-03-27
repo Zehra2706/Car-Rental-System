@@ -28,7 +28,8 @@ public class AuthController : Controller
             ViewBag.Error = "Email veya şifre yanlış";
             return View();
         }
-
+        // Login başarılı olduktan sonra:
+        HttpContext.Session.SetInt32("UserId", user.Id);
         HttpContext.Session.SetString("UserEmail", user.UserInfo.Email);
 
         return RedirectToAction("Index", "User");

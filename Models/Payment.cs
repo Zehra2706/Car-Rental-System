@@ -6,7 +6,7 @@ namespace payment.Models
 {
     public class Payment
     {
-        [Key] // Bu birincil anahtar (Primary Key)
+        [Key]
         public int Id { get; set; }
         public int UserId { get; set; }
         [ForeignKey("UserId")]

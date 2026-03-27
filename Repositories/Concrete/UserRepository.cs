@@ -18,12 +18,6 @@ public class UserRepository : IUserRepository
         _context.SaveChanges();
     }
 
-
-    // public void AddUserInfo(UserInfo userInfo)
-    // {
-    //     throw new NotImplementedException();
-    // }
-
     public User GetByEmail(string email)
     {
         return _context.Users
@@ -55,18 +49,15 @@ public class UserRepository : IUserRepository
 
     public void Update(User user)
     {
-        // _context.Users.Add(user); <--- Sakın bunu yapma!
-        _context.Users.Update(user); // Bu "olanı bul ve değiştir" demektir.
+        _context.Users.Update(user);
         _context.SaveChanges();
     }
     public User? GetUserWithDetails(string email)
     {
-        // Mevcut GetByEmail ile aynı işi yapar ama 
-        // isimlendirme karmaşası olmasın diye bunu da ekliyoruz
         return _context.Users
             .Include(x => x.UserInfo)
             .Include(x => x.UserConnections)
-            .Include(x => x.Licence) // Ehliyet tablosu için
+            .Include(x => x.Licence)
             .FirstOrDefault(x => x.UserInfo.Email == email);
     }
 

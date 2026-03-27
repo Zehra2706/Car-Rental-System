@@ -1,0 +1,106 @@
+@model List<car.Models.Car>
+
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold"><i class="bi bi-car-front text-primary"></i> Benim İlanlarım</h2>
+            <p class="text-muted">Sisteme eklediğiniz tüm araçları buradan yönetebilirsiniz.</p>
+        </div>
+        <a href="/Car/Create" class="btn btn-success shadow-sm">
+            <i class="bi bi-plus-lg"></i> Yeni İlan Ekle
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var car in Model)
+        {
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm overflow-hidden">
+                    <div style="height: 200px; overflow: hidden; position: relative;">
+                        <img src="@(string.IsNullOrEmpty(car.ImagePath) ? "/images/no-image.png" : car.ImagePath)"
+                             class="card-img-top h-100 w-100 object-fit-cover" alt="@car.Brand @car.ModelName">
+                        <span class="badge bg-dark position-absolute top-0 end-0 m-2 opacity-75">@car.ModelYear</span>
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">@car.Brand @car.ModelName</h5>
+                        <p class="card-text text-muted small mb-2">
+                            <i class="bi bi-geo-alt-fill text-danger"></i> @car.Location |
+                            <i class="bi bi-palette-fill" style="color:@car.Color"></i> @car.Color
+                        </p>
+                        
+                        <div class="bg-light p-3 rounded mb-3 border border-opacity-10 border-primary">
+                            @if (car.Prices != null && car.Prices.Any())
+                            {
+                                var p = car.Prices.First();
+                                
+                                <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                                    <small class="fw-bold text-secondary">Günlük:</small>
+                                    <span class="text-success fw-bold">@p.daily.ToString("C2")</span>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between border-bottom pb-1 mb-1 small">
+                                    <small class="text-muted">Haftalık:</small>
+                                    <span class="text-dark fw-semibold">@p.weekly.ToString("C2")</span>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between small">
+                                    <small class="text-muted">Aylık:</small>
+                                    <span class="text-dark fw-semibold">@p.monthly.ToString("C2")</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center">
+                                    <span class="text-muted small italic">Fiyat Belirtilmedi</span>
+                                </div>
+                            }
+                        </div>
+
+                        <p class="card-text small text-secondary text-truncate">@car.Description</p>
+                    </div>
+
+                    <div class="card-footer bg-white border-0 d-flex gap-2 pb-3">
+                        <a href="/Car/Edit/@car.Id" class="btn btn-outline-primary btn-sm flex-fill">
+                            <i class="bi bi-pencil-square"></i> Düzenle
+                        </a>
+                        <button onclick="confirmDelete(@car.Id)" class="btn btn-outline-danger btn-sm flex-fill">
+                            <i class="bi bi-trash3"></i> Sil
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-emoji-frown display-1 text-muted"></i>
+            <h4 class="mt-3">Henüz hiç ilanınız yok.</h4>
+            <a href="/Car/Create" class="btn btn-primary mt-2">İlk İlanını Hemen Oluştur</a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id) {
+            if (confirm("Bu ilanı tamamen silmek istediğinize emin misiniz?")) {
+                window.location.href = "/Car/Delete/" + id;
+            }
+        }
+    </script>
+}

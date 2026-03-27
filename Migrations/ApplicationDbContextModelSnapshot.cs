@@ -75,6 +75,9 @@ namespace car.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsInsured")
                         .HasColumnType("bit");
 
@@ -87,6 +90,9 @@ namespace car.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ModelYear")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

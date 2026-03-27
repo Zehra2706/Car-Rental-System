@@ -11,7 +11,7 @@ public interface IUserRepository
     bool EmailExists(string email);
     bool PhoneExists(string phone);
     bool LicenseExists(string license);
-    User GetUserWithDetails(string email); // UserInfo ve Connection ile birlikte getirir
+    User GetUserWithDetails(string email);
     void Update(User user);
     void Save();
 
