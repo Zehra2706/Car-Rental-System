@@ -1,5 +1,7 @@
 using Car_reservation_automation_system.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using user.Models;
+using UserEntity = user.Models.User;
 
 public class AuthController : Controller
 {
@@ -10,14 +12,12 @@ public class AuthController : Controller
         _userService = userService;
     }
 
-    // 🔹 LOGIN GET
     [HttpGet]
     public IActionResult Login()
     {
         return View();
     }
 
-    // 🔹 LOGIN POST
     [HttpPost]
     public IActionResult Login(LoginViewModel model)
     {
@@ -31,18 +31,22 @@ public class AuthController : Controller
         // Login başarılı olduktan sonra:
         HttpContext.Session.SetInt32("UserId", user.Id);
         HttpContext.Session.SetString("UserEmail", user.UserInfo.Email);
+        HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
+
+    if (user.UserRole == UserEntity.Role.Admin)
+    {
+        return RedirectToAction("Index", "Admin");
+    }
 
         return RedirectToAction("Index", "User");
     }
 
-    // 🔹 REGISTER GET
     [HttpGet]
     public IActionResult Register()
     {
         return View();
     }
 
-    // 🔹 REGISTER POST
     [HttpPost]
     public IActionResult Register(RegisterViewModel model)
     {

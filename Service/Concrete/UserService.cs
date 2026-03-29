@@ -4,14 +4,21 @@ using userConnections.Models;
 using userInfo.Models;
 using car.ViewModels;
 using static user.Models.User;
+using car.Data;
+using static Azure.Core.HttpHeader;
 
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private string licenseNumber;
+    private string phoneNumber;
+    private string adress;
+    private string password;
 
     public UserService(IUserRepository userRepository)
     {
         _userRepository = userRepository;
+        
     }
 
 
@@ -106,4 +113,53 @@ public class UserService : IUserService
             _userRepository.Update(existingUser);
         }
     }
+    public List<User> GetAllUsers()
+{
+    return _userRepository.GetAllUsers();
+}
+
+public void DeleteUser(int id)
+{
+    _userRepository.DeleteUser(id);
+}
+public void AddUser(AdminCreateUserViewModel model)
+{
+    if (_userRepository.EmailExists(model.Email))
+        throw new Exception("Bu email zaten kayıtlı");
+
+    if (_userRepository.PhoneExists(model.PhoneNumber))
+        throw new Exception("Bu telefon numarası zaten kayıtlı");
+
+    if (_userRepository.LicenseExists(model.LicenseNumber))
+        throw new Exception("Bu ehliyet numarası zaten kayıtlı");
+
+{
+    var user = new User
+    {
+        Name = model.Name,
+        Surname = model.Surname,
+        UserRole = Role.Admin,
+        Date = DateTime.Now,
+
+        UserInfo = new UserInfo
+        {
+            Email = model.Email,
+            Password = model.Password
+        },
+
+        UserConnections = new UserConnections
+        {
+            Adress = model.Address,
+            Number = model.PhoneNumber
+        },
+
+        Licence = new Licence
+        {
+            LicenceNumber = model.LicenseNumber        
+        }
+    };
+
+    _userRepository.AddUser(user);
+}
+}
 }

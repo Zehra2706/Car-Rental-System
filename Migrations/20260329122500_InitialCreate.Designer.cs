@@ -12,8 +12,8 @@ using car.Data;
 namespace car.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260327075408_UpdateUserTables")]
-    partial class UpdateUserTables
+    [Migration("20260329122500_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,39 +24,6 @@ namespace car.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("ad.Models.Ad", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CarId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConnectionNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CarId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Ads");
-                });
 
             modelBuilder.Entity("car.Models.Car", b =>
                 {
@@ -78,6 +45,9 @@ namespace car.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsInsured")
                         .HasColumnType("bit");
 
@@ -92,7 +62,12 @@ namespace car.Migrations
                     b.Property<int>("ModelYear")
                         .HasColumnType("int");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Cars");
                 });
@@ -129,70 +104,6 @@ namespace car.Migrations
                     b.HasIndex("CarId");
 
                     b.ToTable("CarFeatures");
-                });
-
-            modelBuilder.Entity("comment.Models.Comment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CarId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CarId");
-
-                    b.HasIndex("RentId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("deposit.Models.Deposit", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<double>("Amount")
-                        .HasColumnType("float");
-
-                    b.Property<int>("CarId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsPaid")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CarId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Deposits");
                 });
 
             modelBuilder.Entity("licence.Models.Licence", b =>
@@ -234,35 +145,6 @@ namespace car.Migrations
                         });
                 });
 
-            modelBuilder.Entity("payment.Models.Payment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<double>("Amount")
-                        .HasColumnType("float");
-
-                    b.Property<int>("CarId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsPaid")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CarId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Payments");
-                });
-
             modelBuilder.Entity("price.Models.Price", b =>
                 {
                     b.Property<int>("Id")
@@ -271,7 +153,7 @@ namespace car.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AracId")
+                    b.Property<int>("CarId")
                         .HasColumnType("int");
 
                     b.Property<double>("daily")
@@ -285,50 +167,9 @@ namespace car.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AracId");
-
-                    b.ToTable("Prices");
-                });
-
-            modelBuilder.Entity("rental.Models.Rental", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CarId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Deposit")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Forecast")
-                        .HasColumnType("float");
-
-                    b.Property<bool>("IsReturned")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("RealReturnDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ReturnDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
                     b.HasIndex("CarId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Rentals");
+                    b.ToTable("Prices");
                 });
 
             modelBuilder.Entity("user.Models.User", b =>
@@ -440,21 +281,13 @@ namespace car.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ad.Models.Ad", b =>
+            modelBuilder.Entity("car.Models.Car", b =>
                 {
-                    b.HasOne("car.Models.Car", "Car")
-                        .WithMany()
-                        .HasForeignKey("CarId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("user.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Car");
 
                     b.Navigation("User");
                 });
@@ -462,58 +295,12 @@ namespace car.Migrations
             modelBuilder.Entity("carFeature.Models.CarFeature", b =>
                 {
                     b.HasOne("car.Models.Car", "Car")
-                        .WithMany()
+                        .WithMany("CarFeatures")
                         .HasForeignKey("CarId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Car");
-                });
-
-            modelBuilder.Entity("comment.Models.Comment", b =>
-                {
-                    b.HasOne("car.Models.Car", "Car")
-                        .WithMany()
-                        .HasForeignKey("CarId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("rental.Models.Rental", "Rental")
-                        .WithMany()
-                        .HasForeignKey("RentId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("user.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Car");
-
-                    b.Navigation("Rental");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("deposit.Models.Deposit", b =>
-                {
-                    b.HasOne("car.Models.Car", "Car")
-                        .WithMany()
-                        .HasForeignKey("CarId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("user.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Car");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("licence.Models.Licence", b =>
@@ -521,27 +308,8 @@ namespace car.Migrations
                     b.HasOne("user.Models.User", "User")
                         .WithOne("Licence")
                         .HasForeignKey("licence.Models.Licence", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("payment.Models.Payment", b =>
-                {
-                    b.HasOne("car.Models.Car", "Car")
-                        .WithMany()
-                        .HasForeignKey("CarId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("user.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Car");
 
                     b.Navigation("User");
                 });
@@ -549,31 +317,12 @@ namespace car.Migrations
             modelBuilder.Entity("price.Models.Price", b =>
                 {
                     b.HasOne("car.Models.Car", "Car")
-                        .WithMany()
-                        .HasForeignKey("AracId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Car");
-                });
-
-            modelBuilder.Entity("rental.Models.Rental", b =>
-                {
-                    b.HasOne("car.Models.Car", "Car")
-                        .WithMany()
+                        .WithMany("Prices")
                         .HasForeignKey("CarId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("user.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Car");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("userConnections.Models.UserConnections", b =>
@@ -581,7 +330,7 @@ namespace car.Migrations
                     b.HasOne("user.Models.User", null)
                         .WithOne("UserConnections")
                         .HasForeignKey("userConnections.Models.UserConnections", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -590,8 +339,15 @@ namespace car.Migrations
                     b.HasOne("user.Models.User", null)
                         .WithOne("UserInfo")
                         .HasForeignKey("userInfo.Models.UserInfo", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("car.Models.Car", b =>
+                {
+                    b.Navigation("CarFeatures");
+
+                    b.Navigation("Prices");
                 });
 
             modelBuilder.Entity("user.Models.User", b =>

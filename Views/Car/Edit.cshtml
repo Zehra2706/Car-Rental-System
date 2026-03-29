@@ -80,7 +80,10 @@
             <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
                 <i class="bi bi-save"></i> Değişiklikleri Kaydet
             </button>
-            <a href="/Car/MyCars" class="btn btn-link w-100 mt-2 text-decoration-none text-muted">Vazgeç</a>
-        </div>
+            <a href="@(ViewBag.Role == "Admin" ? "/Admin/CarList" : "/Car/MyCars")"
+                 class="btn btn-link w-100 mt-2 text-decoration-none text-muted">
+                  Vazgeç
+             </a> 
+             </div>
     </form>
 </div>

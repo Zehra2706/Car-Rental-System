@@ -15,4 +15,7 @@ public interface IUserRepository
     void Update(User user);
     void Save();
 
+    List<User> GetAllUsers();
+void DeleteUser(int id);
+
 }

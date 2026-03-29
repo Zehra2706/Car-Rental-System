@@ -20,8 +20,29 @@ public class CarRepository : ICarRepository
         _context.Cars.Add(car);
     }
 
+public List<Car> GetAllCars()
+{
+    return _context.Cars
+        .Include(x => x.Prices)
+        .ToList();
+}
 
+public void DeleteCar(int id)
+{
+    var car = _context.Cars.Find(id);
 
+    if (car != null)
+    {
+        var features = _context.CarFeatures.Where(x => x.CarId == id);
+        _context.CarFeatures.RemoveRange(features);
+
+        var prices = _context.Prices.Where(x => x.CarId == id);
+        _context.Prices.RemoveRange(prices);
+
+        _context.Cars.Remove(car);
+        _context.SaveChanges();
+    }
+}
 
     public void AddCarFeature(CarFeature feature)
     {
@@ -65,6 +86,4 @@ public class CarRepository : ICarRepository
             .Where(c => c.UserId == userInfo.UserId)
             .ToList();
     }
-
-
 }

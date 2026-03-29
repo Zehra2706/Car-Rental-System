@@ -1,0 +1,36 @@
+@model List<user.Models.User>
+
+    @if (TempData["Error"] != null)
+{
+    <div style="color:red;">
+        @TempData["Error"]
+    </div>
+}
+
+<h2>Kullanıcılar</h2>
+
+<table border="1">
+    <tr>
+        <th>Ad</th>
+        <th>Email</th>
+        <th>İşlem</th>
+    </tr>
+
+@foreach(var item in Model)
+{
+    <tr>
+        <td>@item.Name</td>
+        <td>@item.UserInfo.Email</td>
+        <td>
+<form action="/Admin/DeleteUser/@item.Id" method="post" style="display:inline;">
+    <button type="submit"
+            onclick="return confirm('Silmek istediğine emin misin?')">
+        Sil
+    </button>
+</form>
+        </td>
+    </tr>
+}
+</table>
+
+<a href="/Admin/Index">Çıkış Yap</a>

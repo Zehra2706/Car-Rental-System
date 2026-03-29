@@ -12,5 +12,9 @@ namespace Car_reservation_automation_system.Service.Interfaces
         CarCreateViewModel GetCarForEdit(int id);
         void UpdateCar(CarCreateViewModel model);
         List<Car> GetCarsByEmail(string email);
+
+        
+        List<Car> GetAllCars();
+void DeleteCar(int id);
     }
 }

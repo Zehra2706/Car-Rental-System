@@ -1,0 +1,83 @@
+@model List<car.Models.Car>
+
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">🚗 Araç Listesi</h2>
+        <a href="/Admin/Index" class="btn btn-secondary">← Geri Dön</a>
+    </div>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-lg border-0 h-100">
+
+                    <!-- 📸 FOTO -->
+                    <img src="@(item.ImagePath ?? "/images/no-image.png")"
+                         class="card-img-top"
+                         style="height:200px; object-fit:cover;" />
+
+                    <div class="card-body">
+
+                        <h5 class="card-title text-primary">
+                            @item.Brand @item.ModelName
+                        </h5>
+
+                        <p class="card-text text-muted">
+                            📅 @item.ModelYear <br />
+                            📍 @item.Location
+                        </p>
+
+                        <!-- 💰 FİYAT -->
+                        @if (item.Prices != null && item.Prices.Any())
+                        {
+                            var p = item.Prices.FirstOrDefault();
+
+                            <div class="mb-2">
+                                <span class="badge bg-success fs-6">
+                                    @p.daily ₺ / Gün
+                                </span>
+                            </div>
+
+                            <small class="text-muted">
+                                Haftalık: @p.weekly ₺ <br />
+                                Aylık: @p.monthly ₺
+                            </small>
+                        }
+                        else
+                        {
+                            <span class="text-danger">Fiyat yok</span>
+                        }
+
+                    </div>
+
+                    <div class="card-footer bg-white border-0 text-center">
+
+                        <!-- EDIT -->
+                        <a href="/Car/Edit/@item.Id" class="btn btn-sm btn-primary me-2">
+                            ✏️ Düzenle
+                        </a>
+
+                        <!-- DELETE -->
+                        <form action="/Admin/DeleteCar/@item.Id" method="post" style="display:inline;">
+                            <button type="submit"
+                                    class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Bu aracı silmek istediğine emin misin?')">
+                                🗑 Sil
+                            </button>
+                        </form>
+
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+<a href="/Admin/Index">Çıkış Yap</a>

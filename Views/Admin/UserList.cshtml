@@ -1,0 +1,25 @@
+@model List<user.Models.User>
+
+<h2>Kullanıcılar</h2>
+
+<table border="1">
+    <tr>
+        <th>Ad</th>
+        <th>Email</th>
+        <th>İşlem</th>
+    </tr>
+
+@foreach(var item in Model)
+{
+    <tr>
+        <td>@item.Name</td>
+        <td>@item.UserInfo.Email</td>
+        <td>
+            <a href="/Admin/DeleteUser/@item.Id">
+                <button>Sil</button>
+            </a>
+        </td>
+    </tr>
+}
+</table>
+<a href="/Admin/Index">Çıkış Yap</a>

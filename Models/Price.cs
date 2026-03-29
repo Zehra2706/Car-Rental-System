@@ -7,8 +7,8 @@ namespace price.Models
     {
         [Key]
         public int Id { get; set; }
-        public int AracId { get; set; }
-        [ForeignKey("AracId")]
+        public int CarId { get; set; }
+        [ForeignKey("CarId")]
         public Car? Car { get; set; }
 
 

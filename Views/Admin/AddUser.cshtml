@@ -1,0 +1,62 @@
+@model AdminCreateUserViewModel
+@if (TempData["Error"] != null)
+{
+    <div style="color:red">@TempData["Error"]</div>
+}
+
+<h2>Yeni Kullanıcı Ekle</h2>
+
+<form method="post">
+
+    <div>
+        <label>Ad</label>
+        <input type="text" name="Name" required />
+    </div>
+
+        <div>
+            <label>Soyad</label>
+            <input type="text" name="Surname" required />
+        </div>
+
+
+    <div>
+        <label>Adres</label>
+        <input type="text" name="Address" required />
+    </div>
+    <div>
+        <label>Telefon Numarası</label>
+        <input type="text" name="PhoneNumber" required />
+    </div>
+    <div>
+        <label>Ehliyet Numarası</label>
+        <input type="text" name="LicenseNumber" required />
+        <span asp-validation-for="LicenseNumber" class="text-danger"></span>
+    </div>
+
+
+    <div>
+        <label>Email</label>
+        <input type="email" name="Email" required />
+    </div>
+
+    <div>
+        <label>Şifre</label>
+        <input type="password" name="Password" required />
+        <span asp-validation-for="Password" class="text-danger"></span>    
+    </div>
+    <div>
+    <label>Şifre Tekrar</label>
+    <input type="password" name="ConfirmPassword" required />
+    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+</div>
+    
+
+    <input type="hidden" name="UserRole" value="1" />
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}   
+<div asp-validation-summary="All" class="text-danger"></div>
+ <button type="submit">Kaydet</button>
+</form>
+
+<a href="/Admin/Index">Çıkış Yap</a>

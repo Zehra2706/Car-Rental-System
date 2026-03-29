@@ -13,6 +13,8 @@ namespace Car_reservation_automation_system.Repositories.Interfaces
         List<Car> GetUserCars(string userEmail);
         List<Car> GetCarsByEmail(string email);
         Car GetCarById(int id);
+        List<Car> GetAllCars();
+        void DeleteCar(int id);
 
     }
 }

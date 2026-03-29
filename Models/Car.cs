@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using carFeature.Models;
 using price.Models;
+using user.Models;
 
 namespace car.Models
 {
@@ -16,8 +18,11 @@ namespace car.Models
         public required string Description { get; set; }
         public bool IsInsured { get; set; }
         public string? ImagePath { get; set; }
+        
+        [ForeignKey("UserId")]
         public int UserId { get; set; }
-        public virtual ICollection<CarFeature> CarFeatures { get; set; } = new List<CarFeature>();
-        public virtual ICollection<Price> Prices { get; set; } = new List<Price>();
+        public User User { get; set; }
+        public  ICollection<CarFeature> CarFeatures { get; set; } = new List<CarFeature>();
+        public ICollection<Price> Prices { get; set; } = new List<Price>();
     }
 }

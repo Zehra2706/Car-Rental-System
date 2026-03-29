@@ -12,7 +12,6 @@ namespace car.Controllers
 
         public CarController(ICarService carService) => _carService = carService;
 
-        // --- LİSTELEME ---
         public IActionResult MyCars()
         {
             var userEmail = HttpContext.Session.GetString("UserEmail");
@@ -22,7 +21,6 @@ namespace car.Controllers
             return View(myCars);
         }
 
-        // --- YENİ İLAN OLUŞTURMA ---
         [HttpGet]
         public IActionResult Create()
         {
@@ -58,7 +56,15 @@ namespace car.Controllers
 
                 _carService.AddNewCar(model);
                 TempData["Success"] = "İlan başarıyla oluşturuldu!";
-                return RedirectToAction("MyCars");
+
+                var role = HttpContext.Session.GetString("UserRole");
+
+                if (role == "Admin")
+                {
+                    return RedirectToAction("CarList", "Admin"); // 🔥 admin paneline
+                }
+
+                return RedirectToAction("MyCars"); // normal kullanıcı
             }
             catch (Exception ex)
             {
@@ -67,14 +73,22 @@ namespace car.Controllers
             }
         }
 
-
         [HttpGet]
         public IActionResult Edit(int id)
         {
+            var role = HttpContext.Session.GetString("UserRole");
+
+            ViewBag.Role = role;
             var model = _carService.GetCarForEdit(id);
             if (model == null) return NotFound();
             return View(model);
         }
+        [HttpGet]
+         public IActionResult Delete(int id)
+        {
+              _carService.DeleteCar(id);
+              return RedirectToAction("MyCars");
+         }
 
         [HttpPost]
         public async Task<IActionResult> Edit(CarCreateViewModel model)
@@ -100,13 +114,21 @@ namespace car.Controllers
 
                 _carService.UpdateCar(model);
                 TempData["Success"] = "İlan başarıyla güncellendi!";
-                return RedirectToAction("MyCars");
+                var role = HttpContext.Session.GetString("UserRole");
+
+               if (role == "Admin")
+               {
+                    return RedirectToAction("CarList", "Admin");
+               }
+
+               return RedirectToAction("MyCars");
             }
             catch (Exception ex)
             {
                 ViewBag.Error = "Güncelleme sırasında hata oluştu: " + ex.Message;
                 return View(model);
             }
+            
         }
     }
 }

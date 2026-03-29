@@ -24,6 +24,15 @@ namespace car.Service.Concrete
         {
             return _carRepository.GetCarsByEmail(email);
         }
+        public List<Car> GetAllCars()
+{
+    return _carRepository.GetAllCars();
+}
+
+public void DeleteCar(int id)
+{
+    _carRepository.DeleteCar(id);
+}
 
         public void AddNewCar(CarCreateViewModel model)
         {
@@ -61,7 +70,8 @@ namespace car.Service.Concrete
             {
                 daily = model.DailyPrice,
                 weekly = model.WeeklyPrice,
-                monthly = model.MonthlyPrice
+                monthly = model.MonthlyPrice,
+                CarId = car.Id
             };
 
 
@@ -72,7 +82,7 @@ namespace car.Service.Concrete
         }
         public CarCreateViewModel GetCarForEdit(int id)
         {
-
+            
             var car = _carRepository.GetCarById(id);
             if (car == null) return null;
 
