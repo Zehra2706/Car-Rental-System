@@ -7,6 +7,7 @@ using user.Models;
 using userConnections.Models;
 using userInfo.Models;
 
+
 namespace car.Data
 {
     public class ApplicationDbContext : DbContext
@@ -16,7 +17,7 @@ namespace car.Data
         {
         }
 
-        // 🔹 DbSet'ler
+        // 🔹 DbSet'ler (Veritabanı Tabloları)
         public DbSet<Car> Cars { get; set; }
         public DbSet<CarFeature> CarFeatures { get; set; }
         public DbSet<Price> Prices { get; set; }
@@ -24,62 +25,42 @@ namespace car.Data
         public DbSet<UserInfo> UserInfo { get; set; }
         public DbSet<UserConnections> UserConnections { get; set; }
         public DbSet<Licence> Licences { get; set; }
+
+        public DbSet<rental.Models.Rental> Rentals { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-modelBuilder.Entity<CarFeature>()
-    .HasOne(cf => cf.Car)
-    .WithMany(c => c.CarFeatures)
-    .HasForeignKey(cf => cf.CarId)
-    .OnDelete(DeleteBehavior.Cascade);
+            // İlişkiler
+            modelBuilder.Entity<CarFeature>()
+                .HasOne(cf => cf.Car)
+                .WithMany(c => c.CarFeatures)
+                .HasForeignKey(cf => cf.CarId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-modelBuilder.Entity<Price>()
-    .HasOne(p => p.Car)
-    .WithMany(c => c.Prices)
-    .HasForeignKey(p => p.CarId)
-    .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Price>()
+                .HasOne(p => p.Car)
+                .WithMany(c => c.Prices)
+                .HasForeignKey(p => p.CarId)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            // 🔹 Seed Data (Örnek Veriler)
             modelBuilder.Entity<User>().HasData(
-                new User
-                {
-                    Id = 1,
-                    Name = "deneme",
-                    Surname = "deneme",
-                    UserRole = User.Role.Customer,
-                    Date = new DateTime(2024, 6, 25)
-                }
+                new User { Id = 1, Name = "deneme", Surname = "deneme", UserRole = User.Role.Customer, Date = new DateTime(2024, 6, 25) }
             );
 
             modelBuilder.Entity<UserInfo>().HasData(
-                new UserInfo
-                {
-                    Id = 1,
-                    UserId = 1,
-                    Email = "deneme@deneme.com",
-                    Password = "deneme123"
-                }
+                new UserInfo { Id = 1, UserId = 1, Email = "deneme@deneme.com", Password = "deneme123" }
             );
 
             modelBuilder.Entity<UserConnections>().HasData(
-                new UserConnections
-                {
-                    Id = 1,
-                    UserId = 1,
-                    Number = "1234567890",
-                    Adress = "Deneme Adres"
-                }
+                new UserConnections { Id = 1, UserId = 1, Number = "1234567890", Adress = "Deneme Adres" }
             );
 
             modelBuilder.Entity<Licence>().HasData(
-                new Licence
-                {
-                    Id = 1,
-                    UserId = 1,
-                    LicenceNumber = "L123456789",
-                    Date = new DateTime(2024, 6, 25),
-                    Score = 100
-                }
+                new Licence { Id = 1, UserId = 1, LicenceNumber = "L123456789", Date = new DateTime(2024, 6, 25), Score = 100 }
             );
         }
     }

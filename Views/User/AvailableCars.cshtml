@@ -1,0 +1,78 @@
+@model List<car.Models.Car>
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark">🚗 <span class="text-primary">Kiralık Araç Filomuz</span></h2>
+            <p class="text-muted">Size en uygun aracı seçin ve hemen yola çıkın.</p>
+        </div>
+        <a href="/User/Index" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left"></i> Panele Dön
+        </a>
+    </div>
+
+    <hr>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var car in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm car-card overflow-hidden">
+                        <div class="position-relative">
+                            <img src="@(string.IsNullOrEmpty(car.ImagePath) ? "/images/default-car.png" : car.ImagePath)"
+                                 class="card-img-top" alt="@car.Brand" style="height: 220px; object-fit: cover;">
+                            <span class="badge bg-success position-absolute top-0 end-0 m-3 shadow">Müsait</span>
+                        </div>
+
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-uppercase">@car.Brand @car.ModelName</h5>
+                            
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <span class="badge bg-light text-dark border"><i class="bi bi-card-text"></i> @car.Plate</span>
+                                <span class="badge bg-light text-dark border"><i class="bi bi-calendar3"></i>
+                                    @car.ModelYear</span>
+                                    <span class="badge bg-light text-dark border"><i class="bi bi-geo-alt"></i> @car.Location</span>
+                                </div>
+
+                                <p class="card-text text-muted small">@car.Description</p>
+                            
+                                <hr>
+
+                                <a href="/Rental/Create?carId=@car.Id" class="btn btn-primary w-100 fw-bold py-2 shadow">
+                                    <i class="bi bi-calendar-check"></i> Hemen Kirala
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        else
+            {
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-exclamation-circle display-1 text-muted"></i>
+                    <h4 class="mt-3">Şu an listelenecek araç bulunamadı.</h4>
+                </div>
+            }
+        </div>
+    </div>
+
+    <style>
+        .car-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .car-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #0d6efd, #0b5ed7);
+            border: none;
+        }
+    </style>

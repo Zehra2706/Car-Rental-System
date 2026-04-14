@@ -1,0 +1,49 @@
+@model rental.Models.Rental
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="card shadow border-0 mx-auto" style="max-width: 600px;">
+        <div class="card-header bg-dark text-white text-center">
+            <h4>🔄 İade ve Ödeme Özeti</h4>
+        </div>
+        <div class="card-body">
+            <h5 class="text-primary border-bottom pb-2">@Model.Car?.Brand @Model.Car?.ModelName</h5>
+            
+            <div class="d-flex justify-content-between mt-3">
+                <span>Normal Kiralama Bedeli:</span>
+                <span>@Model.Forecast.ToString("C2")</span>
+            </div>
+
+            @if (DateTime.Now > Model.ReturnDate)
+            {
+                int delay = (DateTime.Now - Model.ReturnDate).Days;
+                <div class="d-flex justify-content-between mt-2 text-danger fw-bold">
+                    <span>Gecikme Cezası (@delay Gün - %10 Faiz):</span>
+                    <span>+ @((delay * (Model.Forecast * 0.10)).ToString("C2"))</span>
+                </div>
+            }
+
+            <hr>
+            <div class="d-flex justify-content-between h4 fw-bold">
+                <span>Toplam Ödenecek:</span>
+                <span class="text-success">@Model.Forecast.ToString("C2")</span>
+            </div>
+
+            <form asp-action="FinalizeReturn" method="post" class="mt-4">
+                <input type="hidden" name="rentalId" value="@Model.Id" />
+                <input type="hidden" name="finalAmount" value="@Model.Forecast" />
+                
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Kart Numarası</label>
+                    <input type="text" class="form-control" placeholder="**** **** **** ****" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">
+                    Ödemeyi Yap ve İadeyi Tamamla
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

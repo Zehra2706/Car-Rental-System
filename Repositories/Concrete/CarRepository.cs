@@ -20,29 +20,29 @@ public class CarRepository : ICarRepository
         _context.Cars.Add(car);
     }
 
-public List<Car> GetAllCars()
-{
-    return _context.Cars
-        .Include(x => x.Prices)
-        .ToList();
-}
-
-public void DeleteCar(int id)
-{
-    var car = _context.Cars.Find(id);
-
-    if (car != null)
+    public List<Car> GetAllCars()
     {
-        var features = _context.CarFeatures.Where(x => x.CarId == id);
-        _context.CarFeatures.RemoveRange(features);
-
-        var prices = _context.Prices.Where(x => x.CarId == id);
-        _context.Prices.RemoveRange(prices);
-
-        _context.Cars.Remove(car);
-        _context.SaveChanges();
+        return _context.Cars
+            .Include(x => x.Prices)
+            .ToList();
     }
-}
+
+    public void DeleteCar(int id)
+    {
+        var car = _context.Cars.Find(id);
+
+        if (car != null)
+        {
+            var features = _context.CarFeatures.Where(x => x.CarId == id);
+            _context.CarFeatures.RemoveRange(features);
+
+            var prices = _context.Prices.Where(x => x.CarId == id);
+            _context.Prices.RemoveRange(prices);
+
+            _context.Cars.Remove(car);
+            _context.SaveChanges();
+        }
+    }
 
     public void AddCarFeature(CarFeature feature)
     {
@@ -85,5 +85,16 @@ public void DeleteCar(int id)
             .Include(c => c.Prices)
             .Where(c => c.UserId == userInfo.UserId)
             .ToList();
+    }
+    public string? GetCarsByUserId(int value)
+    {
+        var userInfo = _context.UserInfo.FirstOrDefault(ui => ui.UserId == value);
+        if (userInfo == null) return null;
+
+        var car = _context.Cars
+            .Include(c => c.Prices)
+            .FirstOrDefault(c => c.UserId == userInfo.UserId);
+
+        return car?.Brand; // Örneğin, sadece marka bilgisini döndürüyoruz
     }
 }

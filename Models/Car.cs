@@ -18,11 +18,12 @@ namespace car.Models
         public required string Description { get; set; }
         public bool IsInsured { get; set; }
         public string? ImagePath { get; set; }
-        
+
         [ForeignKey("UserId")]
         public int UserId { get; set; }
         public User User { get; set; }
-        public  ICollection<CarFeature> CarFeatures { get; set; } = new List<CarFeature>();
+        public ICollection<CarFeature> CarFeatures { get; set; } = new List<CarFeature>();
         public ICollection<Price> Prices { get; set; } = new List<Price>();
+        public string Plate { get; set; }
     }
 }

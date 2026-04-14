@@ -15,6 +15,7 @@ namespace Car_reservation_automation_system.Repositories.Interfaces
         Car GetCarById(int id);
         List<Car> GetAllCars();
         void DeleteCar(int id);
+        string? GetCarsByUserId(int value);
 
     }
 }

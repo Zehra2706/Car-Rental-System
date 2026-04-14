@@ -5,7 +5,6 @@ using userInfo.Models;
 public interface IUserRepository
 {
     void AddUser(User user);
-    // void AddUserInfo(UserInfo userInfo);
     User GetById(int id);
     User GetByEmail(string email);
     bool EmailExists(string email);
@@ -16,6 +15,6 @@ public interface IUserRepository
     void Save();
 
     List<User> GetAllUsers();
-void DeleteUser(int id);
+    void DeleteUser(int id);
 
 }

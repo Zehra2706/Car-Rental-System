@@ -1,24 +1,61 @@
 @{
-    ViewData["Title"] = "Admin Paneli";
+    ViewData["Title"] = "Admin Kontrol Paneli";
+    Layout = "_Layout"; // Temayı kullanması için
 }
 
-<p>Hoşgeldin Admin </p>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12 mb-4 text-center">
+            <h1 class="fw-bold text-dark">🚗 Admin Kontrol Paneli</h1>
+            <p class="text-muted">Sistemdeki tüm araç, kullanıcı ve kiralama süreçlerini buradan yönetebilirsiniz.</p>
+        </div>
+    </div>
 
-<h2>Kullanıcı İşlemleri</h2>
-<a href="/Admin/UserList"><button>Kullanıcı Listele</button></a>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-check fs-1 text-primary"></i>
+                    <h4 class="mt-3">Kiralama Yönetimi</h4>
+                    <p class="small text-muted">Tüm talepleri onayla, reddet veya iade durumlarını izle.</p>
+                    <a href="/Admin/AllRentalRequests" class="btn btn-primary w-100">Talepleri Listele</a>
+                </div>
+            </div>
+        </div>
 
-<hr />
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-car-front fs-1 text-success"></i>
+                    <h4 class="mt-3">Araç Yönetimi</h4>
+                    <p class="small text-muted">Yeni araç ekle veya mevcut araçları düzenle.</p>
+                    <div class="d-grid gap-2">
+                        <a href="/Admin/CarList" class="btn btn-success">Araç Listele</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<h2>Araç İşlemleri</h2>
-<a href="/Admin/CarList"><button>Araç Listele</button></a>
-<a href="/Car/Create"><button>Araç Ekle</button></a>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-people fs-1 text-warning"></i>
+                    <h4 class="mt-3">Kullanıcı & Admin</h4>
+                    <p class="small text-muted">Üyeleri yönet ve yeni yetkililer ata.</p>
+                    <div class="d-grid gap-2">
+                        <a href="/Admin/UserList" class="btn btn-warning text-white">Kullanıcı Listesi</a>
+                        <a href="/Admin/AdminList" class="btn btn-outline-warning btn-sm">Admin Listesi</a>
+                        <a href="/Admin/AddUser" class="btn btn-dark btn-sm">Yetkili Ekle</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<hr />
-
-<h2>Admin İşlemleri</h2>
-<a href="/Admin/AdminList"><button>Admin Listele</button></a>
-<a href="/Admin/AddUser"><button>Admin Ekle</button></a>
-
-<hr />
-
-<a href="/Home/Index">Çıkış Yap</a>
+    <div class="mt-5 text-center">
+        <hr />
+        <a href="/Home/Index" class="btn btn-link text-danger text-decoration-none">
+            <i class="bi bi-box-arrow-right"></i> Güvenli Çıkış Yap
+        </a>
+    </div>
+</div>

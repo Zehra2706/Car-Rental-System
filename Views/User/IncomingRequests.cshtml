@@ -1,0 +1,96 @@
+@model List<rental.Models.Rental>
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="bi bi-bell text-danger"></i> Gelen Kiralama İstekleri</h2>
+        <a href="/User/Index" class="btn btn-outline-secondary btn-sm">Panele Dön</a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-dark text-white">
+                    <tr>
+                        <th class="ps-4">Araç</th>
+                        <th>Kiralayan ID</th>
+                        <th>Tarihler</th>
+                        <th>Kazanç (Depozito Dahil)</th>
+                        <th>Durum</th>
+                        <th class="text-center">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <img src="@item.Car?.ImagePath" class="rounded me-3" width="50" height="40"
+                                             style="object-fit: cover;">
+                                        <div>
+                                            <div class="fw-bold">@item.Car?.Brand @item.Car?.ModelName</div>
+                                            <small class="text-muted">@item.Car?.Plate</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-light text-dark border">User #@item.UserId</span></td>
+                                <td>
+                                    <small class="d-block text-muted">Başlangıç: @item.Date.ToShortDateString()</small>
+                                    <small class="d-block text-muted">Bitiş: @item.ReturnDate.ToShortDateString()</small>
+                                </td>
+                                <td class="fw-bold text-success">@item.Forecast.ToString("C2")</td>
+                                <td>
+                                    @if (item.Status == "OnayBekliyor")
+                                    {
+                                        <span class="badge bg-warning text-dark">Onay Bekliyor</span>
+                                    }
+                                    else if (item.Status == "Onaylandı")
+                                    {
+                                        <span class="badge bg-success">Onaylandı</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Reddedildi</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Status == "OnayBekliyor")
+                                    {
+                                        <form asp-action="UpdateRequestStatus" method="post" class="d-inline">
+                                            <input type="hidden" name="rentalId" value="@item.Id" />
+                                            <input type="hidden" name="status" value="Onaylandı" />
+                                            <button type="submit" class="btn btn-sm btn-success me-1">Onayla</button>
+                                        </form>
+                                        <form asp-action="UpdateRequestStatus" method="post" class="d-inline">
+                                            <input type="hidden" name="rentalId" value="@item.Id" />
+                                            <input type="hidden" name="status" value="Reddedildi" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Reddet</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">İşlem Tamamlandı</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-emoji-neutral display-4 d-block mb-3"></i>
+                                Henüz aracına gelen bir kiralama talebi yok.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,32 @@
+@model List<rental.Models.Rental>
+
+<div class="container mt-4">
+    <h2 class="mb-4 fw-bold">🌍 Sistemdeki Tüm Kiralamalar</h2>
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Müşteri</th>
+                <th>Araç</th>
+                <th>Başlangıç / Bitiş</th>
+                <th>Tutar</th>
+                <th>Durum</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.User?.Name @item.User?.Surname</td>
+                    <td>@item.Car?.Brand @item.Car?.ModelName</td>
+                    <td>@item.Date.ToShortDateString() - @item.ReturnDate.ToShortDateString()</td>
+                    <td class="fw-bold">@item.Forecast.ToString("C2")</td>
+                    <td>
+                        <span class="badge @(item.Status == "Onaylandı" ? "bg-success" : "bg-warning")">
+                            @item.Status
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

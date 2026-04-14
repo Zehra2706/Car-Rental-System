@@ -1,10 +1,11 @@
 using Car_reservation_automation_system.Repositories.Interfaces;
 using Car_reservation_automation_system.Service.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using car.Service.Concrete;      // CarService'in gerçek adresi
+using car.Service.Concrete;
 using Car_reservation_automation_system.Service.Interfaces;
 using Car_reservation_automation_system.Repositories.Interfaces;
 using car.Service.Concrete;
+using Car_reservation_automation_system.Repositories.Concrete;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,8 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
-
+builder.Services.AddScoped<IRentalRepository, RentalRepository>();
+builder.Services.AddScoped<IRentalService, RentalService>();
 builder.Services.AddScoped<ICarRepository, CarRepository>();
 builder.Services.AddScoped<ICarService, CarService>();
 
@@ -37,6 +39,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseSession();
+
 
 app.UseAuthorization();
 

@@ -3,93 +3,93 @@ using car.ViewModels;
 using car.Models;
 using System.IO;
 using Car_reservation_automation_system.Service.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace car.Controllers
 {
     public class CarController : Controller
     {
         private readonly ICarService _carService;
+        private readonly IRentalService _rentalService; // 🟢 RentalService'i ekledik
 
-        public CarController(ICarService carService) => _carService = carService;
+        // Constructor'ı her iki servisi alacak şekilde güncelledik
+        public CarController(ICarService carService, IRentalService rentalService)
+        {
+            _carService = carService;
+            _rentalService = rentalService;
+        }
 
+        // --- 1. İLANLARIM LİSTESİ ---
         public IActionResult MyCars()
         {
-            var userEmail = HttpContext.Session.GetString("UserEmail");
-            if (string.IsNullOrEmpty(userEmail)) return RedirectToAction("Login", "Auth");
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login", "Auth");
 
-            var myCars = _carService.GetCarsByEmail(userEmail);
+            var myCars = _carService.GetCarsByUserId(userId.Value);
             return View(myCars);
         }
 
+        // --- 2. YENİ ARAÇ OLUŞTURMA (GET) ---
         [HttpGet]
         public IActionResult Create()
         {
-            var userEmail = HttpContext.Session.GetString("UserEmail");
-            if (string.IsNullOrEmpty(userEmail)) return RedirectToAction("Login", "Auth");
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login", "Auth");
             return View();
         }
 
+        // --- 3. YENİ ARAÇ OLUŞTURMA (POST) ---
         [HttpPost]
         public async Task<IActionResult> Create(CarCreateViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login", "Auth");
 
-            try
+            model.UserId = userId.Value;
+
+            if (ModelState.IsValid)
             {
-                int currentUserId = HttpContext.Session.GetInt32("UserId") ?? 0;
-                model.UserId = currentUserId;
-
-                if (model.ImageFile != null && model.ImageFile.Length > 0)
+                if (model.ImageFile != null)
                 {
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ImageFile.FileName);
-                    string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/cars");
-
-                    if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
-
-                    string filePath = Path.Combine(uploadPath, fileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await model.ImageFile.CopyToAsync(stream);
-                    }
-                    model.ImagePath = "/images/cars/" + fileName;
+                    model.ImagePath = await SaveImage(model.ImageFile);
                 }
 
                 _carService.AddNewCar(model);
-                TempData["Success"] = "İlan başarıyla oluşturuldu!";
-
-                var role = HttpContext.Session.GetString("UserRole");
-
-                if (role == "Admin")
-                {
-                    return RedirectToAction("CarList", "Admin"); // 🔥 admin paneline
-                }
-
-                return RedirectToAction("MyCars"); // normal kullanıcı
+                return RedirectToAction("MyCars");
             }
-            catch (Exception ex)
-            {
-                ViewBag.Error = "Hata: " + ex.Message;
-                return View(model);
-            }
+            return View(model);
         }
 
+        // --- 4. ARAÇ DETAY VE TAKVİM ---
+        public IActionResult Details(int id)
+        {
+            var car = _carService.GetCarForEdit(id);
+            if (car == null) return NotFound();
+
+            // 🟢 HATALI KISIM BURAYDI: Servis üzerinden temizce çekiyoruz
+            var disabledDates = _rentalService.GetDisabledDatesJson(id);
+
+            // JSON'a çevirip takvime gönderiyoruz
+            ViewBag.DisabledDates = JsonConvert.SerializeObject(disabledDates);
+
+            return View(car);
+        }
+
+        // --- 5. ARAÇ DÜZENLEME (GET) ---
         [HttpGet]
         public IActionResult Edit(int id)
         {
             var role = HttpContext.Session.GetString("UserRole");
-
             ViewBag.Role = role;
+
             var model = _carService.GetCarForEdit(id);
             if (model == null) return NotFound();
             return View(model);
         }
-        [HttpGet]
-         public IActionResult Delete(int id)
-        {
-              _carService.DeleteCar(id);
-              return RedirectToAction("MyCars");
-         }
 
+        // --- 5. ARAÇ DÜZENLEME (POST) ---
         [HttpPost]
         public async Task<IActionResult> Edit(CarCreateViewModel model)
         {
@@ -99,36 +99,47 @@ namespace car.Controllers
             {
                 if (model.ImageFile != null && model.ImageFile.Length > 0)
                 {
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ImageFile.FileName);
-                    string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/cars");
-
-                    if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
-
-                    string filePath = Path.Combine(uploadPath, fileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await model.ImageFile.CopyToAsync(stream);
-                    }
-                    model.ImagePath = "/images/cars/" + fileName;
+                    model.ImagePath = await SaveImage(model.ImageFile);
                 }
 
                 _carService.UpdateCar(model);
                 TempData["Success"] = "İlan başarıyla güncellendi!";
-                var role = HttpContext.Session.GetString("UserRole");
-
-               if (role == "Admin")
-               {
-                    return RedirectToAction("CarList", "Admin");
-               }
-
-               return RedirectToAction("MyCars");
+                return RedirectByRole();
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Güncelleme sırasında hata oluştu: " + ex.Message;
+                ViewBag.Error = "Hata: " + ex.Message;
                 return View(model);
             }
-            
+        }
+
+        // --- 6. ARAÇ SİLME ---
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            _carService.DeleteCar(id);
+            return RedirectToAction("MyCars");
+        }
+
+        // --- YARDIMCI METOTLAR ---
+        private async Task<string> SaveImage(IFormFile imageFile)
+        {
+            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/cars");
+            if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
+
+            string filePath = Path.Combine(uploadPath, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+            return "/images/cars/" + fileName;
+        }
+
+        private IActionResult RedirectByRole()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            return role == "Admin" ? RedirectToAction("CarList", "Admin") : RedirectToAction("MyCars");
         }
     }
 }

@@ -25,5 +25,6 @@ namespace car.ViewModels
         public CarFeature.FuelType FuelType { get; set; }
         public string MotorInsurance { get; set; } = string.Empty;
         public bool IsChauffeured { get; set; }
+        public string? Plate { get; set; }
     }
 }

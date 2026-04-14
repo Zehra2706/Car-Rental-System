@@ -1,0 +1,92 @@
+@model List<rental.Models.Rental>
+@{
+    Layout = "_Layout";
+    var sayfaBasligi = ViewBag.PageTitle ?? "Kiralama Taleplerim";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="bi bi-clock-history text-warning"></i> @sayfaBasligi</h2>
+        <a href="/User/Index" class="btn btn-outline-secondary btn-sm">Panele Dön</a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Araç</th>
+                        <th>Başlangıç</th>
+                        <th>Bitiş</th>
+                        <th>Öngörülen Tutar</th>
+                        <th>Durum</th>
+                        <th class="text-center">İşlem</th> @* 🟢 İşlem sütunu eklendi *@
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <strong>@item.Car?.Brand @item.Car?.ModelName</strong><br>
+                                    <small class="text-muted">@item.Car?.Plate</small>
+                                </td>
+                                <td>@item.Date.ToShortDateString()</td>
+                                <td>@item.ReturnDate.ToShortDateString()</td>
+                                <td class="fw-bold text-primary">@item.Forecast.ToString("C2")</td>
+                                <td>
+                                    @if (item.Status == "OnayBekliyor")
+                                    {
+                                        <span class="badge bg-warning text-dark">Onay Bekliyor</span>
+                                    }
+                                    else if (item.Status == "Onaylandı" && !item.IsReturned)
+                                    {
+                                        <span class="badge bg-success">Kullanımda (Onaylandı)</span>
+                                    }
+                                    else if (item.IsReturned || item.Status == "Tamamlandı")
+                                    {
+                                        <span class="badge bg-secondary">İade Edildi</span>
+                                    }
+                                    else if (item.Status == "Reddedildi")
+                                    {
+                                        <span class="badge bg-danger">Reddedildi</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @* 🟢 İADE ET BUTONU SADECE ONAYLANMIŞ VE İADE EDİLMEMİŞ ARAÇLARDA ÇIKAR *@
+                                    @if (item.Status == "Onaylandı" && !item.IsReturned)
+                                    {
+                                        <form asp-action="ProcessReturnPayment" method="post">
+                                            <input type="hidden" name="rentalId" value="@item.Id" />
+                                            <button type="submit" class="btn btn-sm btn-success shadow-sm">
+                                                <i class="bi bi-box-arrow-in-left"></i> İade Et ve Öde
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (item.IsReturned)
+                                    {
+                                        <small class="text-success fw-bold">İşlem Kapandı</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                Henüz bir kiralama talebiniz bulunmuyor.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,74 @@
+@model rental.Models.Rental
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0">💳 Güvenli Depozito Ödemesi</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info text-center shadow-sm">
+                        Ödenecek Depozito Tutarı: <br>
+                        <strong class="display-6">@Model.Deposit.ToString("N0") TL</strong>
+                    </div>
+
+                    <form asp-action="ConfirmPayment" method="post">
+                        @* 🚩 KRİTİK EKSİK BURASIYDI: UserId mutlaka taşınmalı *@
+                        <input type="hidden" name="UserId" value="@Model.UserId" />
+                        
+                        <input type="hidden" name="CarId" value="@Model.CarId" />
+                        
+                        @* Tarihleri ISO formatında göndermek SQL çakışmalarını önler *@
+                        <input type="hidden" name="Date" value="@Model.Date.ToString("yyyy-MM-ddTHH:mm:ss")" />
+                        <input type="hidden" name="ReturnDate"
+                               value="@Model.ReturnDate.ToString("yyyy-MM-ddTHH:mm:ss")" />
+                        
+                        <input type="hidden" name="Forecast" value="@Model.Forecast" />
+                        <input type="hidden" name="Deposit" value="@Model.Deposit" />
+                        <input type="hidden" name="IsReturned" value="false" />
+                        <input type="hidden" name="Status" value="OnayBekliyor" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kart Üzerindeki İsim</label>
+                            <input type="text" class="form-control" placeholder="Ad Soyad" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kart Numarası</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                                <input type="text" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Son Kullanma</label>
+                                <input type="text" class="form-control" placeholder="AA/YY" maxlength="5" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">CVV</label>
+                                <input type="text" class="form-control" placeholder="123" maxlength="3" required>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <button type="submit" class="btn btn-success w-100 fw-bold py-3 shadow">
+                            <i class="bi bi-shield-lock-fill"></i> Ödemeyi Tamamla ve İsteği Gönder
+                        </button>
+                        
+                        <div class="text-center mt-3 text-muted small">
+                            <i class="bi bi-lock"></i> 256-bit SSL ile korunmaktadır.
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -4,6 +4,7 @@ using carFeature.Models;
 using Car_reservation_automation_system.Service.Interfaces;
 using Car_reservation_automation_system.Repositories.Interfaces;
 using price.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace car.Service.Concrete
 {
@@ -11,6 +12,7 @@ namespace car.Service.Concrete
     {
         private readonly ICarRepository _carRepository;
 
+        // Constructor: Sadece repository alıyoruz
         public CarService(ICarRepository carRepository)
         {
             _carRepository = carRepository;
@@ -20,23 +22,24 @@ namespace car.Service.Concrete
         {
             return _carRepository.GetCarsByEmail(userEmail);
         }
+
         public List<Car> GetCarsByEmail(string email)
         {
             return _carRepository.GetCarsByEmail(email);
         }
-        public List<Car> GetAllCars()
-{
-    return _carRepository.GetAllCars();
-}
 
-public void DeleteCar(int id)
-{
-    _carRepository.DeleteCar(id);
-}
+        public List<Car> GetAllCars()
+        {
+            return _carRepository.GetAllCars();
+        }
+
+        public void DeleteCar(int id)
+        {
+            _carRepository.DeleteCar(id);
+        }
 
         public void AddNewCar(CarCreateViewModel model)
         {
-
             var car = new Car
             {
                 Brand = model.Brand,
@@ -47,12 +50,12 @@ public void DeleteCar(int id)
                 Description = model.Description,
                 ImagePath = model.ImagePath,
                 UserId = model.UserId,
-                IsInsured = true
+                IsInsured = true,
+                Plate = model.Plate
             };
 
             _carRepository.AddCar(car);
             _carRepository.SaveChanges();
-
 
             var feature = new CarFeature
             {
@@ -68,24 +71,20 @@ public void DeleteCar(int id)
 
             var priceInfo = new Price
             {
-                daily = model.DailyPrice,
-                weekly = model.WeeklyPrice,
-                monthly = model.MonthlyPrice,
+                daily = (float)model.DailyPrice,
+                weekly = (float)model.WeeklyPrice,
+                monthly = (float)model.MonthlyPrice,
                 CarId = car.Id
             };
 
-
             _carRepository.AddPrice(priceInfo);
-
-
             _carRepository.SaveChanges();
         }
+
         public CarCreateViewModel GetCarForEdit(int id)
         {
-            
             var car = _carRepository.GetCarById(id);
             if (car == null) return null;
-
 
             var feature = car.CarFeatures?.FirstOrDefault();
             var price = car.Prices?.FirstOrDefault();
@@ -107,12 +106,12 @@ public void DeleteCar(int id)
                 MotorInsurance = feature?.motorInsurance,
                 IsChauffeured = feature?.IsChauffeured ?? false,
 
-                // Ücretler
-                DailyPrice = price?.daily ?? 0,
-                WeeklyPrice = price?.weekly ?? 0,
-                MonthlyPrice = price?.monthly ?? 0
+                DailyPrice = (double)(price?.daily ?? 0),
+                WeeklyPrice = (double)(price?.weekly ?? 0),
+                MonthlyPrice = (double)(price?.monthly ?? 0)
             };
         }
+
         public void UpdateCar(CarCreateViewModel model)
         {
             var car = _carRepository.GetCarById(model.Id);
@@ -143,13 +142,49 @@ public void DeleteCar(int id)
             var price = car.Prices?.FirstOrDefault();
             if (price != null)
             {
-                price.daily = model.DailyPrice;
-                price.weekly = model.WeeklyPrice;
-                price.monthly = model.MonthlyPrice;
+                price.daily = (float)model.DailyPrice;
+                price.weekly = (float)model.WeeklyPrice;
+                price.monthly = (float)model.MonthlyPrice;
             }
 
             _carRepository.SaveChanges();
-
         }
+
+        public List<Car> GetAllCarsForUser()
+        {
+            return _carRepository.GetAllCars();
+        }
+
+        public (decimal TotalPrice, decimal DepositAmount) CalculateRentalFee(int carId, DateTime start, DateTime end)
+        {
+            var car = _carRepository.GetCarById(carId);
+            var price = car?.Prices?.FirstOrDefault();
+
+            int totalDays = (end - start).Days;
+            if (totalDays <= 0) totalDays = 1;
+
+            decimal selectedRate = 0;
+            if (price != null)
+            {
+                if (totalDays >= 30) selectedRate = (decimal)price.monthly;
+                else if (totalDays >= 7) selectedRate = (decimal)price.weekly;
+                else selectedRate = (decimal)price.daily;
+            }
+
+            decimal totalPrice = totalDays * selectedRate;
+            decimal deposit = totalPrice * 0.10m;
+
+            return (totalPrice, deposit);
+        }
+
+        public List<Car> GetCarsByUserId(int userId)
+        {
+            var allCars = _carRepository.GetAllCars();
+            if (allCars == null) return new List<Car>();
+
+            return allCars.Where(c => c.UserId == userId).ToList();
+        }
+
+
     }
 }
