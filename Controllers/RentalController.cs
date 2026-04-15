@@ -3,6 +3,9 @@ using car.Models;
 using Car_reservation_automation_system.Service.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
+using rental.Models;
+using Microsoft.Extensions.Configuration;
+
 
 namespace car.Controllers
 {
@@ -10,12 +13,14 @@ namespace car.Controllers
     {
         private readonly IRentalService _rentalService;
         private readonly ICarService _carService;
+        private readonly IConfiguration _configuration;
 
         // Constructor tek olmalı ve sadece servisleri almalı
-        public RentalController(IRentalService rentalService, ICarService carService)
+        public RentalController(IRentalService rentalService, ICarService carService, IConfiguration configuration)
         {
             _rentalService = rentalService;
             _carService = carService;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -132,5 +137,144 @@ namespace car.Controllers
             TempData["Success"] = "Ödeme başarılı! Kiralama talebiniz yöneticiye iletildi.";
             return RedirectToAction("Index", "User");
         }
+        [HttpPost]
+        public async Task<IActionResult> StartPayment(Rental rental)
+        {    
+            HttpContext.Session.SetString("RentalData", JsonConvert.SerializeObject(rental));
+            var options = new Iyzipay.Options
+            {
+                ApiKey = _configuration["Iyzipay:ApiKey"],
+                SecretKey = _configuration["Iyzipay:SecretKey"],
+                BaseUrl = _configuration["Iyzipay:BaseUrl"]
+            };
+        
+            if (string.IsNullOrEmpty(options.ApiKey) || string.IsNullOrEmpty(options.SecretKey))
+            {
+                throw new Exception("iyzico API anahtarları eksik!");
+            }
+            var request = new Iyzipay.Request.CreateCheckoutFormInitializeRequest
+            {
+             Locale = Iyzipay.Model.Locale.TR.ToString(),
+             ConversationId = "123456",
+             Price = rental.Deposit.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture),
+             PaidPrice = rental.Deposit.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture),
+             Currency = Iyzipay.Model.Currency.TRY.ToString(),
+             BasketId = "B67832",
+             PaymentGroup = Iyzipay.Model.PaymentGroup.PRODUCT.ToString(),
+             CallbackUrl = "https://localhost:5054/Rental/PaymentCallback",
+            };
+
+            request.Buyer = new Iyzipay.Model.Buyer
+            {
+             Id = rental.UserId.ToString(),
+             Name = "Test",
+             Surname = "User",
+             Email = "test@test.com",
+             IdentityNumber = "11111111111",
+             RegistrationAddress = "Adres",
+             Ip = "85.34.78.112",
+             City = "Istanbul",
+             Country = "Turkey"
+            };
+
+            request.ShippingAddress = new Iyzipay.Model.Address
+            {
+              ContactName = "Test User",
+              City = "Istanbul",
+              Country = "Turkey",
+              Description = "Adres"
+            };
+
+            request.BillingAddress = request.ShippingAddress;
+
+            request.BasketItems = new List<Iyzipay.Model.BasketItem>
+            {
+                new Iyzipay.Model.BasketItem
+                {
+                    Id = "BI101",
+                    Name = "Araç Depozito",
+                    Category1 = "Rental",
+                    ItemType = Iyzipay.Model.BasketItemType.PHYSICAL.ToString(),
+                    Price = rental.Deposit.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)
+                }
+            };
+
+            var checkoutForm = await Iyzipay.Model.CheckoutFormInitialize.Create(request, options);
+
+            ViewBag.PaymentForm = checkoutForm.CheckoutFormContent;
+
+            TempData["RentalData"] = JsonConvert.SerializeObject(rental);
+
+            return View("IyzicoPayment");
+        }
+       
+[HttpPost]
+[IgnoreAntiforgeryToken]
+public async Task<IActionResult> PaymentCallback(string token)
+{   
+var rentalDataString = HttpContext.Session.GetString("RentalData");
+
+if (string.IsNullOrEmpty(rentalDataString))
+{
+    return RedirectToAction("Fail", new { message = "Kiralama verisi bulunamadı." });
+}
+
+var rental = JsonConvert.DeserializeObject<Rental>(rentalDataString);    var options = new Iyzipay.Options
+    {
+        ApiKey = _configuration["Iyzipay:ApiKey"],
+        SecretKey = _configuration["Iyzipay:SecretKey"],
+        BaseUrl = _configuration["Iyzipay:BaseUrl"]
+    };
+
+    if (string.IsNullOrEmpty(token))
+    {
+        return RedirectToAction("Fail", new { message = "Token gelmedi (iyzico callback hatası)" });
+    }
+    var request = new Iyzipay.Request.RetrieveCheckoutFormRequest
+    {
+        Token = token
+    };
+
+    // iyzico'dan ödeme sonucunu çekiyoruz
+    var result = await Iyzipay.Model.CheckoutForm.Retrieve(request, options);
+
+    // 1. Durum: Ödeme Gerçekten Başarılı mı?
+    if (result.Status == "success" && result.PaymentStatus == "SUCCESS")
+    {
+        // TempData'daki kiralama verisini alıyoruz
+        var rentalData = TempData["RentalData"] as string;
+        if (string.IsNullOrEmpty(rentalData))
+        {
+            return RedirectToAction("Fail", new { message = "Kiralama verisi bulunamadı." });
+        }
+        
+        // Veritabanına kaydet
+        _rentalService.ConfirmAndSave(rental);
+
+        TempData["Success"] = "Ödemeniz başarıyla alındı ve rezervasyonunuz oluşturuldu.";
+        return RedirectToAction("Success");
+    }
+    else
+    {
+        // 2. Durum: Ödeme başarısız (Hata mesajını kullanıcıya ilet)
+        // iyzico'nun döndüğü hata mesajını alalım
+        string errorMessage = result.ErrorMessage ?? "Ödeme işlemi sırasında bir hata oluştu.";
+        TempData["Error"] = errorMessage;
+        
+        return RedirectToAction("Fail", new { message = errorMessage });
+    }
+}
+[HttpGet]
+public IActionResult Success()
+{
+    return View(); // Views/Rental/Success.cshtml oluşturmalısın
+}
+
+[HttpGet]
+public IActionResult Fail(string message)
+{
+    ViewBag.Message = message;
+    return View(); // Views/Rental/Fail.cshtml oluşturmalısın
+}
     }
 }

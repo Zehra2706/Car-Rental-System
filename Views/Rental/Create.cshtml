@@ -30,7 +30,7 @@
                 </div>
                 
                 <div class="col-md-7">
-                    <form asp-controller="Rental" asp-action="ProcessToPayment" method="post">
+                    <form asp-controller="Rental" asp-action="StartPayment" method="post">
                         <input type="hidden" name="CarId" value="@car?.Id" id="carIdField" />
                         
                         <input type="hidden" id="hiddenForecast" name="Forecast" value="0" />

@@ -1,0 +1,15 @@
+<div class="container text-center mt-5">
+    <div class="card border-danger mb-3" style="max-width: 30rem; margin: 0 auto;">
+        <div class="card-header bg-danger text-white">Ödeme Başarısız!</div>
+        <div class="card-body text-danger">
+            <h5 class="card-title">Hata Detayı:</h5>
+            <p class="card-text">@ViewBag.ErrorMessage</p>
+            <hr />
+            <p>Lütfen kart bilgilerinizi kontrol edip tekrar deneyiniz.</p>
+            <div class="d-grid gap-2">
+                <a href="javascript:history.back()" class="btn btn-warning">Bilgileri Güncelle ve Tekrar Dene</a>
+                <a href="/Home/Index" class="btn btn-secondary">Ana Sayfaya Dön</a>
+            </div>
+        </div>
+    </div>
+</div>

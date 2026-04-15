@@ -632,6 +632,18 @@
           }
         }
       },
+      "Iyzipay/2.1.78": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.2"
+        },
+        "compile": {
+          "lib/netstandard2.1/Iyzipay.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.1/Iyzipay.dll": {}
+        }
+      },
       "Microsoft.AspNetCore.Razor.Language/6.0.24": {
         "type": "package",
         "compile": {
@@ -3108,6 +3120,19 @@
         "lib/netstandard1.0/zh-Hant/Humanizer.resources.dll",
         "lib/netstandard2.0/zh-Hant/Humanizer.resources.dll",
         "logo.png"
+      ]
+    },
+    "Iyzipay/2.1.78": {
+      "sha512": "Fq537JZGTXgqdek6/+mQ801pfByLaQyQ9M0K/6ujiHybhxcDmKKGIwXzbhFEAp23C9x8YV91upbsp6ZUSE0r8A==",
+      "type": "package",
+      "path": "iyzipay/2.1.78",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "iyzipay.2.1.78.nupkg.sha512",
+        "iyzipay.nuspec",
+        "lib/net45/Iyzipay.dll",
+        "lib/netstandard2.1/Iyzipay.dll"
       ]
     },
     "Microsoft.AspNetCore.Razor.Language/6.0.24": {
@@ -6116,6 +6141,7 @@
   },
   "projectFileDependencyGroups": {
     "net10.0": [
+      "Iyzipay >= 2.1.78",
       "Microsoft.EntityFrameworkCore >= 10.0.5",
       "Microsoft.EntityFrameworkCore.Design >= 10.0.5",
       "Microsoft.EntityFrameworkCore.Relational >= 10.0.5",
@@ -6125,23 +6151,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\melisa\\.nuget\\packages\\": {},
+    "C:\\Users\\demir\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\melisa\\Desktop\\car\\car.csproj",
+      "projectUniqueName": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\car-reservation-automation-system\\car.csproj",
       "projectName": "car",
-      "projectPath": "C:\\Users\\melisa\\Desktop\\car\\car.csproj",
-      "packagesPath": "C:\\Users\\melisa\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\melisa\\Desktop\\car\\obj\\",
+      "projectPath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\car-reservation-automation-system\\car.csproj",
+      "packagesPath": "C:\\Users\\demir\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\car-reservation-automation-system\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\melisa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\demir\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -6150,7 +6176,6 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -6169,12 +6194,16 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.100"
+      "SdkAnalysisLevel": "10.0.200"
     },
     "frameworks": {
       "net10.0": {
         "targetAlias": "net10.0",
         "dependencies": {
+          "Iyzipay": {
+            "target": "Package",
+            "version": "[2.1.78, )"
+          },
           "Microsoft.EntityFrameworkCore": {
             "target": "Package",
             "version": "[10.0.5, )"
@@ -6223,7 +6252,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
@@ -6640,5 +6669,27 @@
         }
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1901",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "'NuGet.Packaging' 6.12.1 paketinde önem derecesi düşük olan bilinen bir https://github.com/advisories/GHSA-g4vj-cjjj-v7hg güvenlik açığı var",
+      "libraryId": "NuGet.Packaging",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1901",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "'NuGet.Protocol' 6.12.1 paketinde önem derecesi düşük olan bilinen bir https://github.com/advisories/GHSA-g4vj-cjjj-v7hg güvenlik açığı var",
+      "libraryId": "NuGet.Protocol",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }

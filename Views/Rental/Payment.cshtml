@@ -16,7 +16,7 @@
                         <strong class="display-6">@Model.Deposit.ToString("N0") TL</strong>
                     </div>
 
-                    <form asp-action="ConfirmPayment" method="post">
+                    <form asp-action="StartPayment" method="post">
                         @* 🚩 KRİTİK EKSİK BURASIYDI: UserId mutlaka taşınmalı *@
                         <input type="hidden" name="UserId" value="@Model.UserId" />
                         
