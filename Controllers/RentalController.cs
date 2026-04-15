@@ -161,7 +161,7 @@ namespace car.Controllers
              Currency = Iyzipay.Model.Currency.TRY.ToString(),
              BasketId = "B67832",
              PaymentGroup = Iyzipay.Model.PaymentGroup.PRODUCT.ToString(),
-             CallbackUrl = "https://localhost:5054/Rental/PaymentCallback",
+             CallbackUrl = "http://localhost:5054/User/Index" 
             };
 
             request.Buyer = new Iyzipay.Model.Buyer
