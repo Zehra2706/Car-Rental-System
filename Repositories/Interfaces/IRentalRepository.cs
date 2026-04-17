@@ -6,7 +6,7 @@ namespace Car_reservation_automation_system.Repositories.Interfaces
 {
     public interface IRentalRepository
     {
-        // 🟢 Hataları düzelten eksik tanımlamalar:
+        List<Rental> GetActiveRentalsByCarId(int carId);
         void Add(Rental rental);
         void SaveChanges();
         List<Rental> GetBusyDates(int carId);

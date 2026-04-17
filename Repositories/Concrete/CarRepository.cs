@@ -4,6 +4,7 @@ using Car_reservation_automation_system.Repositories.Interfaces;
 using carFeature.Models;
 using Microsoft.EntityFrameworkCore;
 using price.Models;
+using rental.Models;
 
 public class CarRepository : ICarRepository
 {
@@ -13,7 +14,15 @@ public class CarRepository : ICarRepository
     {
         _context = context;
     }
+    public double GetDailyPrice(int carId)
+    {
+        // Veritabanından fiyata ulaşıyoruz
+        var priceObj = _context.Prices.FirstOrDefault(p => p.CarId == carId);
 
+        // 🚩 BURADAKİ 'DailyPrice' kısmını senin Price.cs içindeki 
+        // gerçek isimle (Örn: Fiyat veya Amount) değiştir.
+        return priceObj != null ? (double)priceObj.daily : 0;
+    }
 
     public void AddCar(Car car)
     {
@@ -96,5 +105,22 @@ public class CarRepository : ICarRepository
             .FirstOrDefault(c => c.UserId == userInfo.UserId);
 
         return car?.Brand; // Örneğin, sadece marka bilgisini döndürüyoruz
+    }
+    public bool CheckAvailability(int carId, DateTime start, DateTime end)
+    {
+        // Saat ve dakikayı tam olarak kontrol eden evrensel çakışma mantığı
+        return !_context.Rentals.Any(r =>
+            r.CarId == carId &&
+            r.Status != "Reddedildi" &&
+            start < r.ReturnDate && // Yeni başlangıç, eskinin bitişinden önce mi?
+            end > r.Date            // Yeni bitiş, eskinin başlangıcından sonra mı?
+        );
+    }
+
+    public List<Rental> GetActiveRentalsByCarId(int carId)
+    {
+        return _context.Rentals
+            .Where(r => r.CarId == carId && r.Status != "Reddedildi" && r.ReturnDate > DateTime.Now)
+            .ToList();
     }
 }

@@ -20,7 +20,7 @@
                         <th>Bitiş</th>
                         <th>Öngörülen Tutar</th>
                         <th>Durum</th>
-                        <th class="text-center">İşlem</th> @* 🟢 İşlem sütunu eklendi *@
+                        <th class="text-center">İşlem</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,6 +28,9 @@
                     {
                         foreach (var item in Model)
                         {
+                            // Status değerini güvenli bir değişkene alalım
+                            var currentStatus = item.Status?.Trim() ?? "";
+
                             <tr>
                                 <td class="ps-4">
                                     <strong>@item.Car?.Brand @item.Car?.ModelName</strong><br>
@@ -37,28 +40,34 @@
                                 <td>@item.ReturnDate.ToShortDateString()</td>
                                 <td class="fw-bold text-primary">@item.Forecast.ToString("C2")</td>
                                 <td>
-                                    @if (item.Status == "OnayBekliyor")
+                                    @* DURUM KONTROLLERİ *@
+                                    @if (currentStatus == "OnayBekliyor")
                                     {
                                         <span class="badge bg-warning text-dark">Onay Bekliyor</span>
                                     }
-                                    else if (item.Status == "Onaylandı" && !item.IsReturned)
+                                    @* İçinde "Onay" kelimesi geçiyorsa ve iade edilmemişse *@
+                                    else if (currentStatus.Contains("Onay") && !item.IsReturned)
                                     {
                                         <span class="badge bg-success">Kullanımda (Onaylandı)</span>
                                     }
-                                    else if (item.IsReturned || item.Status == "Tamamlandı")
+                                    else if (item.IsReturned || currentStatus == "Tamamlandı")
                                     {
                                         <span class="badge bg-secondary">İade Edildi</span>
                                     }
-                                    else if (item.Status == "Reddedildi")
+                                    else if (currentStatus == "Reddedildi")
                                     {
                                         <span class="badge bg-danger">Reddedildi</span>
                                     }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-dark">@currentStatus</span>
+                                    }
                                 </td>
                                 <td class="text-center">
-                                    @* 🟢 İADE ET BUTONU SADECE ONAYLANMIŞ VE İADE EDİLMEMİŞ ARAÇLARDA ÇIKAR *@
-                                    @if (item.Status == "Onaylandı" && !item.IsReturned)
+                                    @* İŞLEM BUTONU KONTROLÜ *@
+                                    @if (currentStatus.Contains("Onay") && !item.IsReturned)
                                     {
-                                        <form asp-action="ProcessReturnPayment" method="post">
+                                        <form asp-action="ProcessReturnPayment" asp-controller="Rental" method="post">
                                             <input type="hidden" name="rentalId" value="@item.Id" />
                                             <button type="submit" class="btn btn-sm btn-success shadow-sm">
                                                 <i class="bi bi-box-arrow-in-left"></i> İade Et ve Öde

@@ -1,132 +1,301 @@
 @using car.Models
 @model rental.Models.Rental
 @{
-    // 'as' kullanmak yerine dinamik çekelim, böylece tip uyuşmazlığı olsa da veriyi okur.
     dynamic car = ViewBag.Car;
     Layout = "_Layout";
 }
 
-@if (car == null)
-{
-    <div class="alert alert-danger">
-        <strong>🚩 Durum:</strong> Veri çantası (ViewBag.Car) boş! <br />
-        <strong>Çözüm:</strong> RentalController içindeki <code>ViewBag.Car = car;</code> satırının çalıştığından emin olun.
-    </div>
-}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-<div class="container mt-5">
-    <div class="card shadow border-0">
-        <div class="card-header bg-primary text-white text-center py-3">
-            <h4 class="mb-0">🚗 Kiralama Talebi: @car?.Brand @car?.ModelName</h4>
-        </div>
-        <div class="card-body p-4">
-            <div class="row">
-                <div class="col-md-5 text-center border-end">
-                    <img src="@car?.ImagePath" class="img-fluid rounded shadow-sm mb-3"
-                         style="max-height: 250px; width: 100%; object-fit: cover;">
-                    <div class="alert alert-dark fw-bold">Plaka: @car?.Plate</div>
-                </div>
-                
-                <div class="col-md-7">
-                    <form asp-controller="Rental" asp-action="StartPayment" method="post">
-                        <input type="hidden" name="CarId" value="@car?.Id" id="carIdField" />
-                        
-                        <input type="hidden" id="hiddenForecast" name="Forecast" value="0" />
-                        <input type="hidden" id="hiddenDeposit" name="Deposit" value="0" />
+<div class="container-fluid mt-5 px-4">
+    <div class="row g-4">
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Alış Tarihi</label>
-                            <input type="text" id="startDate" name="Date" class="form-control bg-white"
-                                   placeholder="Tarih Seçiniz..." required>
+        @* SOL SÜTUN *@
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold border-bottom pb-2 mb-3 text-primary">🔍 Araç Detayları</h5>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <small class="text-muted d-block font-monospace">Marka & Model</small>
+                            <span class="fw-bold h5 text-uppercase">@car?.Brand @car?.ModelName (@car?.ModelYear)</span>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">İade Tarihi</label>
-                            <input type="text" id="endDate" name="ReturnDate" class="form-control bg-white"
-                                   placeholder="Tarih Seçiniz..." required>
+                        <div class="col-6">
+                            <small class="text-muted d-block font-monospace">Renk</small>
+                            <span class="fw-bold text-dark">@(car?.Color ?? "Belirtilmedi")</span>
                         </div>
-
-                        <div id="priceSummary" class="card bg-light mb-4 d-none border-primary">
-                            <div class="card-body">
-                                <p class="mb-1">Süre: <span id="daysCount" class="fw-bold text-dark">0</span> Gün</p>
-                                <p class="mb-1">Toplam: <strong id="totalPrice" class="text-primary">0</strong> TL</p>
-                                <p class="mb-0 text-danger">Ödenecek Depozito (%10): <strong
-                                    id="depositAmount">0</strong> TL</p>
+                        <div class="col-6">
+                            <small class="text-muted d-block font-monospace">Motor Gücü</small>
+                            <span class="fw-bold text-dark">@(car?.EngineSize > 0 ? car.EngineSize.ToString("0.0") :
+                                                   "---") L</span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block font-monospace">Şanzıman</small>
+                                <span class="fw-bold text-dark">@((int)car?.Transmission == 1 ? "Otomatik" :
+                                                 "Manuel")</span>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block font-monospace">Yakıt Tipi</small>
+                                    <span class="fw-bold text-dark">@((int)car?.FuelType == 1 ? "Benzin" : "Dizel")</span>
+                                </div>
+                                <div class="col-12">
+                                    <small class="text-muted d-block font-monospace">Kiralama Tipi</small>
+                                    <span
+                                        class="badge w-100 py-2 @(car?.IsChauffeured == true ? "bg-info text-dark" : "bg-light text-secondary border")">
+                                        <i class="bi bi-person-badge"></i> @(car?.IsChauffeured == true ? "Şoförlü Hizmet Mevcut" : "Standart Kiralama")
+                                    </span>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-flex gap-2">
+                                        <span class="badge @(car?.IsInsured == true ? "bg-success" : "bg-danger")">
+                                            @(car?.IsInsured == true ? "Kaskolu" : "Sigortasız")
+                                        </span>
+                                        @if (!string.IsNullOrEmpty(car?.MotorInsurance))
+                                        {
+                                            <span class="badge bg-primary">@car.MotorInsurance</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <small class="text-muted d-block mb-2 fw-bold text-uppercase"><i
+                                            class="bi bi-tags-fill"></i> Kiralama Tarifeleri</small>
+                                            <div class="row text-center g-2">
+                                                <div class="col-3 border-end">
+                                                    <small class="text-muted d-block" style="font-size:0.65rem;">SAATLİK</small>
+                                                    <span class="fw-bold text-primary" style="font-size:0.8rem;">@((car.DailyPrice /
+                                                                                                    24).ToString("N2")) TL</span>
+                                                    </div>
+                                                    <div class="col-3 border-end">
+                                                        <small class="text-muted d-block" style="font-size:0.65rem;">GÜNLÜK</small>
+                                                        <span class="fw-bold text-dark"
+                                                              style="font-size:0.8rem;">@car.DailyPrice.ToString("N0") TL</span>
+                                                    </div>
+                                                    <div class="col-3 border-end">
+                                                        <small class="text-muted d-block" style="font-size:0.65rem;">HAFTALIK</small>
+                                                        <span class="fw-bold text-dark"
+                                                              style="font-size:0.8rem;">@car.WeeklyPrice.ToString("N0") TL</span>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <small class="text-muted d-block" style="font-size:0.65rem;">AYLIK</small>
+                                                        <span class="fw-bold text-dark"
+                                                              style="font-size:0.8rem;">@car.MonthlyPrice.ToString("N0") TL</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <small class="text-muted d-block font-monospace">Plaka</small>
+                                            <span class="badge bg-dark fs-6 w-100 py-2" style="letter-spacing:2px;">
+                                                @(string.IsNullOrEmpty(car?.Plate) ? "PLAKA YOK" : car.Plate)
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 p-3 bg-light rounded-3 border-start border-3 border-primary shadow-sm">
+                                        <small class="text-muted d-block mb-1 fw-bold text-uppercase">📍 Araç Konumu & Bilgi</small>
+                                        <p class="small mb-1 text-dark fw-bold"><i class="bi bi-geo-alt-fill text-danger"></i>
+                                            @car?.Location</p>
+                                            <p class="small mb-0 text-secondary" style="font-style:italic;">"@car?.Description"</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-3 fw-bold shadow">
-                                <i class="bi bi-credit-card"></i> Depozito Öde ve Devam Et
-                            </button>
-                        </form>
+                            @* ORTA SÜTUN *@
+                            <div class="col-lg-5">
+                                <div
+                                    class="card shadow-sm border-0 rounded-4 bg-white d-flex align-items-center justify-content-center p-3 h-100">
+                                    <img src="@(car?.ImagePath ?? "/images/default-car.png")" class="img-fluid rounded-4 shadow"
+                                         style="max-height:520px; object-fit:contain; width:100%;">
+                                </div>
+                            </div>
+
+                            @* SAĞ SÜTUN: REZERVASYON FORMU *@
+                            <div class="col-lg-3">
+                                <div class="card shadow-lg border-0 rounded-4 h-100 border-top border-5 border-primary">
+                                    <div class="card-body">
+                                        <h5 class="fw-bold mb-4 text-center text-primary">🕒 Rezervasyon Takvimi</h5>
+
+                                        <form asp-controller="Rental" asp-action="StartPayment" method="post">
+                                            <input type="hidden" name="CarId" value="@car?.Id" id="carIdField" />
+                                            <input type="hidden" id="hiddenForecast" name="Forecast" value="0" />
+                                            <input type="hidden" id="hiddenDeposit" name="Deposit" value="0" />
+
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold text-muted">ALIŞ TARİHİ & SAATİ</label>
+                                                <input type="text" id="startDate" name="Date"
+                                                       class="form-control bg-white shadow-sm border-primary" placeholder="Tarih seç..."
+                                                       readonly required>
+                                            </div>
+
+                                            <div class="mb-4">
+                                                <label class="form-label small fw-bold text-muted">İADE TARİHİ & SAATİ</label>
+                                                <input type="text" id="endDate" name="ReturnDate"
+                                                       class="form-control bg-white shadow-sm border-primary" placeholder="Tarih seç..."
+                                                       readonly required>
+                                            </div>
+
+                                            <div id="priceSummary"
+                                                 class="p-3 bg-primary bg-opacity-10 rounded-4 mb-4 d-none border border-primary border-opacity-25">
+                                                <div class="d-flex justify-content-between small mb-2 text-dark">
+                                                    <span>Kiralama Süresi:</span>
+                                                    <span class="fw-bold" id="daysCount">0 Saat</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between small mb-2 text-dark">
+                                                    <span>Kira Bedeli:</span>
+                                                    <span class="fw-bold text-primary" id="totalPrice">0 TL</span>
+                                                </div>
+                                                <hr class="my-2 border-primary border-opacity-25">
+                                                <div class="d-flex justify-content-between text-danger fw-bold h5">
+                                                    <span style="font-size:0.9rem;">Ödenecek Depozito:</span>
+                                                    <span id="depositAmount">0 TL</span>
+                                                </div>
+                                            </div>
+
+                                            <button type="submit" id="submitBtn"
+                                                    class="btn btn-primary btn-lg w-100 py-3 fw-bold rounded-pill shadow" disabled>
+                                                <i class="bi bi-credit-card-fill"></i> Ödemeye Geç
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    @section Scripts {
-        <script>
-            // Controller'dan gelen dolu tarihleri alıyoruz
-            const disabledDates = @Html.Raw(ViewBag.DisabledDates ?? "[]");
-            const carId = document.getElementById('carIdField').value;
+                    @section Scripts {
+                        <script>
+                            const disabledRanges = @Html.Raw(ViewBag.DisabledDates ?? "[]");
+                            const carId = document.getElementById('carIdField')?.value;
 
-            // Flatpickr Ayarları (Dolu tarihler seçilemez)
-            const commonConfig = {
-            minDate: "today",
-            disable: disabledDates,
-            dateFormat: "Y-m-d",
-            locale: { firstDayOfWeek: 1 }
-            };
+                            function isDateDisabled(date) {
+                            return disabledRanges.some(r => {
+                            const rFrom = new Date(r.from);
+                            const rTo = new Date(r.to);
+                            return date >= rFrom && date < rTo;
+                            });
+                            }
 
-            const startPicker = flatpickr("#startDate", {
-            ...commonConfig,
-            onChange: function (selectedDates) {
-            endPicker.set("minDate", selectedDates[0] ? selectedDates[0] : "today");
-            updatePrice();
-            }
-            });
+                            function hasRangeConflict(start, end) {
+                            return disabledRanges.some(r => {
+                            const rFrom = new Date(r.from);
+                            const rTo = new Date(r.to);
+                            return start < rTo && end > rFrom;
+                            });
+                            }
 
-            const endPicker = flatpickr("#endDate", {
-            ...commonConfig,
-            onChange: function () {
-            updatePrice();
-            }
-            });
+                            const commonConfig = {
+                            enableTime: true,
+                            time_24hr: true,
+                            minDate: "today",
+                            disable: [
+                            function (date) {
+                            const dayStart = new Date(date);
+                            dayStart.setHours(0, 0, 0, 0);
+                            const dayEnd = new Date(date);
+                            dayEnd.setHours(23, 59, 59, 999);
+                            return disabledRanges.some(r => {
+                            const rFrom = new Date(r.from);
+                            const rTo = new Date(r.to);
+                            return dayStart >= rFrom && dayEnd <= rTo;
+                            });
+                            }
+                            ],
+                            dateFormat: "Y-m-d H:i",
+                            locale: { firstDayOfWeek: 1 }
+                            };
 
-            function updatePrice() {
-            const startStr = document.getElementById('startDate').value;
-            const endStr = document.getElementById('endDate').value;
+                            const startPicker = flatpickr("#startDate", {
+                            ...commonConfig,
+                            onChange: function (selectedDates) {
+                            if (!selectedDates[0]) return;
 
-            if (startStr && endStr) {
-            const start = new Date(startStr);
-            const end = new Date(endStr);
-                
-            if (end > start) {
-            const days = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24));
-                    
-            // Fiyatı getir
-            fetch(`/Rental/GetPriceCalculation?carId=${carId}&days=${days}`)
-            .then(r => r.json())
-            .then(data => {
-            // Veri 0 geliyorsa veya null geliyorsa kontrol ediyoruz
-            const total = data.total || 0;
-            const deposit = data.deposit || 0;
+                            const selectedStart = selectedDates[0];
 
-            document.getElementById('priceSummary').classList.remove('d-none');
-            document.getElementById('daysCount').innerText = days;
-            document.getElementById('totalPrice').innerText = total.toLocaleString('tr-TR');
-            document.getElementById('depositAmount').innerText = deposit.toLocaleString('tr-TR');
-                            
-            // Inputları doldur
-            document.getElementById('hiddenForecast').value = total;
-            document.getElementById('hiddenDeposit').value = deposit;
-            })
-            .catch(err => console.error("Fiyat çekilirken hata oluştu:", err));
-            }
-            }
-            }
-        </script>
-    }
+                            if (isDateDisabled(selectedStart)) {
+                            alert("Bu saat zaten rezerve edilmiş! Lütfen başka bir saat seçin.");
+                            startPicker.clear();
+                            return;
+                            }
+
+                            endPicker.set("minDate", selectedStart);
+                            endPicker.clear();
+
+                            document.getElementById('priceSummary').classList.add('d-none');
+                            document.getElementById('submitBtn').disabled = true;
+                            }
+                            });
+
+                            const endPicker = flatpickr("#endDate", {
+                            ...commonConfig,
+                            onChange: function (selectedDates) {
+                            if (!selectedDates[0]) return;
+
+                            const selectedEnd = selectedDates[0];
+                            const startStr = document.getElementById('startDate').value;
+
+                            if (!startStr) {
+                            alert("Lütfen önce alış tarihi seçin.");
+                            endPicker.clear();
+                            return;
+                            }
+
+                            const selectedStart = new Date(startStr);
+
+                            if (isDateDisabled(selectedEnd)) {
+                            alert("Bu saat zaten rezerve edilmiş! Lütfen başka bir saat seçin.");
+                            endPicker.clear();
+                            return;
+                            }
+
+                            if (hasRangeConflict(selectedStart, selectedEnd)) {
+                            alert("Seçilen aralık mevcut bir rezervasyonla çakışıyor! Lütfen farklı tarih/saat seçin.");
+                            endPicker.clear();
+                            document.getElementById('priceSummary').classList.add('d-none');
+                            document.getElementById('submitBtn').disabled = true;
+                            return;
+                            }
+
+                            updatePrice();
+                            }
+                            });
+
+                            function updatePrice() {
+                            const startStr = document.getElementById('startDate').value;
+                            const endStr = document.getElementById('endDate').value;
+                            const submitBtn = document.getElementById('submitBtn');
+
+                            if (!startStr || !endStr) return;
+
+                            const start = new Date(startStr);
+                            const end = new Date(endStr);
+
+                            if (end <= start) {
+                            document.getElementById('priceSummary').classList.add('d-none');
+                            submitBtn.disabled = true;
+                            return;
+                            }
+
+                            const totalHours = (end - start) / (1000 * 60 * 60);
+
+                            fetch(`/Rental/GetPriceCalculation?carId=${carId}&hours=${totalHours.toFixed(4)}`)
+                            .then(r => r.json())
+                            .then(data => {
+                            document.getElementById('priceSummary').classList.remove('d-none');
+
+                            const h = Math.floor(totalHours);
+                            const m = Math.round((totalHours % 1) * 60);
+                            document.getElementById('daysCount').innerText = `${h} Saat ${m} Dakika`;
+
+                            document.getElementById('totalPrice').innerText = data.total.toLocaleString('tr-TR') + " TL";
+                            document.getElementById('depositAmount').innerText = data.deposit.toLocaleString('tr-TR') + " TL";
+
+                            document.getElementById('hiddenForecast').value = data.total;
+                            document.getElementById('hiddenDeposit').value = data.deposit;
+                            submitBtn.disabled = false;
+                            });
+                            }
+                        </script>
+                    }

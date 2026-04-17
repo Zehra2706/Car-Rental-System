@@ -37,7 +37,6 @@ namespace car.Service.Concrete
         {
             _carRepository.DeleteCar(id);
         }
-
         public void AddNewCar(CarCreateViewModel model)
         {
             var car = new Car
@@ -50,13 +49,15 @@ namespace car.Service.Concrete
                 Description = model.Description,
                 ImagePath = model.ImagePath,
                 UserId = model.UserId,
-                IsInsured = true,
+                // 🚩 DÜZELTİLDİ: Hardcoded 'true' yerine modelden gelen değeri alıyoruz
+                IsInsured = model.IsInsured,
                 Plate = model.Plate
             };
 
             _carRepository.AddCar(car);
-            _carRepository.SaveChanges();
+            _carRepository.SaveChanges(); // ID oluşması için ilk kayıt
 
+            // Teknik Özellikler
             var feature = new CarFeature
             {
                 CarId = car.Id,
@@ -66,23 +67,25 @@ namespace car.Service.Concrete
                 motorInsurance = model.MotorInsurance,
                 IsChauffeured = model.IsChauffeured
             };
-
             _carRepository.AddCarFeature(feature);
 
+            // Fiyat Bilgileri
             var priceInfo = new Price
             {
+                CarId = car.Id,
                 daily = (float)model.DailyPrice,
                 weekly = (float)model.WeeklyPrice,
-                monthly = (float)model.MonthlyPrice,
-                CarId = car.Id
+                monthly = (float)model.MonthlyPrice
             };
-
             _carRepository.AddPrice(priceInfo);
+
             _carRepository.SaveChanges();
         }
 
+        // --- 2. DÜZENLEME İÇİN VERİ GETİRME ---
         public CarCreateViewModel GetCarForEdit(int id)
         {
+            // Repo'nun Include(c => c.CarFeatures).Include(c => c.Prices) yaptığından emin ol!
             var car = _carRepository.GetCarById(id);
             if (car == null) return null;
 
@@ -99,11 +102,14 @@ namespace car.Service.Concrete
                 Location = car.Location,
                 Description = car.Description,
                 ImagePath = car.ImagePath,
+                Plate = car.Plate,
+                // 🚩 DÜZELTİLDİ: Sigorta durumu artık ViewModel'e aktarılıyor
+                IsInsured = car.IsInsured,
 
                 EngineSize = feature?.engineSize ?? 0,
                 Transmission = feature?.Transmission ?? 0,
                 FuelType = feature?.fuelType ?? 0,
-                MotorInsurance = feature?.motorInsurance,
+                MotorInsurance = feature?.motorInsurance ?? string.Empty,
                 IsChauffeured = feature?.IsChauffeured ?? false,
 
                 DailyPrice = (double)(price?.daily ?? 0),
@@ -112,23 +118,27 @@ namespace car.Service.Concrete
             };
         }
 
+        // --- 3. ARAÇ GÜNCELLEME ---
         public void UpdateCar(CarCreateViewModel model)
         {
             var car = _carRepository.GetCarById(model.Id);
             if (car == null) return;
 
+            // Temel Bilgiler
             car.Brand = model.Brand;
             car.ModelName = model.ModelName;
             car.ModelYear = model.ModelYear;
             car.Color = model.Color;
             car.Location = model.Location;
             car.Description = model.Description;
+            car.Plate = model.Plate;
+            // 🚩 DÜZELTİLDİ: Güncelleme anında sigorta kutucuğu değişirse kaydediyoruz
+            car.IsInsured = model.IsInsured;
 
             if (!string.IsNullOrEmpty(model.ImagePath))
-            {
                 car.ImagePath = model.ImagePath;
-            }
 
+            // Özellik Güncelleme
             var feature = car.CarFeatures?.FirstOrDefault();
             if (feature != null)
             {
@@ -139,6 +149,7 @@ namespace car.Service.Concrete
                 feature.IsChauffeured = model.IsChauffeured;
             }
 
+            // Fiyat Güncelleme
             var price = car.Prices?.FirstOrDefault();
             if (price != null)
             {
@@ -149,6 +160,7 @@ namespace car.Service.Concrete
 
             _carRepository.SaveChanges();
         }
+
 
         public List<Car> GetAllCarsForUser()
         {

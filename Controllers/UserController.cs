@@ -53,7 +53,6 @@ namespace car.Controllers
             return View(cars);
         }
 
-        // --- 🟢 GÜNCELLENEN KISIM: KENDİ TALEPLERİM & AKTİF KİRALAMALARIM ---
         public IActionResult MyRentals(string? status)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
@@ -62,7 +61,6 @@ namespace car.Controllers
             // Servisten tüm listeyi çekiyoruz
             var myRequests = _userService.GetMyRentalRequests(userId.Value);
 
-            // 💡 Melisa, eğer linkten 'Onaylandı' parametresi gelirse listeyi filtreliyoruz
             if (!string.IsNullOrEmpty(status))
             {
                 myRequests = myRequests.Where(r => r.Status == status).ToList();
@@ -75,8 +73,6 @@ namespace car.Controllers
 
             return View(myRequests);
         }
-
-        // --- GELEN İSTEKLER (Araç Sahipleri İçin) ---
         public IActionResult IncomingRequests()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
@@ -99,7 +95,6 @@ namespace car.Controllers
             TempData["Success"] = "Araç başarıyla iade edildi. Bizi tercih ettiğiniz için teşekkürler!";
             return RedirectToAction("MyRentals", new { status = "Onaylandı" });
         }
-        // 1. İade Özet Sayfası (Ödeme öncesi)
         [HttpPost]
         public IActionResult ProcessReturnPayment(int rentalId)
         {
@@ -110,7 +105,6 @@ namespace car.Controllers
             return View("ReturnPayment", rentalCalc);
         }
 
-        // 2. Ödeme Onay ve İade Tamamlama
         [HttpPost]
         public IActionResult FinalizeReturn(int rentalId, double finalAmount)
         {

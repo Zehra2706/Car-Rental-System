@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using rental.Models;
 using Microsoft.Extensions.Configuration;
 
-
 namespace car.Controllers
 {
     public class RentalController : Controller
@@ -15,7 +14,6 @@ namespace car.Controllers
         private readonly ICarService _carService;
         private readonly IConfiguration _configuration;
 
-        // Constructor tek olmalı ve sadece servisleri almalı
         public RentalController(IRentalService rentalService, ICarService carService, IConfiguration configuration)
         {
             _rentalService = rentalService;
@@ -29,23 +27,20 @@ namespace car.Controllers
             var car = _carService.GetCarForEdit(carId);
 
             if (car == null)
-            {
                 return Content($"Hata: {carId} ID'li araç veritabanında bulunamadı!");
-            }
 
             ViewBag.Car = car;
 
-            var disabledDates = _rentalService.GetDisabledDatesJson(carId);
-            ViewBag.DisabledDates = Newtonsoft.Json.JsonConvert.SerializeObject(disabledDates);
+            // ✅ Direkt serialize ediyoruz, {from, to} formatında gelir
+            var disabledRanges = _rentalService.GetDisabledDatesJson(carId);
+            ViewBag.DisabledDates = JsonConvert.SerializeObject(disabledRanges);
 
             return View();
         }
 
-
         [HttpPost]
         public IActionResult ProcessToPayment(rental.Models.Rental rental)
         {
-
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToAction("Login", "Auth");
             rental.UserId = userId.Value;
@@ -57,25 +52,20 @@ namespace car.Controllers
             }
 
             TempData["PendingRental"] = JsonConvert.SerializeObject(rental);
-
             return RedirectToAction("Payment");
         }
 
         [HttpGet]
         public IActionResult Payment()
         {
-            // TempData'dan veriyi geri alıyoruz
             var data = TempData["PendingRental"] as string;
             if (string.IsNullOrEmpty(data)) return RedirectToAction("Index", "Home");
 
             var rental = JsonConvert.DeserializeObject<rental.Models.Rental>(data);
-
-            // Tekrar okuma ihtimaline karşı veriyi TempData'da tutalım
             TempData.Keep("PendingRental");
 
             return View(rental);
         }
-
 
         [HttpPost]
         public IActionResult SendRequest(rental.Models.Rental rental)
@@ -86,7 +76,6 @@ namespace car.Controllers
                 return RedirectToAction("Create", new { carId = rental.CarId });
             }
 
-
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToAction("Login", "Auth");
 
@@ -94,27 +83,23 @@ namespace car.Controllers
             rental.Status = "OnayBekliyor";
             rental.IsReturned = false;
 
-            // Servis üzerinden kaydetme işlemini yapıyoruz
             _rentalService.ConfirmAndSave(rental);
 
             TempData["Success"] = "Kiralama talebiniz başarıyla iletildi!";
             return RedirectToAction("Index", "User");
         }
 
+        // ✅ int days → double hours olarak düzeltildi
         [HttpGet]
-        public JsonResult GetPriceCalculation(int carId, int days)
+        public JsonResult GetPriceCalculation(int carId, double hours)
         {
-            // Servis üzerinden gerçek rakamları alıyoruz
-            var calculation = _rentalService.CalculatePrice(carId, days);
-
-            // Dönen değerleri ekrana (JavaScript'e) gönderiyoruz
+            var calculation = _rentalService.CalculateHourlyPrice(carId, hours);
             return Json(new { total = calculation.total, deposit = calculation.deposit });
         }
 
         [HttpPost]
         public IActionResult ConfirmPayment(rental.Models.Rental rental)
         {
-            // Formdan UserId gelmediyse veya 0 geldiyse Session'dan tekrar çekiyoruz
             if (rental.UserId <= 0)
             {
                 var sessionUserId = HttpContext.Session.GetInt32("UserId");
@@ -126,63 +111,62 @@ namespace car.Controllers
                 rental.UserId = sessionUserId.Value;
             }
 
-            // RealReturnDate'i NULL yapıyoruz (Daha önce SQL'de nullable yapmıştık)
             rental.RealReturnDate = null;
             rental.Status = "OnayBekliyor";
             rental.IsReturned = false;
 
-            // Veritabanına kaydet (Service Katmanı)
             _rentalService.ConfirmAndSave(rental);
 
             TempData["Success"] = "Ödeme başarılı! Kiralama talebiniz yöneticiye iletildi.";
             return RedirectToAction("Index", "User");
         }
+
         [HttpPost]
         public async Task<IActionResult> StartPayment(Rental rental)
-        {    
+        {
             HttpContext.Session.SetString("RentalData", JsonConvert.SerializeObject(rental));
+
             var options = new Iyzipay.Options
             {
                 ApiKey = _configuration["Iyzipay:ApiKey"],
                 SecretKey = _configuration["Iyzipay:SecretKey"],
                 BaseUrl = _configuration["Iyzipay:BaseUrl"]
             };
-        
+
             if (string.IsNullOrEmpty(options.ApiKey) || string.IsNullOrEmpty(options.SecretKey))
-            {
                 throw new Exception("iyzico API anahtarları eksik!");
-            }
+
             var request = new Iyzipay.Request.CreateCheckoutFormInitializeRequest
             {
-             Locale = Iyzipay.Model.Locale.TR.ToString(),
-             ConversationId = "123456",
-             Price = rental.Deposit.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture),
-             PaidPrice = rental.Deposit.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture),
-             Currency = Iyzipay.Model.Currency.TRY.ToString(),
-             BasketId = "B67832",
-             PaymentGroup = Iyzipay.Model.PaymentGroup.PRODUCT.ToString(),
-             CallbackUrl = "http://localhost:5054/User/Index" 
+                Locale = Iyzipay.Model.Locale.TR.ToString(),
+                ConversationId = "123456",
+                Price = rental.Deposit.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture),
+                PaidPrice = rental.Deposit.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture),
+                Currency = Iyzipay.Model.Currency.TRY.ToString(),
+                BasketId = "B67832",
+                PaymentGroup = Iyzipay.Model.PaymentGroup.PRODUCT.ToString(),
+                CallbackUrl = "http://localhost:5054/User/Index"
             };
 
             request.Buyer = new Iyzipay.Model.Buyer
             {
-             Id = rental.UserId.ToString(),
-             Name = "Test",
-             Surname = "User",
-             Email = "test@test.com",
-             IdentityNumber = "11111111111",
-             RegistrationAddress = "Adres",
-             Ip = "85.34.78.112",
-             City = "Istanbul",
-             Country = "Turkey"
+                Id = rental.UserId.ToString(),
+                Name = "Test",
+                Surname = "User",
+                Email = "test@test.com",
+                IdentityNumber = "11111111111",
+                RegistrationAddress = "Adres",
+                Ip = "85.34.78.112",
+                City = "Istanbul",
+                Country = "Turkey"
             };
 
             request.ShippingAddress = new Iyzipay.Model.Address
             {
-              ContactName = "Test User",
-              City = "Istanbul",
-              Country = "Turkey",
-              Description = "Adres"
+                ContactName = "Test User",
+                City = "Istanbul",
+                Country = "Turkey",
+                Description = "Adres"
             };
 
             request.BillingAddress = request.ShippingAddress;
@@ -200,81 +184,63 @@ namespace car.Controllers
             };
 
             var checkoutForm = await Iyzipay.Model.CheckoutFormInitialize.Create(request, options);
-
             ViewBag.PaymentForm = checkoutForm.CheckoutFormContent;
-
             TempData["RentalData"] = JsonConvert.SerializeObject(rental);
 
             return View("IyzicoPayment");
         }
-       
-[HttpPost]
-[IgnoreAntiforgeryToken]
-public async Task<IActionResult> PaymentCallback(string token)
-{   
-var rentalDataString = HttpContext.Session.GetString("RentalData");
 
-if (string.IsNullOrEmpty(rentalDataString))
-{
-    return RedirectToAction("Fail", new { message = "Kiralama verisi bulunamadı." });
-}
-
-var rental = JsonConvert.DeserializeObject<Rental>(rentalDataString);    var options = new Iyzipay.Options
-    {
-        ApiKey = _configuration["Iyzipay:ApiKey"],
-        SecretKey = _configuration["Iyzipay:SecretKey"],
-        BaseUrl = _configuration["Iyzipay:BaseUrl"]
-    };
-
-    if (string.IsNullOrEmpty(token))
-    {
-        return RedirectToAction("Fail", new { message = "Token gelmedi (iyzico callback hatası)" });
-    }
-    var request = new Iyzipay.Request.RetrieveCheckoutFormRequest
-    {
-        Token = token
-    };
-
-    // iyzico'dan ödeme sonucunu çekiyoruz
-    var result = await Iyzipay.Model.CheckoutForm.Retrieve(request, options);
-
-    // 1. Durum: Ödeme Gerçekten Başarılı mı?
-    if (result.Status == "success" && result.PaymentStatus == "SUCCESS")
-    {
-        // TempData'daki kiralama verisini alıyoruz
-        var rentalData = TempData["RentalData"] as string;
-        if (string.IsNullOrEmpty(rentalData))
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> PaymentCallback(string token)
         {
-            return RedirectToAction("Fail", new { message = "Kiralama verisi bulunamadı." });
+            var rentalDataString = HttpContext.Session.GetString("RentalData");
+
+            if (string.IsNullOrEmpty(rentalDataString))
+                return RedirectToAction("Fail", new { message = "Kiralama verisi bulunamadı." });
+
+            var rental = JsonConvert.DeserializeObject<Rental>(rentalDataString);
+
+            var options = new Iyzipay.Options
+            {
+                ApiKey = _configuration["Iyzipay:ApiKey"],
+                SecretKey = _configuration["Iyzipay:SecretKey"],
+                BaseUrl = _configuration["Iyzipay:BaseUrl"]
+            };
+
+            if (string.IsNullOrEmpty(token))
+                return RedirectToAction("Fail", new { message = "Token gelmedi (iyzico callback hatası)" });
+
+            var request = new Iyzipay.Request.RetrieveCheckoutFormRequest { Token = token };
+            var result = await Iyzipay.Model.CheckoutForm.Retrieve(request, options);
+
+            if (result.Status == "success" && result.PaymentStatus == "SUCCESS")
+            {
+                var rentalData = TempData["RentalData"] as string;
+                if (string.IsNullOrEmpty(rentalData))
+                    return RedirectToAction("Fail", new { message = "Kiralama verisi bulunamadı." });
+
+                _rentalService.ConfirmAndSave(rental);
+
+                TempData["Success"] = "Ödemeniz başarıyla alındı ve rezervasyonunuz oluşturuldu.";
+                return RedirectToAction("Success");
+            }
+            else
+            {
+                string errorMessage = result.ErrorMessage ?? "Ödeme işlemi sırasında bir hata oluştu.";
+                TempData["Error"] = errorMessage;
+                return RedirectToAction("Fail", new { message = errorMessage });
+            }
         }
-        
-        // Veritabanına kaydet
-        _rentalService.ConfirmAndSave(rental);
 
-        TempData["Success"] = "Ödemeniz başarıyla alındı ve rezervasyonunuz oluşturuldu.";
-        return RedirectToAction("Success");
-    }
-    else
-    {
-        // 2. Durum: Ödeme başarısız (Hata mesajını kullanıcıya ilet)
-        // iyzico'nun döndüğü hata mesajını alalım
-        string errorMessage = result.ErrorMessage ?? "Ödeme işlemi sırasında bir hata oluştu.";
-        TempData["Error"] = errorMessage;
-        
-        return RedirectToAction("Fail", new { message = errorMessage });
-    }
-}
-[HttpGet]
-public IActionResult Success()
-{
-    return View(); // Views/Rental/Success.cshtml oluşturmalısın
-}
+        [HttpGet]
+        public IActionResult Success() => View();
 
-[HttpGet]
-public IActionResult Fail(string message)
-{
-    ViewBag.Message = message;
-    return View(); // Views/Rental/Fail.cshtml oluşturmalısın
-}
+        [HttpGet]
+        public IActionResult Fail(string message)
+        {
+            ViewBag.Message = message;
+            return View();
+        }
     }
 }

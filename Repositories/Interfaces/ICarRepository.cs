@@ -1,6 +1,7 @@
 using car.Models;
 using carFeature.Models;
 using price.Models;
+using rental.Models;
 
 namespace Car_reservation_automation_system.Repositories.Interfaces
 {
@@ -16,6 +17,11 @@ namespace Car_reservation_automation_system.Repositories.Interfaces
         List<Car> GetAllCars();
         void DeleteCar(int id);
         string? GetCarsByUserId(int value);
+        double GetDailyPrice(int carId);
+
+        bool CheckAvailability(int carId, DateTime start, DateTime end);
+        List<Rental> GetActiveRentalsByCarId(int carId);
+
 
     }
 }

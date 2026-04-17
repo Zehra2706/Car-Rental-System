@@ -1,74 +1,288 @@
+@using car.Models
 @model rental.Models.Rental
 @{
+    // dynamic car: Senin CarCreateViewModel nesnen
+    dynamic car = ViewBag.Car;
     Layout = "_Layout";
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow border-0">
-                <div class="card-header bg-primary text-white text-center py-3">
-                    <h4 class="mb-0">💳 Güvenli Depozito Ödemesi</h4>
-                </div>
-                <div class="card-body p-4">
-                    <div class="alert alert-info text-center shadow-sm">
-                        Ödenecek Depozito Tutarı: <br>
-                        <strong class="display-6">@Model.Deposit.ToString("N0") TL</strong>
+@* Flatpickr Takvim Kütüphanesi *@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<div class="container-fluid mt-5 px-4">
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        
+        @* --- SOL SÜTUN: ARAÇ AYRINTILARI VE TARİFELER (SENİN KODUN, SIFIR MÜDAHALE) --- *@
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold border-bottom pb-2 mb-3 text-primary">🔍 Araç Detayları</h5>
+                    
+                    <div class="row g-3">
+                        @* Marka & Model *@
+                        <div class="col-12">
+                            <small class="text-muted d-block font-monospace">Marka & Model</small>
+                            <span class="fw-bold h5 text-uppercase">@car?.Brand @car?.ModelName (@car?.ModelYear)</span>
+                        </div>
+
+                        @* Teknik Detaylar (Enum Cast İşlemi Yapıldı) *@
+                        <div class="col-6">
+                            <small class="text-muted d-block font-monospace">Renk</small>
+                            <span class="fw-bold text-dark">@(car?.Color ?? "Belirtilmedi")</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block font-monospace">Motor Gücü</small>
+                            <span class="fw-bold text-dark">@(car?.EngineSize > 0 ? car.EngineSize.ToString("0.0") :
+                                                "---") L</span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block font-monospace">Şanzıman</small>
+                                <span class="fw-bold text-dark">@((int)car?.Transmission == 1 ? "Otomatik" :
+                                                       "Manuel")</span>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block font-monospace">Yakıt Tipi</small>
+                                    <span class="fw-bold text-dark">@((int)car?.FuelType == 1 ? "Benzin" : "Dizel")</span>
+                                </div>
+
+                                @* Kiralama & Sigorta *@
+                                <div class="col-12">
+                                    <small class="text-muted d-block font-monospace">Kiralama Tipi</small>
+                                    <span
+                                        class="badge w-100 py-2 @(car?.IsChauffeured == true ? "bg-info text-dark" : "bg-light text-secondary border")">
+                                        <i class="bi bi-person-badge"></i> @(car?.IsChauffeured == true ? "Şoförlü Hizmet Mevcut" : "Standart Kiralama")
+                                    </span>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="d-flex gap-2">
+                                        <span class="badge @(car?.IsInsured == true ? "bg-success" : "bg-danger")">
+                                            @(car?.IsInsured == true ? "Kaskolu" : "Sigortasız")
+                                        </span>
+                                        @if (!string.IsNullOrEmpty(car?.MotorInsurance))
+                                        {
+                                            <span class="badge bg-primary">@car.MotorInsurance</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                @* Fiyat Tablosu *@
+                                <div class="col-12 mt-2">
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <small class="text-muted d-block mb-2 fw-bold text-uppercase"><i
+                                            class="bi bi-tags-fill"></i> Kiralama Tarifeleri</small>
+                                            <div class="row text-center g-2">
+                                                <div class="col-3 border-end">
+                                                    <small class="text-muted d-block" style="font-size: 0.65rem;">SAATLİK</small>
+                                                    <span class="fw-bold text-primary" style="font-size: 0.8rem;">@((car.DailyPrice
+                                                                                                    / 24).ToString("N2")) TL</span>
+                                                    </div>
+                                                    <div class="col-3 border-end">
+                                                        <small class="text-muted d-block" style="font-size: 0.65rem;">GÜNLÜK</small>
+                                                        <span class="fw-bold text-dark"
+                                                              style="font-size: 0.8rem;">@car.DailyPrice.ToString("N0") TL</span>
+                                                    </div>
+                                                    <div class="col-3 border-end">
+                                                        <small class="text-muted d-block" style="font-size: 0.65rem;">HAFTALIK</small>
+                                                        <span class="fw-bold text-dark"
+                                                              style="font-size: 0.8rem;">@car.WeeklyPrice.ToString("N0") TL</span>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <small class="text-muted d-block" style="font-size: 0.65rem;">AYLIK</small>
+                                                        <span class="fw-bold text-dark"
+                                                              style="font-size: 0.8rem;">@car.MonthlyPrice.ToString("N0") TL</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @* Plaka *@
+                                        <div class="col-12">
+                                            <small class="text-muted d-block font-monospace">Plaka</small>
+                                            <span class="badge bg-dark fs-6 w-100 py-2" style="letter-spacing: 2px;">
+                                                @(string.IsNullOrEmpty(car?.Plate) ? "PLAKA YOK" : car.Plate)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    @* Konum & Açıklama *@
+                                    <div class="mt-4 p-3 bg-light rounded-3 border-start border-3 border-primary shadow-sm">
+                                        <small class="text-muted d-block mb-1 fw-bold text-uppercase">📍 Araç Konumu & Bilgi</small>
+                                        <p class="small mb-1 text-dark fw-bold"><i class="bi bi-geo-alt-fill text-danger"></i>
+                                            @car?.Location</p>
+                                            <p class="small mb-0 text-secondary" style="font-style: italic;">"@car?.Description"</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @* --- ORTA SÜTUN: ARAÇ GÖRSELİ (SENİN KODUN) --- *@
+                            <div class="col-lg-5">
+                                <div
+                                    class="card shadow-sm border-0 rounded-4 bg-white d-flex align-items-center justify-content-center p-3 h-100">
+                                    <img src="@(car?.ImagePath ?? "/images/default-car.png")" class="img-fluid rounded-4 shadow"
+                                         style="max-height: 520px; object-fit: contain; width: 100%;">
+                                </div>
+                            </div>
+
+                            @* --- SAĞ SÜTUN: REZERVASYON FORMU (SADECE ÇALIŞMASI İÇİN DÜZELTİLDİ) --- *@
+                            <div class="col-lg-3">
+                                <div class="card shadow-lg border-0 rounded-4 h-100 border-top border-5 border-primary">
+                                    <div class="card-body">
+                                        <h5 class="fw-bold mb-4 text-center text-primary">🕒 Rezervasyon Takvimi</h5>
+
+                                        @* 🚩 DÜZELTME 1: Form ProcessToPayment'a gitmeli *@
+                                        <form asp-controller="Rental" asp-action="ProcessToPayment" method="post">
+                        
+                                            <input type="hidden" name="CarId" value="@car?.Id" id="carIdField" />
+                                            <input type="hidden" id="hiddenForecast" name="Forecast" value="0" />
+                                            <input type="hidden" id="hiddenDeposit" name="Deposit" value="0" />
+
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold text-muted">ALIŞ TARİHİ & SAATİ</label>
+                                                <input type="text" id="startDate" name="Date"
+                                                       class="form-control bg-white shadow-sm border-primary" placeholder="Tarih seç..."
+                                                       readonly required>
+                                            </div>
+
+                                            <div class="mb-4">
+                                                <label class="form-label small fw-bold text-muted">İADE TARİHİ & SAATİ</label>
+                                                <input type="text" id="endDate" name="ReturnDate"
+                                                       class="form-control bg-white shadow-sm border-primary" placeholder="Tarih seç..."
+                                                       readonly required>
+                                            </div>
+
+                                            @* Fiyat Özeti *@
+                                            <div id="priceSummary"
+                                                 class="p-3 bg-primary bg-opacity-10 rounded-4 mb-4 d-none border border-primary border-opacity-25">
+                                                <div class="d-flex justify-content-between small mb-2 text-dark">
+                                                    <span>Kiralama Süresi:</span>
+                                                    <span class="fw-bold" id="daysCount">0 Saat</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between small mb-2 text-dark">
+                                                    <span>Kira Bedeli:</span>
+                                                    <span class="fw-bold text-primary" id="totalPrice">0 TL</span>
+                                                </div>
+                                                <hr class="my-2 border-primary border-opacity-25">
+                                                <div class="d-flex justify-content-between text-danger fw-bold h5">
+                                                    <span style="font-size: 0.9rem;">Ödenecek Depozito:</span>
+                                                    <span id="depositAmount">0 TL</span>
+                                                </div>
+                                            </div>
+
+                                            <button type="submit" id="submitBtn"
+                                                    class="btn btn-primary btn-lg w-100 py-3 fw-bold rounded-pill shadow" disabled>
+                                                Ödemeye Geç
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <form asp-action="StartPayment" method="post">
-                        @* 🚩 KRİTİK EKSİK BURASIYDI: UserId mutlaka taşınmalı *@
-                        <input type="hidden" name="UserId" value="@Model.UserId" />
-                        
-                        <input type="hidden" name="CarId" value="@Model.CarId" />
-                        
-                        @* Tarihleri ISO formatında göndermek SQL çakışmalarını önler *@
-                        <input type="hidden" name="Date" value="@Model.Date.ToString("yyyy-MM-ddTHH:mm:ss")" />
-                        <input type="hidden" name="ReturnDate"
-                               value="@Model.ReturnDate.ToString("yyyy-MM-ddTHH:mm:ss")" />
-                        
-                        <input type="hidden" name="Forecast" value="@Model.Forecast" />
-                        <input type="hidden" name="Deposit" value="@Model.Deposit" />
-                        <input type="hidden" name="IsReturned" value="false" />
-                        <input type="hidden" name="Status" value="OnayBekliyor" />
+                    @section Scripts {
+                        <script>
+                            const disabledRanges = @Html.Raw(ViewBag.DisabledDates ?? "[]");
+                            const carId = document.getElementById('carIdField')?.value;
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Kart Üzerindeki İsim</label>
-                            <input type="text" class="form-control" placeholder="Ad Soyad" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Kart Numarası</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
-                                <input type="text" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19"
-                                       required>
-                            </div>
-                        </div>
+                            const commonConfig = {
+                            enableTime: true,
+                            time_24hr: true,
+                            minDate: "today",
+                            dateFormat: "Y-m-d H:i",
+                            locale: { firstDayOfWeek: 1 }
+                            };
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Son Kullanma</label>
-                                <input type="text" class="form-control" placeholder="AA/YY" maxlength="5" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">CVV</label>
-                                <input type="text" class="form-control" placeholder="123" maxlength="3" required>
-                            </div>
-                        </div>
+                            const startPicker = flatpickr("#startDate", {
+                            ...commonConfig,
+                            onChange: function (selectedDates, dateStr, instance) {
+                            const selectedDate = selectedDates[0];
+                            if (!selectedDate) return;
+                            const time = selectedDate.getTime();
+                
+                            for (let range of disabledRanges) {
+                            const from = new Date(range.from).getTime();
+                            const to = new Date(range.to).getTime();
+                            if (time >= from && time < to) {
+                            alert("Dikkat: Araç bu saatler arasında dolu!");
+                            instance.clear();
+                            return;
+                            }
+                            }
+                            if (selectedDates[0]) endPicker.set("minDate", selectedDates[0]);
+                            updatePrice();
+                            }
+                            });
 
-                        <hr class="my-4">
+                            const endPicker = flatpickr("#endDate", {
+                            ...commonConfig,
+                            onChange: function (selectedDates, dateStr, instance) {
+                            const selectedDate = selectedDates[0];
+                            if (!selectedDate) return;
+                            const time = selectedDate.getTime();
+                
+                            for (let range of disabledRanges) {
+                            const from = new Date(range.from).getTime();
+                            const to = new Date(range.to).getTime();
+                            if (time > from && time <= to) {
+                            alert("İade saati dolu bir kiralama ile çakışıyor!");
+                            instance.clear();
+                            return;
+                            }
+                            }
+                            updatePrice();
+                            }
+                            });
 
-                        <button type="submit" class="btn btn-success w-100 fw-bold py-3 shadow">
-                            <i class="bi bi-shield-lock-fill"></i> Ödemeyi Tamamla ve İsteği Gönder
-                        </button>
-                        
-                        <div class="text-center mt-3 text-muted small">
-                            <i class="bi bi-lock"></i> 256-bit SSL ile korunmaktadır.
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                            function updatePrice() {
+                            const startStr = document.getElementById('startDate').value;
+                            const endStr = document.getElementById('endDate').value;
+                            const submitBtn = document.getElementById('submitBtn');
+                            const summary = document.getElementById('priceSummary');
+
+                            if (startStr && endStr) {
+                            const start = new Date(startStr);
+                            const end = new Date(endStr);
+
+                            if (end > start) {
+                            const diffMs = end - start;
+                            const totalHours = diffMs / (1000 * 60 * 60);
+
+                            // 🚩 DÜZELTME 2: Fiyatın 0 gelmesini önlemek için .ToString yerine Javascript'in replace'ini kullanıyoruz.
+                            let hoursFormatted = totalHours.toFixed(4).replace(".", ",");
+
+                            fetch(`/Rental/GetPriceCalculation?carId=${carId}&hours=${hoursFormatted}`)
+                            .then(r => r.json())
+                            .then(data => {
+                            summary.classList.remove('d-none');
+                            
+                            const h = Math.floor(totalHours);
+                            const m = Math.round((totalHours % 1) * 60);
+                            document.getElementById('daysCount').innerText = `${h} Saat ${m} Dakika`;
+                            
+                            document.getElementById('totalPrice').innerText = data.total.toLocaleString('tr-TR') + " TL";
+                            document.getElementById('depositAmount').innerText = data.deposit.toLocaleString('tr-TR') + " TL";
+                            
+                            document.getElementById('hiddenForecast').value = data.total.toString().replace(",", ".");
+                            document.getElementById('hiddenDeposit').value = data.deposit.toString().replace(",", ".");
+                            
+                            submitBtn.disabled = false;
+                            });
+                            } else {
+                            summary.classList.add('d-none');
+                            submitBtn.disabled = true;
+                            }
+                            }
+                            }
+                        </script>
+                    }

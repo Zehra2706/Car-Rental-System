@@ -18,59 +18,63 @@ namespace car.Service.Concrete
             _carRepo = carRepo;
         }
 
-        // --- 1. FONKSİYON: TAKVİM İÇİN DOLU TARİHLERİ GETİR ---
-        // Flatpickr takviminin anlayacağı { from: '...', to: '...' } formatında döner
-        public List<object> GetDisabledDatesJson(int carId)
-        {
-            var busyDates = _rentalRepo.GetBusyDates(carId);
-            return busyDates.Select(r => new
-            {
-                from = r.Date.ToString("yyyy-MM-dd"),
-                to = r.ReturnDate.ToString("yyyy-MM-dd")
-            }).Cast<object>().ToList();
-        }
-
         public bool IsAvailable(int carId, DateTime start, DateTime end)
         {
+            if (start >= end || start < DateTime.Now.AddMinutes(-10)) return false;
             return _rentalRepo.CheckAvailability(carId, start, end);
+        }
+
+        // ✅ {from, to} formatında döner, Controller direkt serialize eder
+        public List<object> GetDisabledDatesJson(int carId)
+        {
+            var rentals = _rentalRepo.GetActiveRentalsByCarId(carId);
+
+            return rentals.Select(r => (object)new
+            {
+                from = r.Date.ToString("yyyy-MM-dd HH:mm"),
+                to = r.ReturnDate.ToString("yyyy-MM-dd HH:mm")
+            }).ToList();
+        }
+
+        // ✅ Saatlik fiyat hesaplama (frontend hours gönderiyor)
+        public (double total, double deposit) CalculateHourlyPrice(int carId, double hours)
+        {
+            double gunlukFiyat = _carRepo.GetDailyPrice(carId);
+            double saatlikFiyat = gunlukFiyat / 24.0;
+            double total = saatlikFiyat * hours;
+            double deposit = total * 0.10;
+            return (total, deposit);
         }
 
         public (double total, double deposit) CalculatePrice(int carId, int days)
         {
-            var car = _carRepo.GetCarById(carId);
-
-            if (car == null || car.Prices == null)
-            {
-                return (0, 0);
-            }
-
-            var price = car.Prices.FirstOrDefault();
-
-            if (price == null)
-            {
-                return (0, 0);
-            }
-
-            double selectedRate;
-            if (days >= 30) selectedRate = (double)price.monthly;
-            else if (days >= 7) selectedRate = (double)price.weekly;
-            else selectedRate = (double)price.daily;
-
-            double total = days * selectedRate;
+            double gunlukFiyat = _carRepo.GetDailyPrice(carId);
+            double total = gunlukFiyat * days;
             double deposit = total * 0.10;
-
             return (total, deposit);
         }
+
         public void ConfirmAndSave(Rental rental)
         {
-            // Kaydetmeden hemen önce bir kez daha kontrol (Double-check)
-            if (!IsAvailable(rental.CarId, rental.Date, rental.ReturnDate))
-            {
-                throw new Exception("Üzgünüz, bu tarihler arasında araç artık müsait değil.");
-            }
-
             _rentalRepo.Add(rental);
             _rentalRepo.SaveChanges();
+        }
+
+        public List<Rental> GetActiveRentalsByCarId(int carId)
+        {
+            return _rentalRepo.GetActiveRentalsByCarId(carId);
+        }
+
+        public double GetDailyPrice(int carId)
+        {
+            return _carRepo.GetDailyPrice(carId);
+        }
+
+        public Rental GetRentalById(int id)
+        {
+            return _rentalRepo.GetActiveRentalsByCarId(0)
+                              .Concat(_rentalRepo.GetBusyDates(0))
+                              .FirstOrDefault(r => r.Id == id);
         }
     }
 }

@@ -39,8 +39,6 @@ namespace car.Controllers
             if (userId == null) return RedirectToAction("Login", "Auth");
             return View();
         }
-
-        // --- 3. YENİ ARAÇ OLUŞTURMA (POST) ---
         [HttpPost]
         public async Task<IActionResult> Create(CarCreateViewModel model)
         {
@@ -59,10 +57,13 @@ namespace car.Controllers
                 _carService.AddNewCar(model);
                 return RedirectToAction("MyCars");
             }
+
+            // 🚩 BURAYI EKLE: Eğer model geçersizse, nedenini anlamak için hataları toplayalım
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            ViewBag.Errors = errors; // View tarafında bu listeyi yazdırabiliriz.
+
             return View(model);
         }
-
-        // --- 4. ARAÇ DETAY VE TAKVİM ---
         public IActionResult Details(int id)
         {
             var car = _carService.GetCarForEdit(id);

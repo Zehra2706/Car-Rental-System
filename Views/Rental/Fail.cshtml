@@ -4,6 +4,10 @@
         <div class="card-body text-danger">
             <h5 class="card-title">Hata Detayı:</h5>
             <p class="card-text">@ViewBag.ErrorMessage</p>
+            @* Fail.cshtml içinde uygun bir yere ekle *@
+            <div class="alert alert-warning mt-3">
+                <strong>Sistem Mesajı:</strong> @ViewBag.Message
+            </div>
             <hr />
             <p>Lütfen kart bilgilerinizi kontrol edip tekrar deneyiniz.</p>
             <div class="d-grid gap-2">
