@@ -1,11 +1,14 @@
 using Car_reservation_automation_system.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserModel = user.Models.User;
-
+[Authorize(Roles = "Admin")]
 public class AdminController : Controller
 {
     private readonly ICarService _carService;
     private readonly IUserService _userService;
+
+
 
     public AdminController(IUserService userService, ICarService carService)
     {

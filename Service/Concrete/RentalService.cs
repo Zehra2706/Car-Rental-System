@@ -69,6 +69,17 @@ namespace car.Service.Concrete
         {
             return _carRepo.GetDailyPrice(carId);
         }
+        public void CancelRentalRequest(int rentalId)
+        {
+            // İsim hatası düzeltildi (_rentalRepo kullanıldı)
+            // Tip hatası düzeltildi (Rental olduğu açıkça belirtildi)
+            Rental rental = (Rental)_rentalRepo.GetById(rentalId);
+
+            if (rental != null && rental.Status == "OnayBekliyor")
+            {
+                _rentalRepo.Delete(rentalId);
+            }
+        }
 
         public Rental GetRentalById(int id)
         {

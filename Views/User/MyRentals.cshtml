@@ -1,101 +1,140 @@
 @model List<rental.Models.Rental>
 @{
     Layout = "_Layout";
-    var sayfaBasligi = ViewBag.PageTitle ?? "Kiralama Taleplerim";
+    // URL'deki filtreyi kontrol ediyoruz
+    bool isAktifMod = Context.Request.Query["filter"] == "aktif";
+    var sayfaBasligi = isAktifMod ? "Aktif Kiralamalarım ve Taleplerim" : "Tüm Kiralama Geçmişim";
 }
 
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold"><i class="bi bi-clock-history text-warning"></i> @sayfaBasligi</h2>
-        <a href="/User/Index" class="btn btn-outline-secondary btn-sm">Panele Dön</a>
+        <a href="/User/Index" class="btn btn-outline-secondary btn-sm shadow-sm">
+            <i class="bi bi-arrow-left"></i> Panele Dön
+        </a>
     </div>
 
-    <div class="card shadow-sm border-0">
+    <div class="card shadow-sm border-0 rounded-3">
         <div class="card-body p-0">
-            <table class="table table-hover mb-0 align-middle">
-                <thead class="bg-light">
-                    <tr>
-                        <th class="ps-4">Araç</th>
-                        <th>Başlangıç</th>
-                        <th>Bitiş</th>
-                        <th>Öngörülen Tutar</th>
-                        <th>Durum</th>
-                        <th class="text-center">İşlem</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        foreach (var item in Model)
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-3">Araç</th>
+                            <th class="py-3">Başlangıç</th>
+                            <th class="py-3">Bitiş</th>
+                            <th class="py-3">Öngörülen Tutar</th>
+                            <th class="py-3">Durum</th>
+                            @* 🚩 SADECE AKTİF MODDA BAŞLIĞI GÖSTER *@
+                            @if (isAktifMod)
+                            {
+                                <th class="text-center py-3">İşlem</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
                         {
-                            // Status değerini güvenli bir değişkene alalım
-                            var currentStatus = item.Status?.Trim() ?? "";
+                            foreach (var item in Model)
+                            {
+                                var currentStatus = item.Status?.Trim() ?? "";
 
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-dark">@item.Car?.Brand @item.Car?.ModelName</div>
+                                        <small class="text-muted">@item.Car?.Plate</small>
+                                    </td>
+                                    <td>@item.Date.ToShortDateString()</td>
+                                    <td>@item.ReturnDate.ToShortDateString()</td>
+                                    <td class="fw-bold text-primary">@item.Forecast.ToString("C2")</td>
+                                    <td>
+                                        @if (currentStatus == "OnayBekliyor")
+                                        {
+                                            <span class="badge bg-warning text-dark px-3 py-2">Onay Bekliyor</span>
+                                        }
+                                        else if (currentStatus == "Onaylandı" && !item.IsReturned)
+                                        {
+                                            <span class="badge bg-success px-3 py-2">Kullanımda (Aktif)</span>
+                                        }
+                                        else if (item.IsReturned || currentStatus == "İade Edildi" || currentStatus ==
+                                "Tamamlandı")
+                                        {
+                                            <span class="badge bg-secondary px-3 py-2">İade Edildi</span>
+                                        }
+                                        else if (currentStatus == "Reddedildi")
+                                        {
+                                            <span class="badge bg-danger px-3 py-2">Reddedildi</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-dark px-3 py-2 border">@currentStatus</span>
+                                        }
+                                    </td>
+                                    
+                                    @* 🚩 SADECE AKTİF MODDA HÜCREYİ VE BUTONLARI OLUŞTUR *@
+                                    @if (isAktifMod)
+                                    {
+                                        <td class="text-center">
+                                            @if (currentStatus == "Onaylandı" && !item.IsReturned)
+                                            {
+                                                <form asp-action="ProcessReturnPayment" asp-controller="User" method="post"
+                                                      style="display:inline;">
+                                                    <input type="hidden" name="rentalId" value="@item.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
+                                                        <i class="bi bi-box-arrow-in-left"></i> İade Et ve Öde
+                                                    </button>
+                                                </form>
+                                            }
+                                            else if (currentStatus == "OnayBekliyor")
+                                            {
+                                                <form asp-action="CancelRequest" asp-controller="Rental" method="post"
+                                                      style="display:inline;">
+                                                    <input type="hidden" name="rentalId" value="@item.Id" />
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-warning rounded-pill px-3 shadow-sm"
+                                                            onclick="return confirm('Bu talebi geri çekmek istediğinize emin misiniz?')">
+                                                        <i class="bi bi-x-circle"></i> İsteği Geri Al
+                                                    </button>
+                                                </form>
+                                            }
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        }
+                        else
+                        {
                             <tr>
-                                <td class="ps-4">
-                                    <strong>@item.Car?.Brand @item.Car?.ModelName</strong><br>
-                                    <small class="text-muted">@item.Car?.Plate</small>
-                                </td>
-                                <td>@item.Date.ToShortDateString()</td>
-                                <td>@item.ReturnDate.ToShortDateString()</td>
-                                <td class="fw-bold text-primary">@item.Forecast.ToString("C2")</td>
-                                <td>
-                                    @* DURUM KONTROLLERİ *@
-                                    @if (currentStatus == "OnayBekliyor")
-                                    {
-                                        <span class="badge bg-warning text-dark">Onay Bekliyor</span>
-                                    }
-                                    @* İçinde "Onay" kelimesi geçiyorsa ve iade edilmemişse *@
-                                    else if (currentStatus.Contains("Onay") && !item.IsReturned)
-                                    {
-                                        <span class="badge bg-success">Kullanımda (Onaylandı)</span>
-                                    }
-                                    else if (item.IsReturned || currentStatus == "Tamamlandı")
-                                    {
-                                        <span class="badge bg-secondary">İade Edildi</span>
-                                    }
-                                    else if (currentStatus == "Reddedildi")
-                                    {
-                                        <span class="badge bg-danger">Reddedildi</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-light text-dark">@currentStatus</span>
-                                    }
-                                </td>
-                                <td class="text-center">
-                                    @* İŞLEM BUTONU KONTROLÜ *@
-                                    @if (currentStatus.Contains("Onay") && !item.IsReturned)
-                                    {
-                                        <form asp-action="ProcessReturnPayment" asp-controller="Rental" method="post">
-                                            <input type="hidden" name="rentalId" value="@item.Id" />
-                                            <button type="submit" class="btn btn-sm btn-success shadow-sm">
-                                                <i class="bi bi-box-arrow-in-left"></i> İade Et ve Öde
-                                            </button>
-                                        </form>
-                                    }
-                                    else if (item.IsReturned)
-                                    {
-                                        <small class="text-success fw-bold">İşlem Kapandı</small>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">-</span>
-                                    }
+                                @* Colspan değerini sütun sayısına göre (5 veya 6) otomatik ayarlar *@
+                                <td colspan="@(isAktifMod ? 6 : 5)" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="bi bi-inbox display-4 d-block mb-3 opacity-25"></i>
+                                        Henüz listelenecek bir kayıt bulunmuyor.
+                                    </div>
                                 </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
-                                Henüz bir kiralama talebiniz bulunmuyor.
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .table thead th {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.02);
+    }
+</style>

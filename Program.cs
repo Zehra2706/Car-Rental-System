@@ -3,6 +3,9 @@ using Car_reservation_automation_system.Service.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using car.Service.Concrete;
 using Car_reservation_automation_system.Repositories.Concrete;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,20 +26,53 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<car.Data.ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 🚩 SESSION AYARLARI (Buraya taşıdık ve tek bir yerDde dotnet topladık)
+// SESSION AYARLARI
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true; // Tarayıcı çerezleri kısıtlasa da çalışmasını sağlar
+    options.Cookie.IsEssential = true;
 });
 
-// ------------------------------------------------------------------
-var app = builder.Build(); // 🚧 KRİTİK SINIR: Mutfak kapandı!
-// ------------------------------------------------------------------
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
 
-// --- 2. MIDDLEWARE / BORU HATTI (BUILD'DEN SONRA) ---
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                context.Token = context.Request.Cookies["AuthToken"];
+                return Task.CompletedTask;
+            },
+
+            OnChallenge = context =>
+            {
+                context.HandleResponse();
+                context.Response.Redirect("/Auth/Login");
+                return Task.CompletedTask;
+            },
+
+            OnForbidden = context =>
+            {
+                context.Response.Redirect("/Auth/AccessDenied");
+                return Task.CompletedTask;
+            }
+        };
+    });
+
+var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
@@ -45,13 +81,13 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // MapStaticAssets yerine standart UseStaticFiles daha güvenlidir
+app.UseStaticFiles();
 
 app.UseRouting();
 
-// 🚩 UseSession MUTLAKA UseRouting'den sonra, UseAuthorization'dan önce olmalı
 app.UseSession();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

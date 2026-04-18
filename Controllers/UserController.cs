@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using car.ViewModels;
 using Microsoft.AspNetCore.Http;
 using System.Linq; // Filtreleme için gerekli
+using Microsoft.AspNetCore.Authorization;
 
 namespace car.Controllers
 {
+    [Authorize]
     public class UserController : Controller
     {
         private readonly IUserService _userService;
@@ -53,33 +55,51 @@ namespace car.Controllers
             return View(cars);
         }
 
-        public IActionResult MyRentals(string? status)
+        public IActionResult MyRentals(string? filter)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToAction("Login", "Auth");
 
-            // Servisten tüm listeyi çekiyoruz
+            // Servisten kullanıcının tüm taleplerini çekiyoruz
             var myRequests = _userService.GetMyRentalRequests(userId.Value);
 
-            if (!string.IsNullOrEmpty(status))
+            if (filter == "aktif")
             {
-                myRequests = myRequests.Where(r => r.Status == status).ToList();
-                ViewBag.PageTitle = status == "Onaylandı" ? "Aktif Kiralamalarım" : "Taleplerim";
+                myRequests = myRequests.Where(r => r.Status == "Onaylandı" || r.Status == "OnayBekliyor").ToList();
+                ViewBag.PageTitle = "Aktif Kiralamalarım ve Taleplerim";
             }
             else
             {
-                ViewBag.PageTitle = "Tüm Taleplerim";
+                ViewBag.PageTitle = "Tüm Kiralama Geçmişim";
             }
 
             return View(myRequests);
         }
-        public IActionResult IncomingRequests()
+
+
+
+
+        public IActionResult IncomingRequests(string? filter)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToAction("Login", "Auth");
 
-            var incoming = _userService.GetIncomingRequests(userId.Value);
-            return View(incoming);
+            // Servisten senin arabalarına gelen TÜM talepleri çekiyoruz
+            var incomingRequests = _userService.GetIncomingRequests(userId.Value);
+
+            bool isAktifMod = filter == "aktif";
+            if (isAktifMod)
+            {
+                // Sadece cevap bekleyenler veya şu an kullanımda olanlar
+                incomingRequests = incomingRequests.Where(r => r.Status == "OnayBekliyor").ToList();
+                ViewBag.PageTitle = "Aktif Gelen Talepler";
+            }
+            else
+            {
+                ViewBag.PageTitle = "Gelen Talepler Geçmişi";
+            }
+
+            return View(incomingRequests);
         }
 
         [HttpPost]
@@ -88,6 +108,7 @@ namespace car.Controllers
             _userService.UpdateRentalStatus(rentalId, status);
             return RedirectToAction("IncomingRequests");
         }
+
         [HttpPost]
         public IActionResult ReturnCar(int rentalId)
         {
@@ -95,6 +116,7 @@ namespace car.Controllers
             TempData["Success"] = "Araç başarıyla iade edildi. Bizi tercih ettiğiniz için teşekkürler!";
             return RedirectToAction("MyRentals", new { status = "Onaylandı" });
         }
+
         [HttpPost]
         public IActionResult ProcessReturnPayment(int rentalId)
         {

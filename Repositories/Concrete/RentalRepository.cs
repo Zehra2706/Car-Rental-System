@@ -22,7 +22,10 @@ namespace Car_reservation_automation_system.Repositories.Concrete
         {
             _context.Rentals.Add(rental);
         }
-
+        public Rental GetById(int id)
+        {
+            return _context.Rentals.Find(id);
+        }
         // 2. Yapılan işlemleri veritabanına (SQL) kaydeder
         public void SaveChanges()
         {
@@ -50,6 +53,15 @@ namespace Car_reservation_automation_system.Repositories.Concrete
                 .Where(r => r.CarId == carId && r.Status != "Reddedildi")
                 .ToList();
         }
+        public void Delete(int id)
+        {
+            var rental = _context.Rentals.Find(id);
+            if (rental != null)
+            {
+                _context.Rentals.Remove(rental);
+                _context.SaveChanges();
+            }
+        }
 
         // 5. Alternatif isimli metot (Eğer projenin başka yerlerinde bu isimle çağrılıyorsa)
         public List<Rental> GetBusyDates(int carId)
@@ -57,5 +69,9 @@ namespace Car_reservation_automation_system.Repositories.Concrete
             return GetActiveRentalsByCarId(carId);
         }
 
+        object IRentalRepository.GetById(int rentalId)
+        {
+            return GetById(rentalId);
+        }
     }
 }

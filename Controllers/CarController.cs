@@ -6,15 +6,16 @@ using Car_reservation_automation_system.Service.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authorization; // 🚩 Sadece bu kütüphaneyi ekledim
 
 namespace car.Controllers
 {
+    [Authorize] // 🚩 Sınıfın tepesine eklendi: Artık tüm işlemler için giriş şart.
     public class CarController : Controller
     {
         private readonly ICarService _carService;
-        private readonly IRentalService _rentalService; // 🟢 RentalService'i ekledik
+        private readonly IRentalService _rentalService;
 
-        // Constructor'ı her iki servisi alacak şekilde güncelledik
         public CarController(ICarService carService, IRentalService rentalService)
         {
             _carService = carService;
@@ -39,6 +40,7 @@ namespace car.Controllers
             if (userId == null) return RedirectToAction("Login", "Auth");
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> Create(CarCreateViewModel model)
         {
@@ -58,21 +60,20 @@ namespace car.Controllers
                 return RedirectToAction("MyCars");
             }
 
-            // 🚩 BURAYI EKLE: Eğer model geçersizse, nedenini anlamak için hataları toplayalım
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            ViewBag.Errors = errors; // View tarafında bu listeyi yazdırabiliriz.
+            ViewBag.Errors = errors;
 
             return View(model);
         }
+
+        // --- 4. ARAÇ DETAYLARI ---
+        [AllowAnonymous] // 🚩 KRİTİK: Ziyaretçiler üye olmadan arabalara bakabilsin diye burayı açık bıraktım.
         public IActionResult Details(int id)
         {
             var car = _carService.GetCarForEdit(id);
             if (car == null) return NotFound();
 
-            // 🟢 HATALI KISIM BURAYDI: Servis üzerinden temizce çekiyoruz
             var disabledDates = _rentalService.GetDisabledDatesJson(id);
-
-            // JSON'a çevirip takvime gönderiyoruz
             ViewBag.DisabledDates = JsonConvert.SerializeObject(disabledDates);
 
             return View(car);

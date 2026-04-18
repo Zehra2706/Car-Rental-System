@@ -678,3 +678,4 @@ C:\Users\melisa\Desktop\car\obj\Debug\net10.0\car.genruntimeconfig.cache
 C:\Users\melisa\Desktop\car\obj\Debug\net10.0\ref\car.dll
 C:\Users\demir\Desktop\Araç Kiralama Sistemi\car-reservation-automation-system\bin\Debug\net10.0\Iyzipay.dll
 C:\Users\melisa\Desktop\car\bin\Debug\net10.0\Iyzipay.dll
+C:\Users\melisa\Desktop\car\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

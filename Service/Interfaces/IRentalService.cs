@@ -7,7 +7,7 @@ namespace Car_reservation_automation_system.Service.Interfaces
 {
     public interface IRentalService
     {
-
+        void CancelRentalRequest(int rentalId);
         void ConfirmAndSave(rental.Models.Rental rental);
         Rental GetRentalById(int id);
         List<object> GetDisabledDatesJson(int carId);

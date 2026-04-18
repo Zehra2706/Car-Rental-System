@@ -1,18 +1,13 @@
-@model rental.Models.Rental
-
 @{
     ViewData["Title"] = "Ödeme Sayfası";
+    Layout = "_Layout";
 }
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <h2 class="text-center mb-4">Güvenli Ödeme Sayfası</h2>
-            
-            @* Iyzico formunun içine yerleşeceği div *@
             <div id="iyzipay-checkout-form" class="responsive"></div>
-            
-            @* Controller'dan gelen script kodunu buraya basıyoruz *@
             @Html.Raw(ViewBag.PaymentForm)
         </div>
     </div>

@@ -1,143 +1,151 @@
 @{
     Layout = "_Layout";
     var userEmail = Context.Session.GetString("UserEmail");
+    var userName = !string.IsNullOrEmpty(userEmail) ? userEmail.Split('@')[0] : "Kullanıcı";
 }
 
-<div class="container mt-5">
-    <div
-        class="d-flex justify-content-between align-items-center mb-4 p-4 bg-white shadow-sm rounded-3 border-start border-primary border-5">
-        <div>
-            <h2 class="fw-bold mb-0">Hoş Geldin, <span class="text-primary">@userEmail</span>! 👋</h2>
-            <p class="text-muted mb-0">Hesabını yönet, araçlarını listele veya yeni bir macera için araç kirala.</p>
+<div class="container py-5">
+    <div class="header-section mb-5 p-5 text-white rounded-4 shadow-lg position-relative overflow-hidden">
+        <div class="position-relative z-index-2">
+            <h1 class="display-5 fw-bold mb-2">Merhaba, @userName! 👋</h1>
+            <p class="lead opacity-75">Panelinden araçlarını yönetebilir veya yeni bir kiralama başlatabilirsin.</p>
         </div>
-        <div class="text-center">
-            <img src="https://ui-avatars.com/api/?name=@userEmail&background=0D6EFD&color=fff&size=128"
-                 class="rounded-circle shadow-sm border border-2 border-white" width="70" alt="Profil">
-        </div>
+        <div class="header-bg-shapes"></div>
     </div>
 
-    <div class="row g-4 row-cols-1 row-cols-md-3 row-cols-lg-5">
-        
-        <div class="col">
-            <div class="card h-100 border-0 shadow text-center p-3 bg-primary text-white card-hover">
-                <div class="card-body">
-                    <i class="bi bi-search display-4"></i>
-                    <h5 class="card-title mt-3 fw-bold">Araç Kirala</h5>
-                    <p class="card-text small opacity-75">Tüm araçları incele.</p>
-                    <a href="/User/AvailableCars"
-                       class="btn btn-light text-primary fw-bold w-100 mt-2 shadow-sm">Araçları Gör</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="card h-100 border-0 shadow-sm text-center p-3 card-hover">
-                <div class="card-body">
-                    <i class="bi bi-clock-history display-4 text-warning"></i>
-                    <h5 class="card-title mt-3 fw-bold text-dark">Taleplerim</h5>
-                    <p class="card-text text-muted small">Gönderdiğin istekler.</p>
-                    <a href="/User/MyRentals" class="btn btn-warning text-white w-100 mt-2">Görüntüle</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div
-                class="card h-100 border-0 shadow-sm text-center p-3 bg-light card-hover border-bottom border-danger border-3">
-                <div class="card-body">
-                    <i class="bi bi-bell-fill display-4 text-danger"></i>
-                    <h5 class="card-title mt-3 fw-bold text-danger">Gelen İstekler</h5>
-                    <p class="card-text text-muted small">İstekleri onayla/ret.</p>
-                    <a href="/User/IncomingRequests" class="btn btn-danger w-100 mt-2 shadow-sm">Yönet</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="card h-100 border-0 shadow-sm text-center p-3 card-hover">
-                <div class="card-body">
-                    <i class="bi bi-plus-circle display-4 text-success"></i>
-                    <h5 class="card-title mt-3 fw-bold text-dark">Araç Ekle</h5>
-                    <p class="card-text text-muted small">Yeni araç tanımla.</p>
-                    <a href="/Car/Create" class="btn btn-success w-100 mt-2">Ekle</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="card h-100 border-0 shadow-sm text-center p-3 card-hover">
-                <div class="card-body">
-                    <i class="bi bi-person-bounding-box display-4 text-secondary"></i>
-                    <h5 class="card-title mt-3 fw-bold text-dark">Profilim</h5>
-                    <p class="card-text text-muted small">Bilgilerini güncelle.</p>
-                    <a href="/User/EditProfile" class="btn btn-outline-secondary w-100 mt-2">Düzenle</a>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="row mt-5 mb-5">
-        <div class="col-12">
-            <div
-                class="p-4 bg-white rounded-3 border shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-center">
-                <div class="mb-3 mb-md-0">
-                    <h5 class="fw-bold mb-1 text-dark"><i class="bi bi-lightning-charge text-warning"></i> Hızlı Bakış
-                    </h5>
-                    <p class="text-muted small mb-0">İşlemlerine hızlıca göz at.</p>
-                </div>
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <h4 class="fw-bold mb-4 text-dark"><i class="bi bi-car-front-fill me-2 text-primary"></i>Kiralama İşlemlerim
+            </h4>
+            <div class="row g-3">
                 
-                <div class="d-flex align-items-center gap-4">
-                    <a href="/Car/MyCars" class="text-decoration-none text-center stats-link">
-                        <span class="d-block fw-bold h4 mb-0 text-primary">@(ViewBag.CarCount ?? 0)</span>
-                        <small class="text-muted fw-bold">İLANLARIM</small>
+                <div class="col-md-6">
+                    <a href="/User/AvailableCars" class="text-decoration-none">
+                        <div
+                            class="action-card p-4 rounded-4 bg-white shadow-sm h-100 border-0 border-top border-primary border-4">
+                            <i class="bi bi-search text-primary display-6 mb-3 d-block"></i>
+                            <h5 class="fw-bold text-dark">Araç Kirala</h5>
+                            <p class="text-muted small">Uygun araçları listele ve hemen kirala.</p>
+                        </div>
                     </a>
-                    <a href="/User/MyRentals?status=Onaylandı" class="text-decoration-none text-center stats-link">
-                        <span class="d-block fw-bold h4 mb-0 text-success">1</span>
-                        <small class="text-muted fw-bold">AKTİF KİRALARIM</small>
+                </div>
+
+                <div class="col-md-6">
+                    <a href="/User/MyRentals?filter=aktif" class="text-decoration-none">
+                        <div
+                            class="action-card p-4 rounded-4 bg-white shadow-sm h-100 border-0 border-top border-warning border-4">
+                            <i class="bi bi-hourglass-split text-warning display-6 mb-3 d-block"></i>
+                            <h5 class="fw-bold text-dark">Aktif İşlemlerim</h5>
+                            <p class="text-muted small">Onay bekleyen taleplerin ve aktif kiraların.</p>
+                        </div>
                     </a>
+                </div>
 
-                   
-                    <div class="vr mx-2 text-muted opacity-25" style="height: 40px;"></div>
+                <div class="col-12 mt-4">
+                    <h4 class="fw-bold mb-3 text-dark"><i class="bi bi-envelope-fill me-2 text-danger"></i>Gelen
+                        Talepler (İlanlarım İçin)</h4>
+                    </div>
 
-                    <div class="text-center">
-                        <span class="d-block fw-bold h4 mb-0 text-dark">1,250 ₺</span>
-                        <small class="text-muted fw-bold">TOPLAM KAZANÇ</small>
+                    <div class="col-md-6">
+                        <a href="/User/IncomingRequests?filter=aktif" class="text-decoration-none">
+                            <div
+                                class="action-card p-4 rounded-4 bg-white shadow-sm h-100 border-0 border-top border-danger border-4">
+                                <i class="bi bi-bell-fill text-danger display-6 mb-3 d-block"></i>
+                                <h5 class="fw-bold text-dark">Onay Bekleyenler</h5>
+                                <p class="text-muted small">Araçlarına gelen yeni kiralama isteklerini onayla.</p>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-6">
+                        <a href="/User/IncomingRequests" class="text-decoration-none">
+                            <div
+                                class="action-card p-4 rounded-4 bg-white shadow-sm h-100 border-0 border-top border-dark border-4">
+                                <i class="bi bi-archive-fill text-dark display-6 mb-3 d-block"></i>
+                                <h5 class="fw-bold text-dark">Gelen Talep Geçmişi</h5>
+                                <p class="text-muted small">Senin araçların için yapılmış tüm eski kayıtlar.</p>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-12 mt-3">
+                        <a href="/User/MyRentals" class="text-decoration-none">
+                            <div class="action-card p-3 rounded-4 bg-light shadow-sm d-flex align-items-center border-0">
+                                <i class="bi bi-clock-history text-secondary fs-3 me-3"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-dark">Tüm Kiralama Geçmişim</h6>
+                                    <small class="text-muted">Eski kiralamalarını ve reddedilen taleplerini gör.</small>
+                                </div>
+                                <i class="bi bi-chevron-right ms-auto text-muted"></i>
+                            </div>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <h4 class="fw-bold mb-4 text-dark"><i class="bi bi-person-circle me-2 text-secondary"></i>Yönetim</h4>
+                <div class="d-grid gap-3">
+                    <a href="/Car/Create" class="btn btn-dark p-3 rounded-4 fw-bold shadow-sm admin-btn">
+                        <i class="bi bi-plus-circle me-2"></i> Yeni Araç Ekle
+                    </a>
+                    <a href="/Car/MyCars" class="btn btn-outline-primary p-3 rounded-4 fw-bold bg-white admin-btn">
+                        <i class="bi bi-tags-fill me-2"></i> İlanlarımı Yönet
+                    </a>
+                    <a href="/User/EditProfile" class="btn btn-outline-secondary p-3 rounded-4 fw-bold bg-white admin-btn">
+                        <i class="bi bi-person-vcard me-2"></i> Profil Bilgileri
+                    </a>
+                
+                    <div class="info-card p-4 rounded-4 bg-white shadow-sm border-0 mt-2">
+                        <h6 class="fw-bold text-primary mb-2"><i class="bi bi-shield-check"></i> Güvenli Sistem</h6>
+                        <p class="text-muted small mb-0">Tüm ödeme işlemleri iyzico altyapısıyla şifrelenmektedir.
+                            Sorularınız için destek birimine ulaşabilirsiniz.</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<style>
-    body {
-        background-color: #f4f7f6;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+        <style>
+            body {
+                background-color: #f9fbfd;
+                color: #2d3436;
+            }
 
-    .card-hover {
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
+            .header-section {
+                background: linear-gradient(135deg, #0d6efd 0%, #0046b3 100%);
+            }
 
-    .card-hover:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
-    }
+            .header-bg-shapes {
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 100%;
+                height: 100%;
+                background-image: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 25%);
+            }
 
-    .stats-link {
-        transition: transform 0.2s;
-        padding: 5px 15px;
-        border-radius: 10px;
-    }
+            .action-card {
+                transition: all 0.3s ease;
+                border: 1px solid transparent !important;
+            }
 
-    .stats-link:hover {
-        transform: scale(1.1);
-        background-color: #f8f9fa;
-    }
+            .action-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 12px 25px rgba(0, 0, 0, 0.07) !important;
+                background-color: #fff;
+            }
 
-    .btn {
-        border-radius: 10px;
-        padding: 10px;
-    }
-</style>
+            .admin-btn {
+                transition: transform 0.2s ease;
+            }
+
+            .admin-btn:hover {
+                transform: scale(1.02);
+            }
+
+            .rounded-4 {
+                border-radius: 1.2rem !important;
+            }
+        </style>

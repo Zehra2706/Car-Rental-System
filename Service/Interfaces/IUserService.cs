@@ -10,6 +10,7 @@ public interface IUserService
     EditProfileViewModel GetProfileForEdit(string email);
     void UpdateProfile(EditProfileViewModel model, string email);
     List<rental.Models.Rental> GetIncomingRequests(int ownerId);
+    void CancelRentalRequest(int rentalId);
 
     // İstek durumunu güncelleme
     void UpdateRentalStatus(int rentalId, string status);

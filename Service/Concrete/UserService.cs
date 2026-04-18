@@ -11,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Car_reservation_automation_system.Repositories.Interfaces;
+using Car_reservation_automation_system.Repositories.Concrete;
 
 namespace car.Service.Concrete
 {
@@ -199,7 +201,7 @@ namespace car.Service.Concrete
                 _context.SaveChanges();
             }
         }
-
+        // Constructor'da IRentalRepository'nin tanımlı olduğunu varsayıyorum
         public void ReturnCar(int rentalId)
         {
             var rental = _context.Rentals.Find(rentalId);
@@ -232,6 +234,11 @@ namespace car.Service.Concrete
                 Licence = new Licence { LicenceNumber = model.LicenseNumber }
             };
             _userRepository.AddUser(user);
+        }
+
+        public void CancelRentalRequest(int rentalId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
