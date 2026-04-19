@@ -75,7 +75,8 @@
                                     @if (isAktifMod)
                                     {
                                         <td class="text-center">
-                                            @if (currentStatus == "Onaylandı" && !item.IsReturned)
+                                            @if (currentStatus == "Onaylandı" || currentStatus == "Gecikmiş" || currentStatus ==
+                                                        "Gecikmis" || currentStatus == "Onaylandi" && !item.IsReturned)
                                             {
                                                 <form asp-action="ProcessReturnPayment" asp-controller="User" method="post"
                                                       style="display:inline;">

@@ -291,6 +291,162 @@ namespace car.Controllers
             TempData["Success"] = "Kiralama talebiniz başarıyla iptal edildi.";
             return RedirectToAction("MyRentals", "User");
         }
+        [HttpPost]
+        public async Task<IActionResult> StartReturnPayment(int rentalId)
+        {
+            // 1. Veritabanından kiralama kaydını çek
+            var rental = _rentalService.GetRentalById(rentalId);
+            if (rental == null) return RedirectToAction("Fail", new { message = "Kiralama kaydı bulunamadı." });
+
+            // 2. Ceza Hesaplama (Güvenlik için Controller'da tekrar hesaplıyoruz)
+            double penalty = 0;
+            int delayDays = 0;
+            if (DateTime.Now > rental.ReturnDate)
+            {
+                var timeDiff = DateTime.Now - rental.ReturnDate;
+                delayDays = timeDiff.Days;
+                if (delayDays <= 0 && timeDiff.TotalHours > 0) delayDays = 1; // 1 saat bile geçse 1 gün say
+
+                penalty = delayDays * (rental.Forecast * 0.10); // %10 ceza formülü
+            }
+
+            double totalAmount = rental.Forecast + penalty;
+            var culture = System.Globalization.CultureInfo.InvariantCulture;
+
+            // 3. iyzico Seçeneklerini Yapılandır (appsettings.json'dan okur)
+            var options = new Iyzipay.Options
+            {
+                ApiKey = _configuration["Iyzipay:ApiKey"],
+                SecretKey = _configuration["Iyzipay:SecretKey"],
+                BaseUrl = _configuration["Iyzipay:BaseUrl"]
+            };
+
+            // 4. Ödeme Formu İsteği Oluştur
+            var request = new Iyzipay.Request.CreateCheckoutFormInitializeRequest
+            {
+                Locale = Iyzipay.Model.Locale.TR.ToString(),
+                ConversationId = "RETURN_" + rentalId + "_" + Guid.NewGuid().ToString().Substring(0, 5),
+                Price = totalAmount.ToString("0.00", culture),
+                PaidPrice = totalAmount.ToString("0.00", culture),
+                Currency = Iyzipay.Model.Currency.TRY.ToString(),
+                BasketId = "R" + rentalId,
+                PaymentGroup = Iyzipay.Model.PaymentGroup.PRODUCT.ToString(),
+                // 🚩 KRİTİK: Ödeme bitince bu metodumuza geri dönecek
+                CallbackUrl = "http://localhost:5054/Rental/ReturnCallback"
+            };
+
+            // 5. Alıcı Bilgileri (Burayı veritabanındaki kullanıcı verileriyle besliyoruz)
+            request.Buyer = new Iyzipay.Model.Buyer
+            {
+                Id = rental.UserId.ToString(),
+                Name = "Melisa", // Normalde rental.User.Name olmalı
+                Surname = "User",
+                Email = "test@test.com",
+                IdentityNumber = "11111111111",
+                RegistrationAddress = "Adres Bilgisi",
+                Ip = Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1",
+                City = "Istanbul",
+                Country = "Turkey"
+            };
+
+            // 6. Adres Bilgileri
+            var address = new Iyzipay.Model.Address
+            {
+                ContactName = "Melisa User",
+                City = "Istanbul",
+                Country = "Turkey",
+                Description = "Adres Bilgisi"
+            };
+            request.BillingAddress = address;
+            request.ShippingAddress = address;
+
+            // 7. Sepet Kalemleri (Faturada ne görünecek?)
+            request.BasketItems = new List<Iyzipay.Model.BasketItem>
+    {
+        new Iyzipay.Model.BasketItem
+        {
+            Id = "FINAL_PAYMENT_" + rentalId,
+            Name = "Araç Kiralama ve Gecikme Bedeli",
+            Category1 = "Car Rental",
+            ItemType = Iyzipay.Model.BasketItemType.PHYSICAL.ToString(),
+            Price = totalAmount.ToString("0.00", culture)
+        }
+    };
+
+            // 8. iyzico'dan Formu İste
+            var checkoutForm = await Iyzipay.Model.CheckoutFormInitialize.Create(request, options);
+
+            if (checkoutForm.Status == "success")
+            {
+                // Token'ı RentalId ile eşleştirip cache'e atıyoruz
+                _paymentCache[checkoutForm.Token] = rentalId.ToString();
+
+                // iyzico'nun HTML formunu View'a gönderiyoruz
+                ViewBag.PaymentForm = checkoutForm.CheckoutFormContent;
+                return View("IyzicoPayment");
+            }
+
+            // Hata varsa Fail sayfasına yönlendir
+            return RedirectToAction("Fail", new { message = checkoutForm.ErrorMessage });
+        }
+        [HttpPost]
+        [AllowAnonymous] // iyzico'nun dönüş yapabilmesi için dışarıya açık olmalı
+        [IgnoreAntiforgeryToken] // iyzico'dan gelen POST isteği CSRF token içermez, bu şart
+        public async Task<IActionResult> ReturnCallback(string token)
+        {
+            // 1. Token kontrolü: iyzico'dan bir anahtar geldi mi?
+            if (string.IsNullOrEmpty(token))
+                return RedirectToAction("Fail", new { message = "Ödeme anahtarı (token) bulunamadı." });
+
+            // 2. Cache kontrolü: Bu token hangi kiralama (rentalId) içindi?
+            if (!_paymentCache.TryGetValue(token, out string rentalIdStr))
+                return RedirectToAction("Fail", new { message = "Ödeme oturumu zaman aşımına uğradı veya bulunamadı." });
+
+            int rentalId = int.Parse(rentalIdStr);
+
+            // 3. iyzico Ayarları
+            var options = new Iyzipay.Options
+            {
+                ApiKey = _configuration["Iyzipay:ApiKey"],
+                SecretKey = _configuration["Iyzipay:SecretKey"],
+                BaseUrl = _configuration["Iyzipay:BaseUrl"]
+            };
+
+            // 4. iyzico'ya sor: "Bu token'lı işlem gerçekten başarılı mı?"
+            var request = new Iyzipay.Request.RetrieveCheckoutFormRequest { Token = token };
+            var result = await Iyzipay.Model.CheckoutForm.Retrieve(request, options);
+
+            // 5. Durumu kontrol et
+            if (result.Status == "success" && result.PaymentStatus == "SUCCESS")
+            {
+                // ✅ ÖDEME BAŞARILI! Şimdi veritabanı şov başlasın.
+                var rental = _rentalService.GetRentalById(rentalId);
+                if (rental != null)
+                {
+                    rental.IsReturned = true;           // Araba geri geldi
+                    rental.RealReturnDate = DateTime.Now; // Tam olarak şu an teslim edildi
+                    rental.Status = "Tamamlandı";      // Statüyü kapatıyoruz
+
+                    _rentalService.ConfirmAndSave(rental); // Veritabanına işle
+                }
+
+                // Güvenlik için token'ı cache'den temizle
+                _paymentCache.TryRemove(token, out _);
+
+                TempData["Success"] = "Ödeme başarıyla alındı ve iade işleminiz tamamlandı. Keyifli sürüşler!";
+                return RedirectToAction("Success");
+            }
+            else
+            {
+                // ❌ ÖDEME BAŞARISIZ
+                _paymentCache.TryRemove(token, out _);
+                string errorMessage = result.ErrorMessage ?? "Ödeme işlemi banka tarafından reddedildi.";
+                TempData["Error"] = errorMessage;
+
+                return RedirectToAction("Fail", new { message = errorMessage });
+            }
+        }
+
 
     }
 }

@@ -65,7 +65,7 @@ namespace car.Controllers
 
             if (filter == "aktif")
             {
-                myRequests = myRequests.Where(r => r.Status == "Onaylandı" || r.Status == "OnayBekliyor").ToList();
+                myRequests = myRequests.Where(r => r.Status == "Onaylandı" || r.Status == "OnayBekliyor" || r.Status == "Onaylandi" || r.Status == "Gecikmis").ToList();
                 ViewBag.PageTitle = "Aktif Kiralamalarım ve Taleplerim";
             }
             else
