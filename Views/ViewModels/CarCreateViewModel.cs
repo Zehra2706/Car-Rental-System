@@ -1,6 +1,6 @@
 using carFeature.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation; // 🚩 Bunu mutlaka ekle!
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace car.ViewModels
 {
@@ -15,7 +15,6 @@ namespace car.ViewModels
         public string Location { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
 
-        // Plaka kısmı - string? yaparak sistemin "boş kaldı" demesini engelliyoruz
         public string? Plate { get; set; }
 
         public double DailyPrice { get; set; }
@@ -26,15 +25,12 @@ namespace car.ViewModels
         public string? ImagePath { get; set; }
         public bool IsInsured { get; set; }
 
-        // Teknik Özellikler (Bunlar formdan tek tek gelecek)
         public double EngineSize { get; set; }
         public carFeature.Models.CarFeature.TransmissionType Transmission { get; set; }
         public carFeature.Models.CarFeature.FuelType FuelType { get; set; }
         public string MotorInsurance { get; set; } = string.Empty;
         public bool IsChauffeured { get; set; }
 
-        // 🚩 İŞTE KRİTİK DÜZELTME:
-        // Bu nesne formdan gelmediği için validasyonu kapatıyoruz
         [ValidateNever]
         public carFeature.Models.CarFeature? CarFeatures { get; set; }
     }

@@ -17,7 +17,6 @@ namespace car.Data
         {
         }
 
-        // 🔹 DbSet'ler (Veritabanı Tabloları)
         public DbSet<Car> Cars { get; set; }
         public DbSet<CarFeature> CarFeatures { get; set; }
         public DbSet<Price> Prices { get; set; }
@@ -46,7 +45,6 @@ namespace car.Data
                 .HasForeignKey(p => p.CarId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 🔹 Seed Data (Örnek Veriler)
             modelBuilder.Entity<User>().HasData(
                 new User { Id = 1, Name = "deneme", Surname = "deneme", UserRole = User.Role.Customer, Date = new DateTime(2024, 6, 25) }
             );

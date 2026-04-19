@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using car.ViewModels;
 using Microsoft.AspNetCore.Http;
-using System.Linq; // Filtreleme için gerekli
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 
 namespace car.Controllers
@@ -77,20 +77,16 @@ namespace car.Controllers
         }
 
 
-
-
         public IActionResult IncomingRequests(string? filter)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToAction("Login", "Auth");
 
-            // Servisten senin arabalarına gelen TÜM talepleri çekiyoruz
             var incomingRequests = _userService.GetIncomingRequests(userId.Value);
 
             bool isAktifMod = filter == "aktif";
             if (isAktifMod)
             {
-                // Sadece cevap bekleyenler veya şu an kullanımda olanlar
                 incomingRequests = incomingRequests.Where(r => r.Status == "OnayBekliyor").ToList();
                 ViewBag.PageTitle = "Aktif Gelen Talepler";
             }
@@ -120,10 +116,8 @@ namespace car.Controllers
         [HttpPost]
         public IActionResult ProcessReturnPayment(int rentalId)
         {
-            // Servis katmanında gecikme ve %10 faiz hesaplayan metodu çağırıyoruz
             var rentalCalc = _userService.GetReturnCalculation(rentalId);
 
-            // Hesaplanan verilerle ödeme sayfasına gönderiyoruz
             return View("ReturnPayment", rentalCalc);
         }
 

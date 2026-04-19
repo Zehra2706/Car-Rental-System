@@ -16,11 +16,9 @@ public class CarRepository : ICarRepository
     }
     public double GetDailyPrice(int carId)
     {
-        // Veritabanından fiyata ulaşıyoruz
         var priceObj = _context.Prices.FirstOrDefault(p => p.CarId == carId);
 
-        // 🚩 BURADAKİ 'DailyPrice' kısmını senin Price.cs içindeki 
-        // gerçek isimle (Örn: Fiyat veya Amount) değiştir.
+
         return priceObj != null ? (double)priceObj.daily : 0;
     }
 
@@ -104,16 +102,15 @@ public class CarRepository : ICarRepository
             .Include(c => c.Prices)
             .FirstOrDefault(c => c.UserId == userInfo.UserId);
 
-        return car?.Brand; // Örneğin, sadece marka bilgisini döndürüyoruz
+        return car?.Brand;
     }
     public bool CheckAvailability(int carId, DateTime start, DateTime end)
     {
-        // Saat ve dakikayı tam olarak kontrol eden evrensel çakışma mantığı
         return !_context.Rentals.Any(r =>
             r.CarId == carId &&
             r.Status != "Reddedildi" &&
-            start < r.ReturnDate && // Yeni başlangıç, eskinin bitişinden önce mi?
-            end > r.Date            // Yeni bitiş, eskinin başlangıcından sonra mı?
+            start < r.ReturnDate &&
+            end > r.Date
         );
     }
 

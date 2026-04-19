@@ -9,31 +9,44 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
-using Microsoft.AspNetCore.Authorization; // 🚩 Sadece bu eklendi
+using Microsoft.AspNetCore.Authorization;
 
 namespace car.Controllers
 {
-    [Authorize] // 🚩 Sınıfın tepesine eklendi (Giriş şartı)
+    [Authorize]
     public class RentalController : Controller
     {
         private readonly IRentalService _rentalService;
         private readonly ICarService _carService;
         private readonly IConfiguration _configuration;
+        private readonly IUserService _userService;
 
         private static readonly ConcurrentDictionary<string, string> _paymentCache = new();
 
-        public RentalController(IRentalService rentalService, ICarService carService, IConfiguration configuration)
+        public RentalController(IRentalService rentalService, ICarService carService, IConfiguration configuration, IUserService userService)
         {
             _rentalService = rentalService;
             _carService = carService;
             _configuration = configuration;
+            _userService = userService;
         }
 
         [HttpGet]
         public IActionResult Create(int carId)
         {
             var car = _carService.GetCarForEdit(carId);
-            if (car == null) return Content($"Hata: {carId} ID'li araç bulunamadı!");
+            if (car == null) return Content("Araç bulunamadı!");
+
+            var seller = _userService.TGetById(car.UserId);
+
+            if (seller != null)
+            {
+                ViewBag.SellerName = seller.Name + " " + seller.Surname;
+
+                ViewBag.SellerEmail = seller.UserInfo?.Email ?? "E-posta yok";
+
+                ViewBag.SellerPhone = seller.UserConnections?.Number ?? "Telefon yok";
+            }
 
             ViewBag.Car = car;
             var disabledRanges = _rentalService.GetDisabledDatesJson(carId);
@@ -214,7 +227,7 @@ namespace car.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous] // 🚩 GEREKLİ: iyzico'nun ödeme sonucunu bildirebilmesi için bu metot herkese açık olmalı.
+        [AllowAnonymous]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> PaymentCallback(string token)
         {
@@ -272,8 +285,7 @@ namespace car.Controllers
         [HttpPost]
         public IActionResult CancelRequest(int rentalId)
         {
-            // Talebi silmek veya durumunu 'İptal Edildi' yapmak için servisi çağırıyoruz
-            // Ben burada direkt silme (Cancel) mantığını ekliyorum
+
             _rentalService.CancelRentalRequest(rentalId);
 
             TempData["Success"] = "Kiralama talebiniz başarıyla iptal edildi.";

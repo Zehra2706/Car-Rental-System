@@ -1,18 +1,18 @@
 using car.ViewModels;
 using user.Models;
-using rental.Models; // 🟢 Yeni Rental modelinin olduğu yer
+using rental.Models;
 using System.Collections.Generic;
 
 public interface IUserService
 {
-    User? Login(string email, string password); // Null dönebileceği için ? ekledik
+    User? Login(string email, string password);
     void Register(RegisterViewModel model);
     EditProfileViewModel GetProfileForEdit(string email);
     void UpdateProfile(EditProfileViewModel model, string email);
     List<rental.Models.Rental> GetIncomingRequests(int ownerId);
     void CancelRentalRequest(int rentalId);
 
-    // İstek durumunu güncelleme
+    User TGetById(int id);
     void UpdateRentalStatus(int rentalId, string status);
     void ReturnCar(int rentalId);
     List<Rental> GetMyRentalRequests(int userId);

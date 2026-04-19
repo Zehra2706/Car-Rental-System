@@ -26,27 +26,23 @@ namespace Car_reservation_automation_system.Repositories.Concrete
         {
             return _context.Rentals.Find(id);
         }
-        // 2. Yapılan işlemleri veritabanına (SQL) kaydeder
+
         public void SaveChanges()
         {
             _context.SaveChanges();
         }
-
-        // 3. 🕒 SAAT BAZLI ÇAKIŞMA KONTROLÜ
-        // Bu metot, veritabanında belirtilen saatler arasında başka bir kayıt olup olmadığına bakar.
         public bool CheckAvailability(int carId, DateTime start, DateTime end)
         {
-            // Eğer Any() içindeki şart sağlanıyorsa (çakışma varsa) True döner. 
-            // Biz önüne "!" koyarak: "Çakışma YOKSA True (müsait)" demiş oluyoruz.
+
             return !_context.Rentals.Any(r =>
                 r.CarId == carId &&
-                r.Status != "Reddedildi" && // İptal edilenler çakışma sayılmaz
-                start < r.ReturnDate &&     // Yeni isteğin başlangıcı, eskinin bitişinden önceyse
-                end > r.Date                // Yeni isteğin bitişi, eskinin başlangıcından sonraysa
+                r.Status != "Reddedildi" &&
+                start < r.ReturnDate &&
+                end > r.Date
             );
         }
 
-        // 4. Aktif kiralamaları getirir (Takvimde engelli saatleri göstermek için kullanılır)
+
         public List<Rental> GetActiveRentalsByCarId(int carId)
         {
             return _context.Rentals
@@ -63,7 +59,7 @@ namespace Car_reservation_automation_system.Repositories.Concrete
             }
         }
 
-        // 5. Alternatif isimli metot (Eğer projenin başka yerlerinde bu isimle çağrılıyorsa)
+
         public List<Rental> GetBusyDates(int carId)
         {
             return GetActiveRentalsByCarId(carId);

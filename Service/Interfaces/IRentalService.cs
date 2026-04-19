@@ -16,7 +16,6 @@ namespace Car_reservation_automation_system.Service.Interfaces
 
         (double total, double deposit) CalculatePrice(int carId, int days);
         double GetDailyPrice(int carId);
-        // Hem toplam tutarı hem depozitoyu beraber dönen şık bir metot
         (double total, double deposit) CalculateHourlyPrice(int carId, double hours);
     }
 }

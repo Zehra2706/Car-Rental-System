@@ -37,12 +37,12 @@
                         <div class="col-6">
                             <small class="text-muted d-block font-monospace">Motor Gücü</small>
                             <span class="fw-bold text-dark">@(car?.EngineSize > 0 ? car.EngineSize.ToString("0.0") :
-                                                                                                                                                                            "---") L</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            "---") L</span>
                             </div>
                             <div class="col-6">
                                 <small class="text-muted d-block font-monospace">Şanzıman</small>
                                 <span class="fw-bold text-dark">@((int)car?.Transmission == 1 ? "Otomatik" :
-                                                                                                                                                                                                   "Manuel")</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "Manuel")</span>
                                 </div>
                                 <div class="col-6">
                                     <small class="text-muted d-block font-monospace">Yakıt Tipi</small>
@@ -73,7 +73,7 @@
                                                 <div class="col-3 border-end">
                                                     <small class="text-muted d-block" style="font-size:0.65rem;">SAATLİK</small>
                                                     <span class="fw-bold text-primary" style="font-size:0.8rem;">@((car.DailyPrice /
-                                                                                                                                                                                                                                                                                                                                    24).ToString("N2")) TL</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            24).ToString("N2")) TL</span>
                                                     </div>
                                                     <div class="col-3 border-end">
                                                         <small class="text-muted d-block" style="font-size:0.65rem;">GÜNLÜK</small>
@@ -110,14 +110,32 @@
                                 </div>
                             </div>
 
-                            @* --- ORTA SÜTUN: ARAÇ GÖRSELİ --- *@
+                            <!-- ORTA -->
                             <div class="col-lg-5">
-                                <div
-                                    class="card shadow-sm border-0 rounded-4 bg-white d-flex align-items-center justify-content-center p-3 h-100">
+                                <div class="card shadow-sm border-0 rounded-4 h-100 p-3">
                                     <img src="@(car?.ImagePath ?? "/images/default-car.png")" class="img-fluid rounded-4 shadow"
-                                         style="max-height:520px; object-fit:contain; width:100%;">
+                                         style="max-height:520px; object-fit:contain; width:100%;" />
+
+                                    <div class="mt-4 p-3 bg-white rounded-3 border shadow-sm">
+                                        <small class="text-muted d-block mb-2 fw-bold">Satıcı Bilgileri</small>
+
+                                        <div class="d-flex justify-content-between">
+                                            <span>Ad Soyad:</span>
+                                            <b>@ViewBag.SellerName</b>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between">
+                                            <span>Telefon:</span>
+                                            <b>@ViewBag.SellerPhone</b>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Email:</span>
+                                            <b>@ViewBag.SellerEmail</b>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
 
                             @* --- SAĞ SÜTUN: REZERVASYON FORMU --- *@
                             <div class="col-lg-3">

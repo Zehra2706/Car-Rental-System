@@ -12,7 +12,6 @@ namespace car.Service.Concrete
     {
         private readonly ICarRepository _carRepository;
 
-        // Constructor: Sadece repository alıyoruz
         public CarService(ICarRepository carRepository)
         {
             _carRepository = carRepository;
@@ -49,15 +48,15 @@ namespace car.Service.Concrete
                 Description = model.Description,
                 ImagePath = model.ImagePath,
                 UserId = model.UserId,
-                // 🚩 DÜZELTİLDİ: Hardcoded 'true' yerine modelden gelen değeri alıyoruz
+
                 IsInsured = model.IsInsured,
                 Plate = model.Plate
             };
 
             _carRepository.AddCar(car);
-            _carRepository.SaveChanges(); // ID oluşması için ilk kayıt
+            _carRepository.SaveChanges();
 
-            // Teknik Özellikler
+
             var feature = new CarFeature
             {
                 CarId = car.Id,
@@ -69,7 +68,7 @@ namespace car.Service.Concrete
             };
             _carRepository.AddCarFeature(feature);
 
-            // Fiyat Bilgileri
+
             var priceInfo = new Price
             {
                 CarId = car.Id,
@@ -82,10 +81,9 @@ namespace car.Service.Concrete
             _carRepository.SaveChanges();
         }
 
-        // --- 2. DÜZENLEME İÇİN VERİ GETİRME ---
         public CarCreateViewModel GetCarForEdit(int id)
         {
-            // Repo'nun Include(c => c.CarFeatures).Include(c => c.Prices) yaptığından emin ol!
+
             var car = _carRepository.GetCarById(id);
             if (car == null) return null;
 
@@ -103,7 +101,7 @@ namespace car.Service.Concrete
                 Description = car.Description,
                 ImagePath = car.ImagePath,
                 Plate = car.Plate,
-                // 🚩 DÜZELTİLDİ: Sigorta durumu artık ViewModel'e aktarılıyor
+                UserId = car.UserId,
                 IsInsured = car.IsInsured,
 
                 EngineSize = feature?.engineSize ?? 0,
@@ -118,13 +116,11 @@ namespace car.Service.Concrete
             };
         }
 
-        // --- 3. ARAÇ GÜNCELLEME ---
         public void UpdateCar(CarCreateViewModel model)
         {
             var car = _carRepository.GetCarById(model.Id);
             if (car == null) return;
 
-            // Temel Bilgiler
             car.Brand = model.Brand;
             car.ModelName = model.ModelName;
             car.ModelYear = model.ModelYear;
@@ -132,13 +128,11 @@ namespace car.Service.Concrete
             car.Location = model.Location;
             car.Description = model.Description;
             car.Plate = model.Plate;
-            // 🚩 DÜZELTİLDİ: Güncelleme anında sigorta kutucuğu değişirse kaydediyoruz
             car.IsInsured = model.IsInsured;
 
             if (!string.IsNullOrEmpty(model.ImagePath))
                 car.ImagePath = model.ImagePath;
 
-            // Özellik Güncelleme
             var feature = car.CarFeatures?.FirstOrDefault();
             if (feature != null)
             {
@@ -149,7 +143,6 @@ namespace car.Service.Concrete
                 feature.IsChauffeured = model.IsChauffeured;
             }
 
-            // Fiyat Güncelleme
             var price = car.Prices?.FirstOrDefault();
             if (price != null)
             {

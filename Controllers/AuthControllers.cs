@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Http;
 public class AuthController : Controller
 {
     private readonly IUserService _userService;
-    private readonly IConfiguration _configuration; // appsettings.json'dan JWT ayarlarını okumak için
+    private readonly IConfiguration _configuration;
 
     public AuthController(IUserService userService, IConfiguration configuration)
     {

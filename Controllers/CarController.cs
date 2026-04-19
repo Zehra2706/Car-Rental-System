@@ -6,11 +6,11 @@ using Car_reservation_automation_system.Service.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Authorization; // 🚩 Sadece bu kütüphaneyi ekledim
+using Microsoft.AspNetCore.Authorization;
 
 namespace car.Controllers
 {
-    [Authorize] // 🚩 Sınıfın tepesine eklendi: Artık tüm işlemler için giriş şart.
+    [Authorize]
     public class CarController : Controller
     {
         private readonly ICarService _carService;
@@ -67,7 +67,7 @@ namespace car.Controllers
         }
 
         // --- 4. ARAÇ DETAYLARI ---
-        [AllowAnonymous] // 🚩 KRİTİK: Ziyaretçiler üye olmadan arabalara bakabilsin diye burayı açık bıraktım.
+        [AllowAnonymous]
         public IActionResult Details(int id)
         {
             var car = _carService.GetCarForEdit(id);

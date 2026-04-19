@@ -24,7 +24,7 @@ namespace car.Service.Concrete
             return _rentalRepo.CheckAvailability(carId, start, end);
         }
 
-        // ✅ {from, to} formatında döner, Controller direkt serialize eder
+
         public List<object> GetDisabledDatesJson(int carId)
         {
             var rentals = _rentalRepo.GetActiveRentalsByCarId(carId);
@@ -36,7 +36,6 @@ namespace car.Service.Concrete
             }).ToList();
         }
 
-        // ✅ Saatlik fiyat hesaplama (frontend hours gönderiyor)
         public (double total, double deposit) CalculateHourlyPrice(int carId, double hours)
         {
             double gunlukFiyat = _carRepo.GetDailyPrice(carId);
@@ -71,8 +70,7 @@ namespace car.Service.Concrete
         }
         public void CancelRentalRequest(int rentalId)
         {
-            // İsim hatası düzeltildi (_rentalRepo kullanıldı)
-            // Tip hatası düzeltildi (Rental olduğu açıkça belirtildi)
+
             Rental rental = (Rental)_rentalRepo.GetById(rentalId);
 
             if (rental != null && rental.Status == "OnayBekliyor")
