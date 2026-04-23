@@ -12,5 +12,8 @@ namespace userInfo.Models
         public required string Email { get; set; }
         public required string Password { get; set; }
 
+        public string? ResetToken { get; set; }
+        public DateTime? ResetTokenExpire { get; set; }
+
     }
 }

@@ -189,7 +189,10 @@ namespace car.Service.Concrete
 
             return allCars.Where(c => c.UserId == userId).ToList();
         }
-
+        public List<Car> FilterCars(CarFilter filter)
+        {
+             return _carRepository.FilterCars(filter);
+        }
 
     }
 }

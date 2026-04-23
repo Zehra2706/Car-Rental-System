@@ -3,6 +3,7 @@ using car.ViewModels;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using Car_reservation_automation_system.Service.Interfaces;
 
 namespace car.Controllers
 {
@@ -10,10 +11,12 @@ namespace car.Controllers
     public class UserController : Controller
     {
         private readonly IUserService _userService;
+        private readonly IRentalService _rentalService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IRentalService rentalService)
         {
             _userService = userService;
+            _rentalService = rentalService;
         }
 
         public IActionResult Index()
@@ -128,5 +131,19 @@ namespace car.Controllers
             TempData["Success"] = "Ödeme alındı ve iade işlemi başarıyla tamamlandı.";
             return RedirectToAction("MyRentals");
         }
+        [HttpPost]
+        public IActionResult ApproveRental(int rentalId)
+        {
+            _rentalService.ApproveRental(rentalId);
+            return RedirectToAction("IncomingRequests", new { filter = "aktif" });
+        }
+
+        [HttpPost]
+        public IActionResult RejectedRental(int rentalId)
+        {
+            _rentalService.RejectedRental(rentalId);
+            return RedirectToAction("IncomingRequests", new { filter = "aktif" });
+        }
+
     }
 }

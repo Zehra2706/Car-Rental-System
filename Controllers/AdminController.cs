@@ -1,3 +1,4 @@
+using Car_reservation_automation_system.Repositories.Interfaces;
 using Car_reservation_automation_system.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,12 +9,20 @@ public class AdminController : Controller
     private readonly ICarService _carService;
     private readonly IUserService _userService;
 
+private readonly INotificationService _notificationService;
+
+private readonly IRentalService _rentalService;
+
+private readonly IRentalRepository _rentalRepo;
 
 
-    public AdminController(IUserService userService, ICarService carService)
+    public AdminController(IUserService userService, ICarService carService, INotificationService notificationService, IRentalService rentalService, IRentalRepository rentalRepo)
     {
         _userService = userService;
         _carService = carService;
+        _notificationService = notificationService;
+        _rentalService = rentalService;
+        _rentalRepo = rentalRepo;
     }
 
     private bool IsAdmin()
@@ -142,4 +151,5 @@ public class AdminController : Controller
         var allRentals = _userService.GetAllRentals();
         return View(allRentals);
     }
+
 }

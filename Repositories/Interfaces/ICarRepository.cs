@@ -2,6 +2,7 @@ using car.Models;
 using carFeature.Models;
 using price.Models;
 using rental.Models;
+using user.Models;
 
 namespace Car_reservation_automation_system.Repositories.Interfaces
 {
@@ -22,6 +23,7 @@ namespace Car_reservation_automation_system.Repositories.Interfaces
         bool CheckAvailability(int carId, DateTime start, DateTime end);
         List<Rental> GetActiveRentalsByCarId(int carId);
 
-
+        List<Car> FilterCars(CarFilter filter);
+        User GetOwnerByCarId(int carId);
     }
 }

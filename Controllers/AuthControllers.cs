@@ -131,4 +131,63 @@ public class AuthController : Controller
             return View(model);
         }
     }
+    [HttpGet]
+    public IActionResult ForgotPassword()
+    {
+        return View();
+    }
+
+
+[HttpPost]
+public IActionResult ForgotPassword(string email)
+{
+    var user = _userService.GetByEmail(email);
+
+    if (user == null)
+    {
+        ViewBag.Error = "Bu email kayıtlı değil";
+        return View();
+    }
+
+    _userService.SendPasswordResetEmail(email);
+
+    ViewBag.Message = "Şifre sıfırlama maili gönderildi";
+    return View();
+}
+[HttpGet]
+public IActionResult ResetPassword(string token, string password, string confirmPassword)
+{
+    var user = _userService.GetUserByResetToken(token);
+    
+    if (password != confirmPassword)
+    {
+        ViewBag.Error = "Şifreler uyuşmuyor!";
+        ViewBag.Token = token;
+        return View();
+    }
+    
+    if (user == null)
+        return Content("Link geçersiz veya süresi dolmuş");
+
+    ViewBag.Token = token;
+    return View();
+}
+
+[HttpPost]
+public IActionResult ResetPassword(string token, string password)
+{
+    if (string.IsNullOrEmpty(password))
+    {
+        return Content("Şifre boş olamaz");
+    }
+    try
+    {
+        _userService.ResetPassword(token, password);
+        return RedirectToAction("Login");
+    }
+    catch
+    {
+        return Content("Bir hata oluştu");
+    }
+}
 }

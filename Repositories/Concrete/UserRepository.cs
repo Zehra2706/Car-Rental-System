@@ -82,4 +82,25 @@ public void DeleteUser(int id)
     {
         throw new NotImplementedException();
     }
+
+    public string GeneratePasswordResetToken(string email)
+    {
+        throw new NotImplementedException();
+    }
+
+    public User GetUserByResetToken(string token)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ResetPassword(string token, string newPassword)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SendPasswordResetEmail(string email)
+    {
+        throw new NotImplementedException();
+    }
+
 }

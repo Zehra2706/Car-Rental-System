@@ -143,5 +143,41 @@ namespace car.Controllers
             var role = HttpContext.Session.GetString("UserRole");
             return role == "Admin" ? RedirectToAction("CarList", "Admin") : RedirectToAction("MyCars");
         }
+        [HttpGet]
+public IActionResult AdminList(string search, CarFilter filter)
+{
+    var cars = _carService.FilterCars(filter);
+
+    if (!string.IsNullOrEmpty(search))
+    {
+        search = search.ToLower();
+
+        cars = cars.Where(c =>
+            c.Brand.ToLower().Contains(search) ||
+            c.ModelName.ToLower().Contains(search) ||
+            c.Plate.ToLower().Contains(search)
+        ).ToList();
+    }
+    return View("~/Views/Admin/CarList.cshtml", cars);
+}
+
+public IActionResult UserList(string search, CarFilter filter)
+{
+    var cars = _carService.FilterCars(filter);
+
+    if (!string.IsNullOrEmpty(search))
+    {
+        search = search.ToLower();
+
+        cars = cars.Where(c =>
+            c.Brand.ToLower().Contains(search) ||
+            c.ModelName.ToLower().Contains(search) ||
+            c.Plate.ToLower().Contains(search)
+        ).ToList();
+    }
+
+    return View("~/Views/User/AvailableCars.cshtml", cars);
+}
+
     }
 }

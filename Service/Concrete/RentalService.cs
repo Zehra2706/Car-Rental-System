@@ -4,6 +4,7 @@ using rental.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using user.Models;
 
 namespace car.Service.Concrete
 {
@@ -11,11 +12,21 @@ namespace car.Service.Concrete
     {
         private readonly IRentalRepository _rentalRepo;
         private readonly ICarRepository _carRepo;
-
-        public RentalService(IRentalRepository rentalRepo, ICarRepository carRepo)
+        private readonly INotificationService _notificationService;
+        private readonly IUserRepository _userRepository;
+        private readonly IUserService _userService;
+        public RentalService(
+            IRentalRepository rentalRepo,
+            ICarRepository carRepo,
+            INotificationService notificationService,
+            IUserRepository userRepository,
+            IUserService userService)
         {
             _rentalRepo = rentalRepo;
             _carRepo = carRepo;
+            _notificationService = notificationService;
+            _userRepository = userRepository;
+            _userService = userService;
         }
 
         public bool IsAvailable(int carId, DateTime start, DateTime end)
@@ -53,11 +64,47 @@ namespace car.Service.Concrete
             return (total, deposit);
         }
 
-        public void ConfirmAndSave(Rental rental)
-        {
-            _rentalRepo.Add(rental);
-            _rentalRepo.SaveChanges();
-        }
+public void ConfirmAndSave(User user, Rental rental)
+{
+    _rentalRepo.Add(rental);
+    _rentalRepo.SaveChanges();
+
+    var car = _carRepo.GetCarById(rental.CarId);
+
+    if(car == null)
+    {
+        Console.WriteLine("CAR BULUNAMADI");
+        return;
+    }
+
+    Console.WriteLine("CAR OWNER ID: " + car.UserId);
+
+    var owner = _userService.GetById(car.UserId);
+
+    if(owner == null)
+    {
+        Console.WriteLine("OWNER NULL");
+        return;
+    }
+
+    if(owner.UserInfo == null)
+    {
+        Console.WriteLine("OWNER USERINFO NULL");
+        return;
+    }
+
+    Console.WriteLine("OWNER EMAIL: " + owner.UserInfo.Email);
+
+    rental.Car = car;
+
+    // kiralayana
+    _notificationService.RentalCreated(user, rental);
+    _notificationService.DepositPaid(user, rental);
+
+    // araç sahibine
+    _notificationService.NewRentalRequest(owner, rental);
+    _notificationService.OwnerDepositInfo(owner, rental);
+}
 
         public List<Rental> GetActiveRentalsByCarId(int carId)
         {
@@ -68,22 +115,115 @@ namespace car.Service.Concrete
         {
             return _carRepo.GetDailyPrice(carId);
         }
-        public void CancelRentalRequest(int rentalId)
+public void CancelRentalRequest(int rentalId)
+{
+    Rental rental = _rentalRepo.GetById(rentalId);
+
+    if (rental != null)
+    {
+        var user = _rentalRepo.GetUserByRental(rental.Id);
+
+        if (rental.Status == "OnayBekliyor")
         {
+            _rentalRepo.Delete(rentalId);
 
-            Rental rental = (Rental)_rentalRepo.GetById(rentalId);
-
-            if (rental != null && rental.Status == "OnayBekliyor")
+            if (user != null)
             {
-                _rentalRepo.Delete(rentalId);
+                _notificationService.RentalRejected(user, rental);
+            }
+        }
+    }
+}
+
+    public Rental GetRentalById(int id)
+    {
+        var rental = _rentalRepo.GetById(id);
+
+        if (rental != null)
+        {
+            if (rental.Status == "Onaylandı" && DateTime.Now >= rental.Date && DateTime.Now <= rental.ReturnDate)
+            {
+                rental.Status = "Aktif";
+                _rentalRepo.Update(rental);
+                _rentalRepo.SaveChanges();
             }
         }
 
-        public Rental GetRentalById(int id)
+        return rental;
+    }
+        public void UpdateRental(Rental rental)
         {
-            return _rentalRepo.GetActiveRentalsByCarId(0)
-                              .Concat(_rentalRepo.GetBusyDates(0))
-                              .FirstOrDefault(r => r.Id == id);
+            _rentalRepo.Update(rental);
+            _rentalRepo.SaveChanges();
+
         }
+
+        public User GetUserByRental(int rentalId)
+        {
+            return _rentalRepo.GetUserByRental(rentalId);
+        }
+public void ApproveRental(int rentalId)
+{
+    Console.WriteLine("APPROVE RENTAL CALISTI");
+
+    var rental = _rentalRepo.GetById(rentalId);
+
+    if (rental == null)
+    {
+        Console.WriteLine("Rental bulunamadı");
+        return;
+    }
+
+    rental.Status = "Onaylandı";
+
+    _rentalRepo.Update(rental);
+    _rentalRepo.SaveChanges();
+
+    Console.WriteLine("STATUS UPDATE EDILDI");
+
+    var user = _rentalRepo.GetUserByRental(rentalId);
+
+    if (user == null)
+    {
+        Console.WriteLine("USER NULL");
+        return;
+    }
+
+    if (user.UserInfo == null)
+    {
+        Console.WriteLine("USERINFO NULL");
+        return;
+    }
+
+    Console.WriteLine("MAIL GONDERILIYOR: " + user.UserInfo.Email);
+
+    _notificationService.RentalApproved(user, rental);
+}
+public void RejectedRental(int rentalId)
+{
+    Console.WriteLine("REJECT RENTAL CALISTI");
+
+    var rental = _rentalRepo.GetById(rentalId);
+
+    if (rental == null)
+        return;
+
+    rental.Status = "Reddedildi";
+
+    _rentalRepo.Update(rental);
+    _rentalRepo.SaveChanges();
+
+    var user = _rentalRepo.GetUserByRental(rentalId);
+
+    if (user?.UserInfo?.Email == null)
+    {
+        Console.WriteLine("EMAIL BULUNAMADI");
+        return;
+    }
+
+    Console.WriteLine("MAIL GONDERILIYOR: " + user.UserInfo.Email);
+
+    _notificationService.RentalRejected(user, rental);
+}
     }
 }

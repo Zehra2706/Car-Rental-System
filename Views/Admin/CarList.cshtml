@@ -6,10 +6,147 @@
 
 <div class="container mt-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-primary">🚗 Araç Listesi</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-primary">🚗 Araç Listesi</h2>
+    <div>
+        <button class="btn btn-dark me-2"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#filterSidebar">
+            🔍 Filtrele
+        </button>
+
         <a href="/Admin/Index" class="btn btn-secondary">← Geri Dön</a>
     </div>
+<form method="get" action="/Car/UserList" class="mb-3">
+
+    <div class="input-group">
+        <input type="text"
+               name="search"
+               value="@Context.Request.Query["search"]"
+               class="form-control"
+               placeholder="Ara (marka, model, plaka)">
+
+        <button class="btn btn-primary" type="submit">
+            🔍 Ara
+        </button>
+    </div>
+
+</form>
+</div>
+<div class="offcanvas offcanvas-end" tabindex="-1" id="filterSidebar" style="width:320px;">
+
+    <!-- HEADER -->
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title fw-bold text-primary">
+            🔍 Filtrele
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+
+    <!-- BODY -->
+    <div class="offcanvas-body">
+
+        <form method="get" action="/Car/AdminList">
+
+            <!-- MARKA -->
+            <div class="mb-3">
+                <label>Marka</label>
+                <input type="text" name="Brand" class="form-control">
+            </div>
+            
+            <!-- MODEL -->
+            <div class="mb-3">
+                <label>Model</label>
+                <input type="text" name="ModelName" class="form-control">
+            </div>
+
+            <!-- YIL -->
+            <div class="mb-3">
+                <label>Model Yılı</label>
+                <div class="d-flex gap-2">
+                    <input type="number" name="MinYear" class="form-control" placeholder="Min">
+                    <input type="number" name="MaxYear" class="form-control" placeholder="Max">
+                </div>
+            </div>
+
+            <!-- VİTES -->
+            <div class="mb-3">
+                <label>Vites</label>
+                <select name="Transmission" class="form-control">
+                    <option value="">Hepsi</option>
+                    <option value="0">Manuel</option>
+                    <option value="1">Otomatik</option>
+                </select>
+            </div>
+
+            <!-- YAKIT -->
+            <div class="mb-3">
+                <label>Yakıt</label>
+                <select name="FuelType" class="form-control">
+                    <option value="">Hepsi</option>
+                    <option value="0">Benzin</option>
+                    <option value="1">Dizel</option>
+                    <option value="2">Elektrik</option>
+                </select>
+            </div>
+
+            <!-- ŞOFÖR -->
+            <div class="mb-3">
+                <label>Şoför</label>
+                <select name="IsChauffeured" class="form-control">
+                    <option value="">Hepsi</option>
+                    <option value="true">Var</option>
+                    <option value="false">Yok</option>
+                </select>
+            </div>
+
+                        <!-- FİYAT TİPİ -->
+            <div class="mb-3">
+                <label>Fiyat Türü</label>
+                <select name="PriceType" class="form-control">
+                    <option value="daily">Günlük</option>
+                    <option value="weekly">Haftalık</option>
+                    <option value="monthly">Aylık</option>
+                </select>
+            </div>
+
+            <!-- FİYAT ARALIĞI -->
+            <div class="mb-3">
+                <label>Fiyat Aralığı</label>
+                <div class="d-flex gap-2">
+                    <input type="number" name="MinPrice" class="form-control" placeholder="Min ₺">
+                    <input type="number" name="MaxPrice" class="form-control" placeholder="Max ₺">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+                Filtrele
+            </button>
+
+        </form>
+    </div>
+</div>
+@if (Model == null || !Model.Any())
+{
+    <div class="text-center mt-5">
+        <h4 class="text-danger">Filtreye uygun araç bulunamadı</h4>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var car in Model)
+        {
+            <!-- kart -->
+        }
+    </div>
+}
+@* @if (Context.Request.Query.Any())
+{
+    <div class="mb-3">
+        <span class="badge bg-primary">Filtre aktif</span>
+    </div>
+} *@
 
     <div class="row">
         @foreach (var item in Model)
@@ -81,3 +218,26 @@
 
 </div>
 <a href="/Admin/Index">Çıkış Yap</a>
+<script>
+    function toggleFilter() {
+        var box = document.getElementById("filterBox");
+
+        if (box.style.display === "none") {
+            box.style.display = "block";
+        } else {
+            box.style.display = "none";
+        }
+    }
+
+    // 🔥 CANLI ARAMA BURASI
+    document.getElementById("searchBox").addEventListener("keyup", function () {
+        let value = this.value.toLowerCase();
+
+        document.querySelectorAll(".card").forEach(card => {
+            card.style.display =
+                card.innerText.toLowerCase().includes(value)
+                ? ""
+                : "none";
+        });
+    });
+</script>

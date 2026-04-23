@@ -5,6 +5,8 @@ using rental.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using user.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Car_reservation_automation_system.Repositories.Concrete
 {
@@ -24,7 +26,10 @@ namespace Car_reservation_automation_system.Repositories.Concrete
         }
         public Rental GetById(int id)
         {
-            return _context.Rentals.Find(id);
+            return _context.Rentals
+                .Include(r => r.User) // Kullanıcıyı yükle
+                    .ThenInclude(u => u.UserInfo) // Kullanıcının Email bilgilerini yükle
+                .FirstOrDefault(r => r.Id == id);
         }
 
         public void SaveChanges()
@@ -64,10 +69,29 @@ namespace Car_reservation_automation_system.Repositories.Concrete
         {
             return GetActiveRentalsByCarId(carId);
         }
+        public void Update(Rental rental)
+        {
+            _context.Rentals.Update(rental);
+        }
 
-        object IRentalRepository.GetById(int rentalId)
+        Rental IRentalRepository.GetById(int rentalId)
         {
             return GetById(rentalId);
+        }
+
+        public User GetUserByRental(int rentalId)
+        {
+        var rental = _context.Rentals
+                .Include(r => r.User)
+                .ThenInclude(u => u.UserInfo)
+                .FirstOrDefault(r => r.Id == rentalId);
+
+            return rental?.User;
+        }
+
+        public void GetRentalById(int rentalId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

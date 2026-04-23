@@ -1,0 +1,64 @@
+    <button type="button" class="btn btn-outline-primary mb-3" onclick="toggleFilter()">
+     Filtrele
+</button>
+    <form id="filterBox" method="get" action="/Car/List" 
+      class="mb-4 p-3 border rounded bg-light" style="display:none;">
+
+    <div class="row g-2">
+
+        <div class="col-md-2">
+            <input type="number" name="MinPrice" class="form-control" placeholder="Min ₺">
+        </div>
+
+        <div class="col-md-2">
+            <input type="number" name="MaxPrice" class="form-control" placeholder="Max ₺">
+        </div>
+
+        <div class="col-md-2">
+            <input type="text" name="Brand" class="form-control" placeholder="Marka">
+        </div>
+
+        <div class="col-md-2">
+            <input type="number" name="MinYear" class="form-control" placeholder="Min Yıl">
+        </div>
+
+        <div class="col-md-2">
+            <input type="number" name="MaxYear" class="form-control" placeholder="Max Yıl">
+        </div>
+
+
+        <select name="Transmission" class="form-control">
+            <option value="">Vites</option>
+            <option value="0">Manuel</option>
+            <option value="1">Otomatik</option>
+        </select>
+        <select name="FuelType" class="form-control">
+    <option value="">Yakıt</option>
+    <option value="0">Benzin</option>
+    <option value="1">Dizel</option>
+    <option value="2">Elektrik</option>
+    </select>
+<select name="IsChauffeured" class="form-control">
+    <option value="">Şoför</option>
+    <option value="false">Yok</option>
+    <option value="true">Var</option>
+</select>
+
+    </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filtrele</button>
+        </div>
+</form>
+@if (Model != null && Model.Any())
+{
+    foreach (var item in Model)
+    {
+        <!-- kart -->
+    }
+}
+else
+{
+    <div class="text-center mt-5">
+        <h4 class="text-danger">🚫 Filtreye uygun araç bulunamadı</h4>
+    </div>
+}

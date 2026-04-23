@@ -1,4 +1,5 @@
 
+using car.Controllers;
 using car.Models;
 using car.ViewModels;
 
@@ -18,5 +19,7 @@ namespace Car_reservation_automation_system.Service.Interfaces
         List<Car> GetAllCarsForUser();
         List<car.Models.Car> GetAllCars();
         List<Car> GetCarsByUserId(int userId);
+        List<Car> FilterCars(CarFilter filter);
+
     }
 }

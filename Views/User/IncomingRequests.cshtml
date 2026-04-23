@@ -77,19 +77,13 @@
                                                 @if (item.Status == "OnayBekliyor")
                                                 {
                                                     <div class="btn-group shadow-sm rounded-pill overflow-hidden">
-                                                        <form asp-action="UpdateRequestStatus" asp-controller="User" method="post"
-                                                              style="display:inline;">
-                                                            <input type="hidden" name="rentalId" value="@item.Id" />
-                                                            <input type="hidden" name="status" value="Onaylandı" />
-                                                            <button type="submit"
-                                                                    class="btn btn-sm btn-success px-3 border-0">Onayla</button>
+                                                        <form asp-action="ApproveRental" asp-controller="User" method="post">
+                                                        <input type="hidden" name="rentalId" value="@item.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-success px-3 border-0">Onayla</button>
                                                         </form>
-                                                        <form asp-action="UpdateRequestStatus" asp-controller="User" method="post"
-                                                              style="display:inline;">
-                                                            <input type="hidden" name="rentalId" value="@item.Id" />
-                                                            <input type="hidden" name="status" value="Reddedildi" />
-                                                            <button type="submit"
-                                                                    class="btn btn-sm btn-danger px-3 border-0">Reddet</button>
+                                                        <form asp-action="RejectedRental" asp-controller="User" method="post">
+                                                        <input type="hidden" name="rentalId" value="@item.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-danger px-3 border-0">Reddet</button>
                                                         </form>
                                                     </div>
                                                 }

@@ -17,4 +17,5 @@ public interface IUserRepository
     List<User> GetAllUsers();
     void DeleteUser(int id);
 
+
 }

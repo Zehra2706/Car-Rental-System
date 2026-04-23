@@ -1,6 +1,7 @@
 using rental.Models;
 using System.Collections.Generic;
 using System;
+using user.Models;
 
 namespace Car_reservation_automation_system.Repositories.Interfaces
 {
@@ -12,6 +13,9 @@ namespace Car_reservation_automation_system.Repositories.Interfaces
         void SaveChanges();
         List<Rental> GetBusyDates(int carId);
         bool CheckAvailability(int carId, DateTime start, DateTime end);
-        object GetById(int rentalId);
+        Rental GetById(int rentalId);
+        void Update(Rental rental);
+        void GetRentalById(int rentalId);
+        User GetUserByRental(int rentalId);
     }
 }

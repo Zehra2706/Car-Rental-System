@@ -15,10 +15,10 @@ namespace user.Models
         public required Role UserRole { get; set; }
         public required DateTime Date { get; set; }
 
-        public UserInfo UserInfo { get; set; }
-        public UserConnections UserConnections { get; set; }
+        public UserInfo? UserInfo { get; set; }
+        public UserConnections? UserConnections { get; set; }
 
-        public Licence Licence { get; set; }
+        public Licence? Licence { get; set; }
 
 
 

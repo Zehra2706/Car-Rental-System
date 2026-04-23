@@ -22,13 +22,14 @@ namespace car.Controllers
         private readonly IUserService _userService;
 
         private static readonly ConcurrentDictionary<string, string> _paymentCache = new();
-
-        public RentalController(IRentalService rentalService, ICarService carService, IConfiguration configuration, IUserService userService)
+private readonly INotificationService _notificationService;
+        public RentalController(IRentalService rentalService, ICarService carService, IConfiguration configuration, IUserService userService, INotificationService notificationService)
         {
             _rentalService = rentalService;
             _carService = carService;
             _configuration = configuration;
             _userService = userService;
+            _notificationService = notificationService;
         }
 
         [HttpGet]
@@ -83,7 +84,9 @@ namespace car.Controllers
             rental.Status = "OnayBekliyor";
             rental.IsReturned = false;
 
-            _rentalService.ConfirmAndSave(rental);
+            // _rentalService.UpdateRental(rental);
+            var user = _userService.TGetById(userId.Value);
+            _rentalService.ConfirmAndSave(user, rental);
 
             TempData["Success"] = "Kiralama talebiniz başarıyla iletildi!";
             return RedirectToAction("Index", "User");
@@ -114,7 +117,7 @@ namespace car.Controllers
             rental.Status = "OnayBekliyor";
             rental.IsReturned = false;
 
-            _rentalService.ConfirmAndSave(rental);
+            _rentalService.UpdateRental(rental);
 
             TempData["Success"] = "Ödeme başarılı! Kiralama talebiniz yöneticiye iletildi.";
             return RedirectToAction("Index", "User");
@@ -256,9 +259,20 @@ namespace car.Controllers
                 var userId = HttpContext.Session.GetInt32("UserId");
                 if (userId != null) rental.UserId = userId.Value;
 
-                rental.Status = "OnayBekliyor";
-                _rentalService.ConfirmAndSave(rental);
+                rental.Status = "OnayBekliyor";    // onay bekliyor değiştirdim.
+                _rentalService.UpdateRental(rental);
+                var user = _userService.TGetById(rental.UserId);
+                var car = _carService.GetCarForEdit(rental.CarId);
 
+                // araç sahibini bul
+                var owner = _userService.TGetById(car.UserId);
+
+                _notificationService.RentalCreated(user, rental);
+                _notificationService.DepositPaid(user, rental);
+
+                // araç sahibine mail
+                _notificationService.NewRentalRequest(owner, rental);
+                _notificationService.OwnerDepositInfo(owner, rental);
                 _paymentCache.TryRemove(token, out _);
 
                 TempData["Success"] = "Ödemeniz başarıyla alındı!";
@@ -426,8 +440,14 @@ namespace car.Controllers
                     rental.IsReturned = true;           // Araba geri geldi
                     rental.RealReturnDate = DateTime.Now; // Tam olarak şu an teslim edildi
                     rental.Status = "Tamamlandı";      // Statüyü kapatıyoruz
+                    var user = _userService.TGetById(rental.UserId);
 
-                    _rentalService.ConfirmAndSave(rental); // Veritabanına işle
+                    var car = _carService.GetCarForEdit(rental.CarId);
+                    var owner = _userService.TGetById(car.UserId);
+
+                    _rentalService.UpdateRental(rental); // Veritabanına işle
+                    _notificationService.RentalFinished(user, rental);
+                    _notificationService.OwnerRentalFinished(owner, rental);
                 }
 
                 // Güvenlik için token'ı cache'den temizle

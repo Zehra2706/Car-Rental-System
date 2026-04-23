@@ -23,5 +23,13 @@ public interface IUserService
     void AddUser(AdminCreateUserViewModel model);
     List<car.Models.Car> GetAllCarsForUser();
     List<rental.Models.Rental> GetAllRentals();
+    User GetByEmail(string email);
 
+void Update(User user);
+string GeneratePasswordResetToken(string email);
+User GetUserByResetToken(string token);
+void ResetPassword(string token, string newPassword);
+void SendPasswordResetEmail(string email);
+
+User GetById(int id);   
 }
