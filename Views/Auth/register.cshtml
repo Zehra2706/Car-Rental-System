@@ -1,21 +1,145 @@
 @model RegisterViewModel
 
-
-<form asp-action="Register" method="post">
-    <input asp-for="Name" placeholder="Ad" />
-    <input asp-for="Surname" placeholder="Soyad" />
-    <input asp-for="Email" placeholder="Email" />
-    <input asp-for="Address" placeholder="Adres" />
-    <input asp-for="PhoneNumber" placeholder="Telefon Numarası" />
-    <input asp-for="LicenseNumber" placeholder="Ehliyet Numarası" />
-    <input asp-for="Password" type="password" placeholder="Şifre" />
-    <input asp-for="ConfirmPassword" type="password" placeholder="Şifre Tekrar" />
-
-    <button type="submit">Kayıt Ol</button>
-</form>
-@if (ViewBag.Error != null)
-{
-    <div style="color:red">
-        @ViewBag.Error
-    </div>
+@{
+    ViewData["Title"] = "Kayıt Ol";
 }
+
+<style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(to right, #eaeaec, #d3d9e5);
+        min-height: 100vh;
+    }
+
+    .register-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 0;
+    }
+
+    .register-card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        width: 400px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .register-title {
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #111;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+    }
+
+    .form-control:focus {
+        border-color: #2563eb;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-register {
+        width: 100%;
+        padding: 10px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+
+    .error {
+        color: red;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .links {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+
+    .links a {
+        color: #2563eb;
+        text-decoration: none;
+        margin: 0 5px;
+    }
+
+    .links a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="register-container">
+    <div class="register-card">
+
+        <h2 class="register-title">Kayıt Ol</h2>
+
+        <form asp-action="Register" method="post">
+
+            <div class="form-group">
+                <input asp-for="Name" class="form-control" placeholder="Ad" />
+            </div>
+
+            <div class="form-group">
+                <input asp-for="Surname" class="form-control" placeholder="Soyad" />
+            </div>
+
+            <div class="form-group">
+                <input asp-for="Email" class="form-control" placeholder="Email" />
+            </div>
+
+            <div class="form-group">
+                <input asp-for="Address" class="form-control" placeholder="Adres" />
+            </div>
+
+            <div class="form-group">
+                <input asp-for="PhoneNumber" class="form-control" placeholder="Telefon Numarası" />
+            </div>
+
+            <div class="form-group">
+                <input asp-for="LicenseNumber" class="form-control" placeholder="Ehliyet Numarası" />
+            </div>
+
+            <div class="form-group">
+                <input asp-for="Password" type="password" class="form-control" placeholder="Şifre" />
+            </div>
+
+            <div class="form-group">
+                <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Şifre Tekrar" />
+            </div>
+
+            <button type="submit" class="btn-register">Kayıt Ol</button>
+
+        </form>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="error">@ViewBag.Error</div>
+        }
+
+        <div class="links">
+            Zaten hesabınız var mı?
+            <a href="/Auth/Login">Giriş Yap</a>
+        </div>
+
+        <div class="links">
+            <a href="/">Ana Sayfaya Dön</a>
+        </div>
+
+    </div>
+</div>

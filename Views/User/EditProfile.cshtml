@@ -1,56 +1,150 @@
 @model car.ViewModels.EditProfileViewModel
 @{
     Layout = "_Layout";
+    // Kullanıcı adını diğer sayfalarla aynı mantıkta çekiyoruz
+    var userNameFromSession = Context.Session.GetString("UserName");
+    var userEmail = Context.Session.GetString("UserEmail");
+    string displayDisplayName = !string.IsNullOrEmpty(userNameFromSession) ? userNameFromSession :
+                               (!string.IsNullOrEmpty(userEmail) ? userEmail.Split('@')[0] : "Değerli Üyemiz");
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow border-0">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Profil Bilgilerimi Güncelle</h4>
-                </div>
-                <div class="card-body p-4">
-                    <form action="/User/EditProfile" method="post">
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Ad</label>
-                                <input type="text" name="Name" class="form-control" value="@Model?.Name"
-                                       placeholder="Adınız" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Soyad</label>
-                                <input type="text" name="Surname" class="form-control" value="@Model?.Surname"
-                                       placeholder="Soyadınız" required>
-                            </div>
-                        </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">E-posta (Değiştirilemez)</label>
-                            <input type="email" name="Email" class="form-control bg-light"
+<style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background: #f4f7fa;
+        padding-top: 90px;
+    }
+
+    /* TOPBAR */
+    .custom-topbar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 70px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        z-index: 2000;
+    }
+
+    .topbar-left-btn { font-size: 30px; cursor: pointer; color: #1e3a8a; }
+    .topbar-right-area { display: flex; align-items: center; gap: 20px; }
+    .logout-btn-new {
+        background: #ef4444; color: white; border: none;
+        padding: 8px 16px; border-radius: 10px; font-weight: 600; text-decoration: none;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+        position: fixed; left: -280px; top: 0; width: 280px; height: 100%;
+        background: #1e3a8a; color: white; padding: 25px;
+        transition: 0.4s; z-index: 3000;
+    }
+    .sidebar.active { left: 0; }
+    .sidebar a { display: block; color: rgba(255,255,255,0.8); text-decoration: none; padding: 12px; margin: 8px 0; border-radius: 10px; }
+    .sidebar a:hover { background: rgba(255,255,255,0.15); color: white; }
+
+    /* PROFILE CARD */
+    .profile-card {
+        border: none;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+</style>
+
+<div class="custom-topbar">
+    <div class="topbar-left-btn" onclick="toggleMenu()">
+        <i class="bi bi-list"></i>
+    </div>
+    <div class="topbar-right-area">
+        <span class="fw-bold text-dark d-none d-md-inline">
+            <i class="bi bi-person-circle me-1 text-primary"></i> @displayDisplayName
+        </span>
+ 
+    </div>
+</div>
+
+<div id="sidebar" class="sidebar shadow-lg">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold m-0">Menü</h3>
+        <i class="bi bi-x-lg" style="cursor:pointer" onclick="toggleMenu()"></i>
+    </div>
+    <a href="/User/Index"><i class="bi bi-house-door me-2"></i> Dashboard</a>
+    <a href="/User/AvailableCars"><i class="bi bi-car-front me-2"></i> Araç Kirala</a>
+    <a href="/User/MyRentals"><i class="bi bi-list-check me-2"></i> Kiralamalarım</a>
+    <hr class="opacity-25">
+    <a href="/User/IncomingRequests?filter=aktif"><i class="bi bi-bell-fill me-2 text-warning"></i> Talepleri Yönet</a>
+    <a href="/Car/MyCars"><i class="bi bi-tags me-2"></i> İlanlarım</a>
+    <a href="/Car/Create"><i class="bi bi-plus-square me-2"></i> Araç Ekle</a>
+    <a href="/User/EditProfile"><i class="bi bi-gear me-2"></i> Ayarlar</a>
+</div>
+
+<div class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-dark m-0"><i class="bi bi-person-vcard text-primary"></i> Profil Ayarlarım</h2>
+                <a href="/User/Index" class="btn btn-white shadow-sm rounded-pill border-0 px-4">
+                    <i class="bi bi-arrow-left"></i> Vazgeç
+                </a>
+            </div>
+
+            <div class="profile-card card p-4 p-md-5">
+                <form action="/User/EditProfile" method="post">
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary small">AD</label>
+                            <input type="text" name="Name" class="form-control rounded-3 shadow-sm border-light-subtle" value="@Model?.Name"
+                                   placeholder="Adınız" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary small">SOYAD</label>
+                            <input type="text" name="Surname" class="form-control rounded-3 shadow-sm border-light-subtle" value="@Model?.Surname"
+                                   placeholder="Soyadınız" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary small">E-POSTA (DEĞİŞTİRİLEMEZ)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-light-subtle rounded-start-3"><i class="bi bi-lock-fill text-muted"></i></span>
+                            <input type="email" name="Email" class="form-control bg-light border-light-subtle rounded-end-3"
                                    value="@Context.Session.GetString("UserEmail")" readonly>
                         </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Telefon Numarası</label>
-                            <input type="tel" name="PhoneNumber" class="form-control" value="@Model?.PhoneNumber"
-                                   placeholder="05xx xxx xx xx" required>
-                        </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary small">TELEFON NUMARASI</label>
+                        <input type="tel" name="PhoneNumber" class="form-control rounded-3 shadow-sm border-light-subtle" value="@Model?.PhoneNumber"
+                               placeholder="05xx xxx xx xx" required>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Adres Bilgisi</label>
-                            <textarea name="Address" class="form-control" rows="3" placeholder="Açık adresiniz..."
-                                      required>@Model?.Address</textarea>
-                        </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary small">ADRES BİLGİSİ</label>
+                        <textarea name="Address" class="form-control rounded-3 shadow-sm border-light-subtle" rows="3" placeholder="Açık adresiniz..."
+                                  required>@Model?.Address</textarea>
+                    </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success btn-lg">Değişiklikleri Kaydet</button>
-                            <a href="/User/Index" class="btn btn-outline-secondary">İptal Et ve Dön</a>
-                        </div>
-                    </form>
-                </div>
+                    <div class="d-grid gap-3 pt-3">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow fw-bold py-3">
+                            <i class="bi bi-check2-circle me-2"></i> Değişiklikleri Kaydet
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function toggleMenu() {
+        document.getElementById("sidebar").classList.toggle("active");
+    }
+</script>

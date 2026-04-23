@@ -144,6 +144,12 @@ namespace car.Controllers
             _rentalService.RejectedRental(rentalId);
             return RedirectToAction("IncomingRequests", new { filter = "aktif" });
         }
+        [AllowAnonymous]
+        public IActionResult PublicCars()
+        {
+            var cars = _userService.GetAllCarsForUser();
+            return View(cars);
+        }
 
     }
 }

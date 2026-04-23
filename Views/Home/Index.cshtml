@@ -1,15 +1,230 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<car.Models.Car>
+
+@{
+    ViewData["Title"] = "Ana Sayfa";
 }
 
-<div style="text-align:center; margin-top:100px;">
-    <h1>Hoşgeldiniz</h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <a href="/Auth/Login">
-        <button style="padding:10px 20px; margin:10px;">Giriş Yap</button>
-    </a>
+<style>
+    body {
+        background-color: #f8fafc;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        margin: 0;
+    }
 
-    <a href="/Auth/Register">
-        <button style="padding:10px 20px; margin:10px;">Kayıt Ol</button>
-    </a>
+    /* NAVBAR */
+    .navbar-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 60px;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .brand {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1e3a8a;
+        letter-spacing: -1px;
+    }
+
+    .navbar-custom a {
+        text-decoration: none;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    .btn-login {
+        background: #1e3a8a;
+        color: white !important;
+        padding: 10px 25px;
+        border-radius: 50px;
+        box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+    }
+
+    .btn-login:hover {
+        background: #1e40af;
+        transform: translateY(-2px);
+    }
+
+    .btn-register {
+        color: #1e3a8a;
+        padding: 10px 20px;
+    }
+
+    /* HERO */
+    .hero {
+        text-align: center;
+        padding: 100px 20px 60px;
+        background: radial-gradient(circle at top right, #e0e7ff 0%, transparent 40%),
+            radial-gradient(circle at top left, #f1f5f9 0%, transparent 40%);
+    }
+
+    .hero h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 15px;
+    }
+
+    .hero p {
+        font-size: 1.2rem;
+        color: #64748b;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* CAR CARDS */
+    .car-card {
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        cursor: pointer;
+        height: 100%;
+        position: relative;
+    }
+
+    .car-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .img-wrapper {
+        position: relative;
+        overflow: hidden;
+        height: 220px;
+    }
+
+    .car-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+    }
+
+    .car-card:hover .car-img {
+        transform: scale(1.08);
+    }
+
+    .car-body {
+        padding: 25px;
+    }
+
+    .car-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .car-info {
+        display: flex;
+        gap: 15px;
+        color: #94a3b8;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+
+    .price-tag {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 15px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .price-value {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #2563eb;
+    }
+
+    .price-label {
+        font-size: 0.8rem;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+
+    .click-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 10;
+    }
+
+    .rent-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 5px 15px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        color: #1e3a8a;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<div class="navbar-custom">
+    <div class="brand">ROTA<span style="color: #2563eb;">DRIVE</span></div>
+
+    <div>
+        <a href="/Auth/Register" class="btn-register">Kayıt Ol</a>
+        <a href="/Auth/Login" class="btn-login">Giriş Yap</a>
+    </div>
 </div>
+
+<div class="hero">
+    <h1>Yolculuğun <span style="color: #2563eb;">Burada</span> Başlıyor</h1>
+    <p>Modern filomuz ve şeffaf fiyat politikamızla dilediğin aracı saniyeler içinde kirala.</p>
+</div>
+
+<div class="container pb-5">
+    <div class="row g-4">
+
+        @foreach (var car in Model)
+        {
+            <div class="col-md-4">
+                <div class="car-card">
+                    <a href="/Auth/Login" class="click-overlay"></a>
+
+                    <div class="img-wrapper">
+                        <img class="car-img" src="@(car.ImagePath != null ? car.ImagePath : "/images/default-car.png")" />
+                        <div class="rent-badge">
+                            <i class="bi bi-lightning-charge-fill"></i> ŞİMDİ KİRALA
+                        </div>
+                    </div>
+
+                    <div class="car-body">
+                        <div class="car-title">@car.Brand @car.ModelName</div>
+                        
+                        <div class="car-info">
+                            <span><i class="bi bi-calendar3"></i> @car.ModelYear</span>
+                            <span><i class="bi bi-geo-alt"></i> @car.Location</span>
+                        </div>
+
+                        
+                    </div>
+
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+<footer class="text-center py-5 text-muted small">
+    &copy; 2026 RotaDrive Car Rental. Tüm hakları saklıdır.
+</footer>

@@ -3,30 +3,191 @@
     Layout = "_Layout";
     bool isAktifMod = Context.Request.Query["filter"] == "aktif";
     var sayfaBasligi = isAktifMod ? "Onay Bekleyen Talepler" : "Tüm Gelen Talepler Geçmişi";
+
+    // Kullanıcı adını Dashboard ile aynı mantıkta çekiyoruz
+    var userNameFromSession = Context.Session.GetString("UserName");
+    var userEmail = Context.Session.GetString("UserEmail");
+    string displayDisplayName = !string.IsNullOrEmpty(userNameFromSession) ? userNameFromSession :
+                               (!string.IsNullOrEmpty(userEmail) ? userEmail.Split('@')[0] : "Değerli Üyemiz");
 }
 
-<div class="container mt-5">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background: #f4f7fa;
+        padding-top: 80px;
+    }
+
+    /* TOPBAR - DASHBOARD İLE AYNI */
+    .custom-topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 70px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+        z-index: 2000;
+    }
+
+    .topbar-left-btn {
+        font-size: 30px;
+        cursor: pointer;
+        color: #1e3a8a;
+        user-select: none;
+    }
+
+    .topbar-right-area {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .user-name-tag {
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .logout-btn-new {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .logout-btn-new:hover {
+        background: #dc2626;
+        color: white;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        width: 280px;
+        height: 100%;
+        background: #1e3a8a;
+        color: white;
+        padding: 25px;
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 3000;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .sidebar a {
+        display: block;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        padding: 12px 15px;
+        margin: 10px 0;
+        border-radius: 10px;
+    }
+
+    .sidebar a:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+    }
+
+    /* TABLO TASARIMI */
+    .table-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        background: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-group-pill {
+        display: flex;
+        gap: 5px;
+        background: #f8fafc;
+        padding: 5px;
+        border-radius: 50px;
+    }
+
+    .badge-status {
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 8px 12px;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="custom-topbar">
+    <div class="topbar-left-btn" onclick="toggleMenu()">
+        <i class="bi bi-list"></i>
+    </div>
+
+    <div class="topbar-right-area">
+        <span class="user-name-tag d-none d-md-inline">
+            <i class="bi bi-person-circle me-1 text-primary"></i> @displayDisplayName
+        </span>
+    
+    </div>
+</div>
+
+<div id="sidebar" class="sidebar shadow-lg">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold"><i class="bi bi-envelope-exclamation text-danger"></i> @sayfaBasligi</h2>
-        <a href="/User/Index" class="btn btn-outline-secondary btn-sm shadow-sm">
-            <i class="bi bi-arrow-left"></i> Panele Dön
+        <h3 class="fw-bold m-0">Menü</h3>
+        <i class="bi bi-x-lg" style="cursor:pointer" onclick="toggleMenu()"></i>
+    </div>
+    <a href="/User/Index"><i class="bi bi-house-door me-2"></i> Dashboard</a>
+    <a href="/User/AvailableCars"><i class="bi bi-car-front me-2"></i> Araç Kirala</a>
+    <a href="/User/MyRentals"><i class="bi bi-list-check me-2"></i> Kiralamalarım</a>
+    <hr class="opacity-25">
+    <a href="/User/IncomingRequests?filter=aktif"><i class="bi bi-bell-fill me-2 text-warning"></i> Talepleri Yönet</a>
+    <a href="/Car/MyCars"><i class="bi bi-tags me-2"></i> İlanlarım</a>
+    <a href="/Car/Create"><i class="bi bi-plus-square me-2"></i> Araç Ekle</a>
+    <a href="/User/EditProfile"><i class="bi bi-gear me-2"></i> Ayarlar</a>
+</div>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="/User/Index" class="text-decoration-none">Panel</a></li>
+                    <li class="breadcrumb-item active">Talepler</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold m-0">
+                <i class="bi bi-envelope-paper-fill text-primary me-2"></i>@sayfaBasligi
+            </h2>
+        </div>
+        <a href="/User/Index" class="btn btn-white shadow-sm rounded-3 border-0">
+            <i class="bi bi-chevron-left"></i> Geri Dön
         </a>
     </div>
 
-    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle">
-                    <thead class="bg-light text-secondary">
-                        <tr>
-                            <th class="ps-4 py-3">Araç</th>
-                            <th class="py-3">Müşteri</th>
-                            <th class="py-3">Tarih Aralığı</th>
-                            <th class="py-3">Kazanç</th>
-                            <th class="py-3">Durum</th>
-                            @if (isAktifMod)
-                            {
-                                <th class="text-center py-3">İşlem</th>
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 border-0 py-3 text-secondary small text-uppercase">Araç Detayı</th>
+                        <th class="border-0 py-3 text-secondary small text-uppercase">Müşteri</th>
+                        <th class="border-0 py-3 text-secondary small text-uppercase text-center">Tarih Aralığı</th>
+                        <th class="border-0 py-3 text-secondary small text-uppercase text-center">Kazanç</th>
+                        <th class="border-0 py-3 text-secondary small text-uppercase text-center">Durum</th>
+                        @if (isAktifMod)
+                        {
+                            <th class="border-0 py-3 text-secondary small text-uppercase text-center">
+                                İşlem</th>
                             }
                         </tr>
                     </thead>
@@ -38,74 +199,75 @@
                                 <tr>
                                     <td class="ps-4">
                                         <div class="fw-bold text-dark">@item.Car?.Brand @item.Car?.ModelName</div>
-                                        <small class="text-muted">@item.Car?.Plate</small>
+                                        <span class="badge bg-secondary-subtle text-secondary fw-normal">@item.Car?.Plate</span>
                                     </td>
                                     <td>
-                                        <div class="small">@item.User?.UserInfo?.Email</div>
+                                        <div class="small fw-semibold text-dark">@item.User?.UserInfo?.Email</div>
                                     </td>
-                                    <td>
-                                        <div class="small">@item.Date.ToShortDateString() - @item.ReturnDate.ToShortDateString()
-                                        </div>
+                                    <td class="text-center">
+                                        <div class="small text-muted">@item.Date.ToShortDateString()</div>
+                                        <div class="small text-muted">@item.ReturnDate.ToShortDateString()</div>
                                     </td>
-                                    <td class="fw-bold text-success">@item.Forecast.ToString("C2")</td>
-                                    <td>
+                                    <td class="text-center fw-bold text-success">
+                                        @item.Forecast.ToString("C2")
+                                    </td>
+                                    <td class="text-center">
                                         @if (item.Status == "OnayBekliyor")
                                         {
                                             <span
-                                                class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2">Onay
-                                                Bekliyor</span>
-                                            }
+                                            class="badge-status bg-warning-subtle text-warning border border-warning-subtle">Beklemede</span>
+                                        }
                                         else if (item.Status == "Onaylandı")
+                                        {
+                                            <span
+                                            class="badge-status bg-success-subtle text-success border border-success-subtle">Onaylandı</span>
+                                        }
+                                        else if (item.Status == "Reddedildi")
+                                        {
+                                            <span
+                                            class="badge-status bg-danger-subtle text-danger border border-danger-subtle">Reddedildi</span>
+                                        }
+                                    </td>
+                                    @if (isAktifMod)
+                                    {
+                                        <td class="text-center">
+                                            @if (item.Status == "OnayBekliyor")
                                             {
-                                                <span
-                                                class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">Onaylandı</span>
-                                            }
-                                            else if (item.Status == "Reddedildi")
-                                            {
-                                                <span
-                                                class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2">Reddedildi</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-light text-dark border px-3 py-2">@item.Status</span>
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <form asp-action="ApproveRental" asp-controller="User" method="post">
+                                                        <input type="hidden" name="rentalId" value="@item.Id" />
+                                                        <button type="submit"
+                                                                class="btn btn-sm btn-success rounded-pill px-3">Onayla</button>
+                                                    </form>
+                                                    <form asp-action="RejectedRental" asp-controller="User" method="post">
+                                                        <input type="hidden" name="rentalId" value="@item.Id" />
+                                                        <button type="submit"
+                                                                class="btn btn-sm btn-danger rounded-pill px-3">Reddet</button>
+                                                    </form>
+                                                </div>
                                             }
                                         </td>
-                                    
-                                        @if (isAktifMod)
-                                        {
-                                            <td class="text-center">
-                                                @if (item.Status == "OnayBekliyor")
-                                                {
-                                                    <div class="btn-group shadow-sm rounded-pill overflow-hidden">
-                                                        <form asp-action="ApproveRental" asp-controller="User" method="post">
-                                                        <input type="hidden" name="rentalId" value="@item.Id" />
-                                                        <button type="submit" class="btn btn-sm btn-success px-3 border-0">Onayla</button>
-                                                        </form>
-                                                        <form asp-action="RejectedRental" asp-controller="User" method="post">
-                                                        <input type="hidden" name="rentalId" value="@item.Id" />
-                                                        <button type="submit" class="btn btn-sm btn-danger px-3 border-0">Reddet</button>
-                                                        </form>
-                                                    </div>
-                                                }
-                                            </td>
-                                        }
-                                    </tr>
-                                }
-                            }
-                        else
-                            {
-                                <tr>
-                                    <td colspan="@(isAktifMod ? 6 : 5)" class="text-center py-5">
-                                        <div class="text-muted opacity-50">
-                                            <i class="bi bi-inbox-fill display-4"></i>
-                                            <p class="mt-2">Gösterilecek bir talep bulunmuyor.</p>
-                                        </div>
-                                    </td>
+                                    }
                                 </tr>
                             }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="bi bi-inbox display-1 text-muted opacity-25"></i>
+                                    <p class="text-muted mt-3">Henüz bir kiralama talebi bulunmuyor.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById("sidebar").classList.toggle("active");
+        }
+    </script>

@@ -1,28 +1,148 @@
 @using Car_reservation_automation_system.ViewModels
 @model LoginViewModel
 
-<h2>Giriş Yap</h2>
-
-<form method="post">
-    <div>
-        <label>Email</label>
-        <input asp-for="Email" />
-    </div>
-
-    <div>
-        <label>Şifre</label>
-        <input asp-for="Password" type="password" />
-    </div>
-
-    <button type="submit">Giriş</button>
-</form>
-
-@if(ViewBag.Error != null)
-{
-    <p style="color:red">@ViewBag.Error</p>
+@{
+    ViewData["Title"] = "Giriş Yap";
 }
-<div style="margin-top:10px;">
-    <a href="/Auth/ForgotPassword" style="color:blue;">
-        Şifremi unuttum
-    </a>
+
+<style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(to right, #eaeaec, #d3d9e5);
+        height: 100vh;
+    }
+
+    .login-container {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .login-card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        width: 350px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-title {
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #111;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        font-size: 14px;
+        color: #444;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+    }
+
+    .form-control:focus {
+        border-color: #2563eb;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-login {
+        width: 100%;
+        padding: 10px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+
+    .error {
+        color: red;
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    .extra-links {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+
+    .extra-links a {
+        color: #2563eb;
+        text-decoration: none;
+    }
+
+    .extra-links a:hover {
+        text-decoration: underline;
+    }
+
+    .links {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+
+    .links a {
+        color: #2563eb;
+        text-decoration: none;
+        margin: 0 5px;
+    }
+
+    .links a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-card">
+
+        <h2 class="login-title">Giriş Yap</h2>
+
+        <form method="post">
+
+            <div class="form-group">
+                <label>Email</label>
+                <input asp-for="Email" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label>Şifre</label>
+                <input asp-for="Password" type="password" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn-login">Giriş Yap</button>
+
+        </form>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="error">@ViewBag.Error</div>
+        }
+
+        <div class="extra-links">
+            <a href="/Auth/ForgotPassword">Şifremi unuttum</a>
+        </div>
+
+        <div class="extra-links">
+            Kayıdınız yok mu?
+            <a href="/Auth/Register">Kayıt Ol</a>
+        </div>
+        <div class="links">
+            <a href="/">Ana Sayfaya Dön</a>
+        </div>
+
+    </div>
 </div>
