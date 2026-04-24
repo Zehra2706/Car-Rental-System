@@ -1,0 +1,142 @@
+@model List<car.Models.Review>
+@{
+    Layout = "_Layout";
+    var userNameFromSession = Context.Session.GetString("UserName");
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f7fa; padding-top: 80px; }
+    
+    /* TOPBAR */
+    .custom-topbar {
+        position: fixed; top: 0; left: 0; right: 0; height: 70px;
+        background: white; display: flex; align-items: center;
+        justify-content: space-between; padding: 0 30px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08); z-index: 2000;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+        position: fixed; left: -280px; top: 0; width: 280px; height: 100%;
+        background: #1e3a8a; color: white; padding: 25px;
+        transition: 0.4s; z-index: 3000;
+    }
+    .sidebar.active { left: 0; }
+    .sidebar a { display: block; color: rgba(255,255,255,0.8); text-decoration: none; padding: 12px; margin: 8px 0; border-radius: 10px; }
+    .sidebar a:hover { background: rgba(255,255,255,0.15); color: white; }
+    .sidebar .admin-badge { background: #dc3545; font-size: 10px; padding: 2px 8px; border-radius: 5px; margin-left: 5px; }
+
+    /* TABLE CARD */
+    .admin-card { border: none; border-radius: 20px; background: white; }
+    .table thead { background: #f8fafc; }
+</style>
+
+<div class="custom-topbar">
+    <div onclick="toggleMenu()" style="font-size: 30px; cursor: pointer; color: #1e3a8a;">
+        <i class="bi bi-list"></i>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <a href="/Admin/Index" class="btn btn-outline-primary btn-sm rounded-pill px-4 fw-bold">
+            <i class="bi bi-house-door me-1"></i> Ana Sayfaya Dön
+        </a>
+        <span class="fw-bold text-dark border-start ps-3">
+            <i class="bi bi-shield-lock-fill text-danger me-1"></i> Admin: @userNameFromSession
+        </span>
+    </div>
+</div>
+
+<div id="sidebar" class="sidebar shadow-lg">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold m-0">Admin Panel</h3>
+        <i class="bi bi-x-lg" style="cursor:pointer" onclick="toggleMenu()"></i>
+    </div>
+    <a href="/Admin/Dashboard"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+    <a href="/Admin/ManageCars"><i class="bi bi-car-front me-2"></i> Araç Yönetimi</a>
+    <a href="/Admin/ManageUsers"><i class="bi bi-people me-2"></i> Kullanıcılar</a>
+    <hr class="opacity-25">
+    <a href="/Admin/ManageReviews" style="background: rgba(255,255,255,0.2);"><i class="bi bi-chat-quote me-2"></i> Yorum Yönetimi</a>
+    <a href="/Auth/Logout" class="text-danger mt-5"><i class="bi bi-box-arrow-right me-2"></i> Çıkış Yap</a>
+</div>
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark m-0">Sistemdeki Tüm Yorumlar</h2>
+            <p class="text-muted small">Uygunsuz içerikleri buradan takip edebilir ve silebilirsiniz.</p>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+        </div>
+    }
+
+    <div class="card admin-card shadow-sm overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Kullanıcı ID</th>
+                        <th>Araç</th>
+                        <th>Puan</th>
+                        <th>Yorum</th>
+                        <th>Tarih</th>
+                        <th class="text-center pe-4">Aksiyon</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var review in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold text-secondary">#@review.UserId</td>
+                                <td>
+                                    <div class="fw-bold">@review.Car?.Brand</div>
+                                    <div class="small text-muted">@review.Car?.ModelName</div>
+                                </td>
+                                <td>
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="bi @(i <= review.Rating ? "bi-star-fill text-warning" : "bi-star text-muted")" style="font-size: 12px;"></i>
+                                    }
+                                </td>
+                                <td style="max-width: 250px;">
+                                    <p class="small text-dark mb-0 text-wrap">@review.Comment</p>
+                                </td>
+                                <td><small class="text-muted">@review.CreatedDate.ToString("dd.MM.yyyy")</small></td>
+                                <td class="text-center pe-4">
+                                    <button onclick="adminDelete(@review.Id)" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm">
+                                        <i class="bi bi-trash-fill"></i> Kaldır
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">Sistemde henüz yorum bulunmuyor.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleMenu() {
+        document.getElementById("sidebar").classList.toggle("active");
+    }
+
+    function adminDelete(id) {
+        if (confirm("Bu yorumu sistemden kalıcı olarak silmek istediğinize emin misiniz?")) {
+            window.location.href = "/Admin/DeleteReviewByAdmin/" + id;
+        }
+    }
+</script>

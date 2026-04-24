@@ -22,10 +22,6 @@ namespace user.Models
 
 
 
-        // public static implicit operator User(User v)
-        // {
-        //     throw new NotImplementedException();
-        // }
 
     }
 }

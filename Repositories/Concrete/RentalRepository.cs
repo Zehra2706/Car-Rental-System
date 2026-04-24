@@ -18,8 +18,6 @@ namespace Car_reservation_automation_system.Repositories.Concrete
         {
             _context = context;
         }
-
-        // 1. Yeni kiralama ekler
         public void Add(Rental rental)
         {
             _context.Rentals.Add(rental);
@@ -27,8 +25,8 @@ namespace Car_reservation_automation_system.Repositories.Concrete
         public Rental GetById(int id)
         {
             return _context.Rentals
-                .Include(r => r.User) // Kullanıcıyı yükle
-                    .ThenInclude(u => u.UserInfo) // Kullanıcının Email bilgilerini yükle
+                .Include(r => r.User)
+                    .ThenInclude(u => u.UserInfo)
                 .FirstOrDefault(r => r.Id == id);
         }
 
@@ -81,10 +79,10 @@ namespace Car_reservation_automation_system.Repositories.Concrete
 
         public User GetUserByRental(int rentalId)
         {
-        var rental = _context.Rentals
-                .Include(r => r.User)
-                .ThenInclude(u => u.UserInfo)
-                .FirstOrDefault(r => r.Id == rentalId);
+            var rental = _context.Rentals
+                    .Include(r => r.User)
+                    .ThenInclude(u => u.UserInfo)
+                    .FirstOrDefault(r => r.Id == rentalId);
 
             return rental?.User;
         }

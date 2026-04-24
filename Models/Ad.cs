@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using car.Models; // 1. BU ŞART (Foreign Key için)
+using car.Models;
 using user.Models;
 namespace ad.Models
 {

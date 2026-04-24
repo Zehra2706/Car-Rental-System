@@ -22,8 +22,8 @@ namespace car.Service.Concrete
         private readonly IUserRepository _userRepository;
         private readonly ApplicationDbContext _context;
         private readonly EmailService _emailService;
-        private readonly  ICarRepository _carRepository;
-        private readonly  INotificationService _notificationService;
+        private readonly ICarRepository _carRepository;
+        private readonly INotificationService _notificationService;
         private readonly PasswordHasher<User> _passwordHasher = new PasswordHasher<User>();
         public UserService(IUserRepository userRepository, ApplicationDbContext context, EmailService emailService, ICarRepository carRepository, INotificationService notificationService)
         {
@@ -39,13 +39,13 @@ namespace car.Service.Concrete
             User? user = _userRepository.GetUserWithDetails(email);
             if (user == null) return null;
 
-            if (!user.UserInfo.Password.StartsWith("AQAAAA"))     // silinecek
+            if (!user.UserInfo.Password.StartsWith("AQAAAA"))
             {
                 if (user.UserInfo.Password != password) return null;
                 return user;
             }
             var result = _passwordHasher.VerifyHashedPassword(user, user.UserInfo.Password, password);
-            
+
             if (result == PasswordVerificationResult.Failed)
                 return null;
 
@@ -229,10 +229,10 @@ namespace car.Service.Concrete
                 _context.SaveChanges();
             }
             var user = _context.Users.Find(rental.UserId);
-           _notificationService.RentalFinished(user, rental);
+            _notificationService.RentalFinished(user, rental);
 
             var owner = _carRepository.GetOwnerByCarId(rental.CarId);
-           _notificationService.OwnerRentalFinished(owner, rental); 
+            _notificationService.OwnerRentalFinished(owner, rental);
         }
 
         public void ReturnCar(int rentalId)
@@ -267,9 +267,10 @@ namespace car.Service.Concrete
             };
 
             var hashedPassword = _passwordHasher.HashPassword(user, model.Password);
-    
-            user.UserInfo = new UserInfo { 
-                Email = model.Email, 
+
+            user.UserInfo = new UserInfo
+            {
+                Email = model.Email,
                 Password = hashedPassword // Hashlenmiş şifre
             };
             _userRepository.AddUser(user);
@@ -286,47 +287,46 @@ namespace car.Service.Concrete
         {
             throw new NotImplementedException();
         }
-        
-    
-    public string GeneratePasswordResetToken(string email)
-{
-    var user = _userRepository.GetByEmail(email);
-    if (user == null) return null;
 
-    var token = Guid.NewGuid().ToString();
 
-    // DB’ye kaydet (UserInfo içine eklemen en mantıklısı)
-    user.UserInfo.ResetToken = token;
-    user.UserInfo.ResetTokenExpire = DateTime.Now.AddMinutes(30);
+        public string GeneratePasswordResetToken(string email)
+        {
+            var user = _userRepository.GetByEmail(email);
+            if (user == null) return null;
 
-    _userRepository.Update(user);
+            var token = Guid.NewGuid().ToString();
 
-    return token;
-}
-public User GetUserByResetToken(string token)
-{
-    return _context.Users
-        .Include(u => u.UserInfo)
-        .FirstOrDefault(u =>
-            u.UserInfo != null &&
-            u.UserInfo.ResetToken == token &&
-            u.UserInfo.ResetTokenExpire > DateTime.Now);
-}
-public void ResetPassword(string token, string newPassword)
-{
-    var user = GetUserByResetToken(token);
+            user.UserInfo.ResetToken = token;
+            user.UserInfo.ResetTokenExpire = DateTime.Now.AddMinutes(30);
 
-    if (user == null)
-        throw new Exception("Token geçersiz veya süresi dolmuş");
+            _userRepository.Update(user);
 
-    var hashedPassword = _passwordHasher.HashPassword(user, newPassword);
-    user.UserInfo.Password = hashedPassword;
-    
-    user.UserInfo.ResetToken = null;
-    user.UserInfo.ResetTokenExpire = null;
+            return token;
+        }
+        public User GetUserByResetToken(string token)
+        {
+            return _context.Users
+                .Include(u => u.UserInfo)
+                .FirstOrDefault(u =>
+                    u.UserInfo != null &&
+                    u.UserInfo.ResetToken == token &&
+                    u.UserInfo.ResetTokenExpire > DateTime.Now);
+        }
+        public void ResetPassword(string token, string newPassword)
+        {
+            var user = GetUserByResetToken(token);
 
-    _userRepository.Update(user);
-}
+            if (user == null)
+                throw new Exception("Token geçersiz veya süresi dolmuş");
+
+            var hashedPassword = _passwordHasher.HashPassword(user, newPassword);
+            user.UserInfo.Password = hashedPassword;
+
+            user.UserInfo.ResetToken = null;
+            user.UserInfo.ResetTokenExpire = null;
+
+            _userRepository.Update(user);
+        }
 
         public User GetByEmail(string email)
         {
@@ -346,25 +346,25 @@ public void ResetPassword(string token, string newPassword)
 
         public void Update(User user)
         {
-             _context.Users.Update(user);
-             _context.SaveChanges();
+            _context.Users.Update(user);
+            _context.SaveChanges();
         }
 
-public void SendPasswordResetEmail(string email)
-{
-    var user = _userRepository.GetByEmail(email);
-    if (user == null) return;
+        public void SendPasswordResetEmail(string email)
+        {
+            var user = _userRepository.GetByEmail(email);
+            if (user == null) return;
 
-    var token = Guid.NewGuid().ToString();
+            var token = Guid.NewGuid().ToString();
 
-    user.UserInfo.ResetToken = token;
-    user.UserInfo.ResetTokenExpire = DateTime.Now.AddMinutes(30);
+            user.UserInfo.ResetToken = token;
+            user.UserInfo.ResetTokenExpire = DateTime.Now.AddMinutes(30);
 
-    _userRepository.Update(user);
+            _userRepository.Update(user);
 
-    var link = $"http://localhost:5054/Auth/ResetPassword?token={token}";
+            var link = $"http://localhost:5054/Auth/ResetPassword?token={token}";
 
-    var body = $@"
+            var body = $@"
     <div style='font-family: Arial, sans-serif; line-height:1.6; color:#333'>
 
         <h2 style='color:#2c3e50;'>Şifre Sıfırlama Talebi</h2>
@@ -399,15 +399,15 @@ public void SendPasswordResetEmail(string email)
     </div>
     ";
 
-    _emailService.SendEmail(email, "Şifre Sıfırlama Talebi", body);
-}
+            _emailService.SendEmail(email, "Şifre Sıfırlama Talebi", body);
+        }
 
-public User GetById(int id)
-{
-    return _context.Users
-        .Include(u => u.UserInfo)
-        .Include(u => u.UserConnections)
-        .FirstOrDefault(u => u.Id == id);
-}
+        public User GetById(int id)
+        {
+            return _context.Users
+                .Include(u => u.UserInfo)
+                .Include(u => u.UserConnections)
+                .FirstOrDefault(u => u.Id == id);
+        }
     }
 }

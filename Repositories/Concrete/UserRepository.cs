@@ -62,21 +62,21 @@ public class UserRepository : IUserRepository
     }
 
     public List<User> GetAllUsers()
-{
-    return _context.Users
-        .Include(x => x.UserInfo)
-        .ToList();
-}
-
-public void DeleteUser(int id)
-{
-    var user = _context.Users.Find(id);
-    if (user != null)
     {
-        _context.Users.Remove(user);
-        _context.SaveChanges();
+        return _context.Users
+            .Include(x => x.UserInfo)
+            .ToList();
     }
-}
+
+    public void DeleteUser(int id)
+    {
+        var user = _context.Users.Find(id);
+        if (user != null)
+        {
+            _context.Users.Remove(user);
+            _context.SaveChanges();
+        }
+    }
 
     public void Save()
     {

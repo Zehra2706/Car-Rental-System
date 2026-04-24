@@ -5,137 +5,189 @@
     Layout = "_Layout";
 }
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://npmcdn.com/flatpickr/dist/l10n/tr.js"></script>
 
-<div class="container-fluid mt-5 px-4">
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 mb-4">
-            <i class="bi bi-exclamation-octagon-fill me-2"></i> @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="container-fluid mb-4">
+    <div class="d-flex justify-content-between align-items-center bg-white p-3 shadow-sm rounded-4">
+        
+        <button class="btn btn-light rounded-circle shadow-sm" onclick="toggleMenu()"
+                style="width: 50px; height: 50px;">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+
+        <a href="/User/Index" class="btn btn-outline-dark rounded-pill px-4 shadow-sm fw-bold">
+            <i class="bi bi-house-door-fill me-2"></i>Ana Sayfaya Dön
+        </a>
+    </div>
+    <div id="sidebar" class="sidebar shadow-lg">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold m-0">Menü</h3>
+            <i class="bi bi-x-lg" style="cursor:pointer" onclick="toggleMenu()"></i>
         </div>
-    }
+        <a href="/User/Index"><i class="bi bi-house-door me-2"></i> Dashboard</a>
+        <a href="/User/AvailableCars"><i class="bi bi-car-front me-2"></i> Araç Kirala</a>
+        <a href="/User/MyRentals"><i class="bi bi-list-check me-2"></i> Kiralamalarım</a>
+        <hr class="opacity-25">
+        <a href="/Car/MyReviews"><i class="bi bi-chat-left-text me-2"></i> Yorumlarım</a>
+        <a href="/Car/MyCars"><i class="bi bi-tags me-2"></i> İlanlarım</a>
+        <a href="/Auth/Logout" class="text-danger mt-5"><i class="bi bi-box-arrow-right me-2"></i> Çıkış Yap</a>
 
-    <div class="row g-4">
-        @* --- SOL SÜTUN: ARAÇ DETAYLARI --- *@
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold border-bottom pb-2 mb-3 text-primary">🔍 Araç Detayları</h5>
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <small class="text-muted d-block font-monospace">Marka & Model</small>
-                            <span class="fw-bold h5 text-uppercase">@car?.Brand @car?.ModelName (@car?.ModelYear)</span>
-                        </div>
-                        <div class="col-6">
-                            <small class="text-muted d-block font-monospace">Renk</small>
-                            <span class="fw-bold text-dark">@(car?.Color ?? "Belirtilmedi")</span>
-                        </div>
-                        <div class="col-6">
-                            <small class="text-muted d-block font-monospace">Motor Gücü</small>
-                            <span class="fw-bold text-dark">@(car?.EngineSize > 0 ? car.EngineSize.ToString("0.0") :
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            "---") L</span>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted d-block font-monospace">Vites Tipi</small>
-                                <span class="fw-bold text-dark">@((int)car?.Transmission == 1 ? "Otomatik" :
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           "Manuel")</span>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-muted d-block font-monospace">Yakıt Tipi</small>
-                                    <span class="fw-bold text-dark">@((int)car?.FuelType == 1 ? "Benzin" : "Dizel")</span>
-                                </div>
-                                <div class="col-12 mt-2">
-                                    <span
-                                        class="badge w-100 py-2 @(car?.IsChauffeured == true ? "bg-info text-dark" : "bg-light text-secondary border")">
-                                        <i class="bi bi-person-badge"></i> @(car?.IsChauffeured == true ? "Şoförlü Hizmet Mevcut" : "Standart Kiralama")
-                                    </span>
-                                </div>
+    </div>
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/tr.js"></script>
+
+    <div class="container-fluid mt-5 px-4">
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 mb-4">
+                <i class="bi bi-exclamation-octagon-fill me-2"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 rounded-4 h-100">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold border-bottom pb-2 mb-3 text-primary">🔍 Araç Detayları</h5>
+
+                        @{
+                            var arac = ViewBag.Car as car.Models.Car;
+                            var oz = arac?.CarFeatures?.FirstOrDefault();
+                            var fiyat = arac?.Prices?.FirstOrDefault();
+                        }
+
+                        @if (arac != null)
+                        {
+                            <div class="row g-3">
+                                @* Marka & Model *@
                                 <div class="col-12">
-                                    <div class="d-flex gap-2">
-                                        <span class="badge @(car?.IsInsured == true ? "bg-success" : "bg-danger")">
-                                            @(car?.IsInsured == true ? "Kaskolu" : "Sigortasız")
-                                        </span>
-                                        @if (!string.IsNullOrEmpty(car?.MotorInsurance))
-                                        {
-                                            <span class="badge bg-primary">@car.MotorInsurance</span>
-                                        }
+                                    <small class="text-muted d-block font-monospace">Marka & Model</small>
+                                    <span class="fw-bold h5 text-uppercase">@arac.Brand @arac.ModelName
+                                        (@arac.ModelYear)</span>
                                     </div>
-                                </div>
-                                <div class="col-12 mt-2">
-                                    <div class="p-3 bg-light rounded-3 border shadow-sm">
-                                        <small class="text-muted d-block mb-2 fw-bold text-uppercase"><i
-                                            class="bi bi-tags-fill"></i> Kiralama Tarifeleri</small>
+
+                                    @* Teknik Detaylar *@
+                                    <div class="col-6">
+                                        <small class="text-muted d-block font-monospace">Renk</small>
+                                        <span class="fw-bold text-dark">@(arac.Color ?? "Belirtilmedi")</span>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <small class="text-muted d-block font-monospace">Motor Gücü</small>
+                                        <span class="fw-bold text-dark">
+                                            @(oz != null ? oz.engineSize.ToString("0.0") : "---") L
+                                        </span>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <small class="text-muted d-block font-monospace">Vites Tipi</small>
+                                        <span class="fw-bold text-dark">
+                                            @(oz != null ? oz.Transmission.ToString() : "---")
+                                        </span>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <small class="text-muted d-block font-monospace">Yakıt Tipi</small>
+                                        <span class="fw-bold text-dark">
+                                            @(oz != null ? oz.fuelType.ToString() : "---")
+                                        </span>
+                                    </div>
+
+                                    @* TÜM ÜCRETLER (Günlük, Haftalık, Aylık) *@
+                                    <div class="col-12 mt-2">
+                                        <div class="p-3 bg-light rounded-3 border shadow-sm">
+                                            <small
+                                                class="text-muted d-block mb-2 fw-bold text-uppercase text-center border-bottom pb-1">
+                                                <i class="bi bi-tags-fill"></i> Kiralama Tarifeleri
+                                            </small>
                                             <div class="row text-center g-2">
-                                                <div class="col-3 border-end">
-                                                    <small class="text-muted d-block" style="font-size:0.65rem;">SAATLİK</small>
-                                                    <span class="fw-bold text-primary" style="font-size:0.8rem;">@((car.DailyPrice /
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    24).ToString("N2")) TL</span>
+                                                <div class="col-4 border-end">
+                                                    <small class="text-muted d-block" style="font-size:0.7rem;">GÜNLÜK</small>
+                                                    <span class="fw-bold text-primary"
+                                                          style="font-size:0.9rem;">@(fiyat?.daily.ToString("N0") ?? "0") ₺</span>
+                                                </div>
+                                                <div class="col-4 border-end">
+                                                    <small class="text-muted d-block" style="font-size:0.7rem;">HAFTALIK</small>
+                                                    <span class="fw-bold text-primary"
+                                                          style="font-size:0.9rem;">@(fiyat?.weekly.ToString("N0") ?? "0")
+                                                        ₺</span>
                                                     </div>
-                                                    <div class="col-3 border-end">
-                                                        <small class="text-muted d-block" style="font-size:0.65rem;">GÜNLÜK</small>
-                                                        <span class="fw-bold text-dark"
-                                                              style="font-size:0.8rem;">@car.DailyPrice.ToString("N0") TL</span>
-                                                    </div>
-                                                    <div class="col-3 border-end">
-                                                        <small class="text-muted d-block" style="font-size:0.65rem;">HAFTALIK</small>
-                                                        <span class="fw-bold text-dark"
-                                                              style="font-size:0.8rem;">@car.WeeklyPrice.ToString("N0") TL</span>
-                                                    </div>
-                                                    <div class="col-3">
-                                                        <small class="text-muted d-block" style="font-size:0.65rem;">AYLIK</small>
-                                                        <span class="fw-bold text-dark"
-                                                              style="font-size:0.8rem;">@car.MonthlyPrice.ToString("N0") TL</span>
+                                                    <div class="col-4">
+                                                        <small class="text-muted d-block" style="font-size:0.7rem;">AYLIK</small>
+                                                        <span class="fw-bold text-primary"
+                                                              style="font-size:0.9rem;">@(fiyat?.monthly.ToString("N0") ?? "0")
+                                                            ₺</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <small class="text-muted d-block font-monospace">Plaka</small>
-                                            <span class="badge bg-dark fs-6 w-100 py-2" style="letter-spacing:2px;">
-                                                @(string.IsNullOrEmpty(car?.Plate) ? "PLAKA YOK" : car.Plate)
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="mt-4 p-3 bg-light rounded-3 border-start border-3 border-primary shadow-sm">
-                                        <small class="text-muted d-block mb-1 fw-bold text-uppercase">📍 Araç Konumu & Bilgi</small>
-                                        <p class="small mb-1 text-dark fw-bold"><i class="bi bi-geo-alt-fill text-danger"></i>
-                                            @car?.Location</p>
-                                            <p class="small mb-0 text-secondary" style="font-style:italic;">"@car?.Description"</p>
-                                        </div>
+
+                                            @* Plaka *@
+                                            <div class="col-12">
+                                                <small class="text-muted d-block font-monospace">Plaka Bilgisi</small>
+                                                <span class="badge bg-dark fs-6 w-100 py-2" style="letter-spacing:2px;">
+                                                    @(string.IsNullOrEmpty(arac.Plate) ? "PLAKA TANIMLANMAMIŞ" : arac.Plate)
+                                                </span>
+                                            </div>
+
+                                            @* KONUM VE BİLGİ *@
+                                            <div class="col-12 mt-3">
+                                                <div class="p-3 bg-white rounded-3 border-start border-3 border-primary shadow-sm">
+                                                    <small class="text-muted d-block mb-1 fw-bold text-uppercase">📍 Konum &
+                                                        Bilgi</small>
+                                                        <p class="small mb-1 text-dark fw-bold">
+                                                            <i class="bi bi-geo-alt-fill text-danger"></i> @arac.Location
+                                                        </p>
+                                                        <hr class="my-2 opacity-25">
+                                                        <p class="small mb-0 text-secondary" style="font-style:italic; line-height:1.4;">
+                                                            <i class="bi bi-info-circle-fill text-primary me-1"></i> @arac.Description
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                    else
+                                        {
+                                            <div class="alert alert-danger">⚠️ Araç verileri boru hattında kayboldu!</div>
+                                        }
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- ORTA -->
                             <div class="col-lg-5">
                                 <div class="card shadow-sm border-0 rounded-4 h-100 p-3">
-                                    <img src="@(car?.ImagePath ?? "/images/default-car.png")" class="img-fluid rounded-4 shadow"
+                                    <img src="@(arac?.ImagePath ?? "/images/default-car.png")" class="img-fluid rounded-4 shadow"
                                          style="max-height:520px; object-fit:contain; width:100%;" />
 
                                     <div class="mt-4 p-3 bg-white rounded-3 border shadow-sm">
                                         <small class="text-muted d-block mb-2 fw-bold">Satıcı Bilgileri</small>
 
-                                        <div class="d-flex justify-content-between">
+                                        <div class="d-flex justify-content-between mb-1">
                                             <span>Ad Soyad:</span>
                                             <b>@ViewBag.SellerName</b>
                                         </div>
 
-                                        <div class="d-flex justify-content-between">
+                                        <div class="d-flex justify-content-between mb-1">
                                             <span>Telefon:</span>
                                             <b>@ViewBag.SellerPhone</b>
                                         </div>
-                                        <div class="d-flex justify-content-between">
+            
+                                        <div class="d-flex justify-content-between mb-3">
                                             <span>Email:</span>
                                             <b>@ViewBag.SellerEmail</b>
                                         </div>
+
+                                        <hr class="opacity-25">
+                                        <a href="/Car/ViewCarReviews?carId=@arac?.Id"
+                                               class="btn btn-outline-primary w-100 rounded-pill shadow-sm py-2">
+                                            <i class="bi bi-chat-left-text-fill me-2"></i>Müşteri Yorumlarını Gör
+                                        </a>
                                     </div>
                                 </div>
                             </div>
-
 
                             @* --- SAĞ SÜTUN: REZERVASYON FORMU --- *@
                             <div class="col-lg-3">
@@ -188,138 +240,170 @@
                                     </div>
                                 </div>
                             </div>
+
                         </div>
-                    </div>
 
-                    @section Scripts {
-                        <script>
-                            const disabledRangesRaw = @Html.Raw(ViewBag.DisabledDates ?? "[]");
-                            const carId = document.getElementById('carIdField')?.value;
+                        @section Scripts {
+                            <script>
+                                const disabledRangesRaw = @Html.Raw(ViewBag.DisabledDates ?? "[]");
+                                const carId = document.getElementById('carIdField')?.value;
 
-                            // Tarihleri Flatpickr'ın anlayacağı JS formatına çeviriyoruz
-                            const parsedDisabledDates = disabledRangesRaw.map(r => ({
-                            from: new Date(r.from),
-                            to: new Date(r.to)
-                            }));
+                                // Tarihleri Flatpickr'ın anlayacağı JS formatına çeviriyoruz
+                                const parsedDisabledDates = disabledRangesRaw.map(r => ({
+                                from: new Date(r.from),
+                                to: new Date(r.to)
+                                }));
 
-                            function isDateDisabled(date) {
-                            const time = date.getTime();
-                            return parsedDisabledDates.some(r => time >= r.from.getTime() && time < r.to.getTime());
-                            }
+                                function isDateDisabled(date) {
+                                const time = date.getTime();
+                                return parsedDisabledDates.some(r => time >= r.from.getTime() && time < r.to.getTime());
+                                }
 
-                            function hasRangeConflict(start, end) {
-                            const startTime = start.getTime();
-                            const endTime = end.getTime();
-                            return parsedDisabledDates.some(r => startTime < r.to.getTime() && endTime > r.from.getTime());
-                            }
+                                function hasRangeConflict(start, end) {
+                                const startTime = start.getTime();
+                                const endTime = end.getTime();
+                                return parsedDisabledDates.some(r => startTime < r.to.getTime() && endTime > r.from.getTime());
+                                }
 
-                            const commonConfig = {
-                            enableTime: true,
-                            time_24hr: true,
-                            minDate: "today",
-                            disable: parsedDisabledDates,
-                            dateFormat: "Y-m-d H:i",
-                            locale: "tr",
-                            minuteIncrement: 30
-                            };
+                                const commonConfig = {
+                                enableTime: true,
+                                time_24hr: true,
+                                minDate: "today",
+                                disable: parsedDisabledDates,
+                                dateFormat: "Y-m-d H:i",
+                                locale: "tr",
+                                minuteIncrement: 30
+                                };
 
-                            const startPicker = flatpickr("#startDate", {
-                            ...commonConfig,
-                            onChange: function (selectedDates) {
-                            if (!selectedDates[0]) return;
+                                const startPicker = flatpickr("#startDate", {
+                                ...commonConfig,
+                                onChange: function (selectedDates) {
+                                if (!selectedDates[0]) return;
                 
-                            const selectedStart = selectedDates[0];
-                            if (isDateDisabled(selectedStart)) {
-                            alert("Bu saat dolu! Lütfen boş bir saat seçin.");
-                            startPicker.clear();
-                            return;
-                            }
+                                const selectedStart = selectedDates[0];
+                                if (isDateDisabled(selectedStart)) {
+                                alert("Bu saat dolu! Lütfen boş bir saat seçin.");
+                                startPicker.clear();
+                                return;
+                                }
 
-                            // Minimum dönüş saati (Alıştan 1 saat sonra)
-                            endPicker.set("minDate", new Date(selectedStart.getTime() + 3600000));
-                            document.getElementById('endDate').disabled = false;
+                                // Minimum dönüş saati (Alıştan 1 saat sonra)
+                                endPicker.set("minDate", new Date(selectedStart.getTime() + 3600000));
+                                document.getElementById('endDate').disabled = false;
                 
-                            // Eğer daha önce iade tarihi seçildiyse fiyatı tekrar hesapla
-                            if (document.getElementById('endDate').value) {
-                            checkAndCalculate();
-                            } else {
-                            document.getElementById('priceSummary').classList.add('d-none');
-                            document.getElementById('submitBtn').disabled = true;
-                            }
-                            }
-                            });
+                                // Eğer daha önce iade tarihi seçildiyse fiyatı tekrar hesapla
+                                if (document.getElementById('endDate').value) {
+                                checkAndCalculate();
+                                } else {
+                                document.getElementById('priceSummary').classList.add('d-none');
+                                document.getElementById('submitBtn').disabled = true;
+                                }
+                                }
+                                });
 
-                            const endPicker = flatpickr("#endDate", {
-                            ...commonConfig,
-                            onChange: function (selectedDates) {
-                            if (!selectedDates[0]) return;
-                            checkAndCalculate();
-                            }
-                            });
+                                const endPicker = flatpickr("#endDate", {
+                                ...commonConfig,
+                                onChange: function (selectedDates) {
+                                if (!selectedDates[0]) return;
+                                checkAndCalculate();
+                                }
+                                });
 
-                            function checkAndCalculate() {
-                            const startStr = document.getElementById('startDate').value;
-                            const endStr = document.getElementById('endDate').value;
-                            const submitBtn = document.getElementById('submitBtn');
+                                function checkAndCalculate() {
+                                const startStr = document.getElementById('startDate').value;
+                                const endStr = document.getElementById('endDate').value;
+                                const submitBtn = document.getElementById('submitBtn');
 
-                            if (!startStr) {
-                            alert("Lütfen önce alış tarihi seçin.");
-                            endPicker.clear();
-                            return;
-                            }
+                                if (!startStr) {
+                                alert("Lütfen önce alış tarihi seçin.");
+                                endPicker.clear();
+                                return;
+                                }
 
-                            const start = new Date(startStr);
-                            const end = new Date(endStr);
+                                const start = new Date(startStr);
+                                const end = new Date(endStr);
 
-                            if (isDateDisabled(end)) {
-                            alert("Seçilen iade saati dolu!");
-                            endPicker.clear();
-                            return;
-                            }
+                                if (isDateDisabled(end)) {
+                                alert("Seçilen iade saati dolu!");
+                                endPicker.clear();
+                                return;
+                                }
 
-                            if (hasRangeConflict(start, end)) {
-                            alert("Seçilen aralık mevcut bir rezervasyonla çakışıyor! Lütfen aralığı değiştirin.");
-                            endPicker.clear();
-                            document.getElementById('priceSummary').classList.add('d-none');
-                            submitBtn.disabled = true;
-                            return;
-                            }
+                                if (hasRangeConflict(start, end)) {
+                                alert("Seçilen aralık mevcut bir rezervasyonla çakışıyor! Lütfen aralığı değiştirin.");
+                                endPicker.clear();
+                                document.getElementById('priceSummary').classList.add('d-none');
+                                submitBtn.disabled = true;
+                                return;
+                                }
 
-                            updatePrice(start, end);
-                            }
+                                updatePrice(start, end);
+                                }
 
-                            function updatePrice(start, end) {
-                            const submitBtn = document.getElementById('submitBtn');
-                            const totalHours = (end - start) / (1000 * 60 * 60);
+                                function updatePrice(start, end) {
+                                const submitBtn = document.getElementById('submitBtn');
+                                const totalHours = (end - start) / (1000 * 60 * 60);
 
-                            // API'ye gönderirken ondalık sorununu çözmek için noktaya çeviriyoruz
-                            const fetchHours = totalHours.toFixed(4).replace(",", ".");
+                                // API'ye gönderirken ondalık sorununu çözmek için noktaya çeviriyoruz
+                                const fetchHours = totalHours.toFixed(4).replace(",", ".");
 
-                            fetch(`/Rental/GetPriceCalculation?carId=${carId}&hours=${fetchHours}`)
-                            .then(r => r.json())
-                            .then(data => {
-                            document.getElementById('priceSummary').classList.remove('d-none');
+                                fetch(`/Rental/GetPriceCalculation?carId=${carId}&hours=${fetchHours}`)
+                                .then(r => r.json())
+                                .then(data => {
+                                document.getElementById('priceSummary').classList.remove('d-none');
 
-                            const h = Math.floor(totalHours);
-                            const m = Math.round((totalHours % 1) * 60);
-                            document.getElementById('daysCount').innerText = `${h} Saat ${m} Dakika`;
+                                const h = Math.floor(totalHours);
+                                const m = Math.round((totalHours % 1) * 60);
+                                document.getElementById('daysCount').innerText = `${h} Saat ${m} Dakika`;
 
-                            // UI gösterimi için Türkçe format
-                            document.getElementById('totalPrice').innerText = data.total.toLocaleString('tr-TR') + " TL";
-                            document.getElementById('depositAmount').innerText = data.deposit.toLocaleString('tr-TR') + " TL";
+                                // UI gösterimi için Türkçe format
+                                document.getElementById('totalPrice').innerText = data.total.toLocaleString('tr-TR') + " TL";
+                                document.getElementById('depositAmount').innerText = data.deposit.toLocaleString('tr-TR') + " TL";
 
-                            // 🚩 KESİN ÇÖZÜM: 
-                            // Fiyatları JavaScript'ten her zaman NOKTA ile string olarak gönderiyoruz. 
-                            // Controller tarafında bunu biz manuel parse edeceğiz.
-                            document.getElementById('hiddenForecast').value = data.total.toString().replace(",", ".");
-                            document.getElementById('hiddenDeposit').value = data.deposit.toString().replace(",", ".");
+                                // 🚩 KESİN ÇÖZÜM: 
+                                // Fiyatları JavaScript'ten her zaman NOKTA ile string olarak gönderiyoruz. 
+                                // Controller tarafında bunu biz manuel parse edeceğiz.
+                                document.getElementById('hiddenForecast').value = data.total.toString().replace(",", ".");
+                                document.getElementById('hiddenDeposit').value = data.deposit.toString().replace(",", ".");
                     
-                            submitBtn.disabled = false;
-                            })
-                            .catch(() => {
-                            submitBtn.disabled = true;
-                            alert("Fiyat hesaplanırken hata oluştu.");
-                            });
+                                submitBtn.disabled = false;
+                                })
+                                .catch(() => {
+                                submitBtn.disabled = true;
+                                alert("Fiyat hesaplanırken hata oluştu.");
+                                });
+                                }
+                                function toggleMenu() {
+                                document.getElementById("sidebar").classList.toggle("active");
+                                }
+                            </script>
+                        }
+                        <style>
+                            .sidebar {
+                            position: fixed;
+                            left: -280px;
+                            /* Kapalıyken solda gizli */
+                            top: 0;
+                            width: 280px;
+                            height: 100%;
+                            background: #1e3a8a;
+                            color: white;
+                            padding: 25px;
+                            transition: 0.4s ease;
+                            z-index: 3000;
                             }
-                        </script>
-                    }
+
+                            .sidebar.active {
+                            left: 0;
+                            /* Açıldığında ekrana gelir */
+                            }
+
+                            .sidebar a {
+                            display: block;
+                            color: rgba(255, 255, 255, 0.8);
+                            text-decoration: none;
+                            padding: 12px 15px;
+                            margin: 10px 0;
+                            border-radius: 10px;
+                            }
+                        </style>

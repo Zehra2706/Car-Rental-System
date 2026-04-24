@@ -20,6 +20,7 @@ namespace Car_reservation_automation_system.Service.Interfaces
         List<car.Models.Car> GetAllCars();
         List<Car> GetCarsByUserId(int userId);
         List<Car> FilterCars(CarFilter filter);
+        Car GetCarById(int id);
 
     }
 }

@@ -128,7 +128,8 @@
                             <input type="text" name="Location" value="@Model.Location" class="form-control rounded-3 shadow-sm" required>
                         </div>
                     </div>
-
+<div class="col-md-4"><input type="text" name="Plate" value="@Model.Plate" class="form-control" readonly>
+ </div>
                     <div class="mb-4 p-3 bg-light rounded-4 border border-dashed text-center">
                         <label class="form-label fw-bold text-dark d-block mb-3">Araç Fotoğrafı</label>
                         @if (!string.IsNullOrEmpty(Model.ImagePath))
@@ -170,6 +171,7 @@
                     </button>
                 </div>
             </form>
+            <div asp-validation-summary="All" class="text-danger"></div>
         </div>
     </div>
 </div>

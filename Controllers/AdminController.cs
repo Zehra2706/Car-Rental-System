@@ -9,20 +9,24 @@ public class AdminController : Controller
     private readonly ICarService _carService;
     private readonly IUserService _userService;
 
-private readonly INotificationService _notificationService;
+    private readonly INotificationService _notificationService;
 
-private readonly IRentalService _rentalService;
+    private readonly IRentalService _rentalService;
 
-private readonly IRentalRepository _rentalRepo;
+    private readonly IRentalRepository _rentalRepo;
+    private readonly IReviewService _reviewService;
+    private readonly IReviewRepository _reviewRepository;
 
 
-    public AdminController(IUserService userService, ICarService carService, INotificationService notificationService, IRentalService rentalService, IRentalRepository rentalRepo)
+    public AdminController(IUserService userService, ICarService carService, INotificationService notificationService, IRentalService rentalService, IRentalRepository rentalRepo, IReviewService reviewService, IReviewRepository reviewRepository)
     {
         _userService = userService;
         _carService = carService;
         _notificationService = notificationService;
         _rentalService = rentalService;
         _rentalRepo = rentalRepo;
+        _reviewService = reviewService;
+        _reviewRepository = reviewRepository;
     }
 
     private bool IsAdmin()
@@ -150,6 +154,25 @@ private readonly IRentalRepository _rentalRepo;
     {
         var allRentals = _userService.GetAllRentals();
         return View(allRentals);
+    }
+    [HttpGet]
+    public IActionResult ManageReviews()
+    {
+        if (HttpContext.Session.GetString("UserRole") != "Admin") return RedirectToAction("Login", "Auth");
+
+        var allReviews = _reviewService.GetAllReviews();
+        return View(allReviews);
+    }
+
+    public IActionResult DeleteReviewByAdmin(int id)
+    {
+        if (HttpContext.Session.GetString("UserRole") != "Admin") return Unauthorized();
+
+        // Admin olduğu için UserId kontrolü yapmadan direkt siliyoruz
+        _reviewRepository.DeleteReview(id);
+
+        TempData["Success"] = "Yorum admin tarafından başarıyla kaldırıldı.";
+        return RedirectToAction("ManageReviews");
     }
 
 }

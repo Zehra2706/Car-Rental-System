@@ -15,11 +15,13 @@ namespace car.Controllers
     {
         private readonly ICarService _carService;
         private readonly IRentalService _rentalService;
+        private readonly IReviewService _reviewService;
 
-        public CarController(ICarService carService, IRentalService rentalService)
+        public CarController(ICarService carService, IRentalService rentalService, IReviewService reviewService)
         {
             _carService = carService;
             _rentalService = rentalService;
+            _reviewService = reviewService;
         }
 
         // --- 1. İLANLARIM LİSTESİ ---
@@ -67,14 +69,16 @@ namespace car.Controllers
         }
 
         // --- 4. ARAÇ DETAYLARI ---
-        [AllowAnonymous]
         public IActionResult Details(int id)
         {
-            var car = _carService.GetCarForEdit(id);
+            var car = _carService.GetCarById(id);
+
             if (car == null) return NotFound();
 
+            // Diğer bilgiler
             var disabledDates = _rentalService.GetDisabledDatesJson(id);
             ViewBag.DisabledDates = JsonConvert.SerializeObject(disabledDates);
+            ViewBag.Reviews = _reviewService.GetCarReviews(id);
 
             return View(car);
         }
@@ -95,6 +99,10 @@ namespace car.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(CarCreateViewModel model)
         {
+            if (model.Id == 0)
+            {
+                return Content("Hata: ID 0 geliyor, bu yüzden güncellenecek araç bulunamıyor!");
+            }
             if (!ModelState.IsValid) return View(model);
 
             try
@@ -137,47 +145,129 @@ namespace car.Controllers
             }
             return "/images/cars/" + fileName;
         }
+        [HttpGet]
+        public IActionResult EditReview(int id)
+        {
+            var review = _reviewService.GetReview(id);
+            if (review == null) return NotFound();
 
+            // Güvenlik kontrolü
+            if (review.UserId != HttpContext.Session.GetInt32("UserId")) return Unauthorized();
+
+            return View(review);
+        }
+
+        [HttpPost]
+        public IActionResult EditReview(int id, int rating, string comment)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login", "Auth");
+
+            var review = _reviewService.GetReview(id);
+            if (review == null) return NotFound();
+
+            _reviewService.UpdateReview(id, userId.Value, rating, comment);
+
+            return RedirectToAction("MyReviews");
+        }
+        public IActionResult ViewCarReviews(int carId)
+        {
+            // 1. Aracı buluyoruz (Başlıkta marka/model göstermek ve geri dönüş linki için)
+            var car = _carService.GetCarById(carId);
+
+            if (car == null)
+            {
+                return NotFound();
+            }
+
+            var reviews = _reviewService.GetCarReviews(carId);
+
+            ViewBag.CarId = carId;
+            ViewBag.CarInfo = $"{car.Brand} {car.ModelName}";
+            ViewBag.CarImage = car.ImagePath;
+
+
+            return View(reviews);
+        }
+
+
+        public IActionResult DeleteReview(int id)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login", "Auth");
+
+
+            _reviewService.DeleteReview(id, userId.Value);
+
+            TempData["Success"] = "Yorumunuz kalıcı olarak silindi.";
+
+            return RedirectToAction("MyReviews");
+        }
+        public IActionResult MyReviews()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login", "Auth");
+
+            var reviews = _reviewService.GetUserReviews(userId.Value);
+            return View(reviews);
+        }
+
+        [HttpPost]
+        public IActionResult AddComment(int carId, int rating, string comment)
+        {
+
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login", "Auth");
+
+            _reviewService.PostReview(carId, userId.Value, rating, comment);
+
+            TempData["Success"] = "Değerlendirmeniz başarıyla kaydedildi, teşekkür ederiz!";
+
+            return RedirectToAction("Index", "User");
+        }
         private IActionResult RedirectByRole()
         {
             var role = HttpContext.Session.GetString("UserRole");
-            return role == "Admin" ? RedirectToAction("CarList", "Admin") : RedirectToAction("MyCars");
+
+            return role == "Admin"
+                ? RedirectToAction("CarList", "Admin")
+                : RedirectToAction("MyCars", "Car");
         }
         [HttpGet]
-public IActionResult AdminList(string search, CarFilter filter)
-{
-    var cars = _carService.FilterCars(filter);
+        public IActionResult AdminList(string search, CarFilter filter)
+        {
+            var cars = _carService.FilterCars(filter);
 
-    if (!string.IsNullOrEmpty(search))
-    {
-        search = search.ToLower();
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.ToLower();
 
-        cars = cars.Where(c =>
-            c.Brand.ToLower().Contains(search) ||
-            c.ModelName.ToLower().Contains(search) ||
-            c.Plate.ToLower().Contains(search)
-        ).ToList();
-    }
-    return View("~/Views/Admin/CarList.cshtml", cars);
-}
+                cars = cars.Where(c =>
+                    c.Brand.ToLower().Contains(search) ||
+                    c.ModelName.ToLower().Contains(search) ||
+                    c.Plate.ToLower().Contains(search)
+                ).ToList();
+            }
+            return View("~/Views/Admin/CarList.cshtml", cars);
+        }
 
-public IActionResult UserList(string search, CarFilter filter)
-{
-    var cars = _carService.FilterCars(filter);
+        public IActionResult UserList(string search, CarFilter filter)
+        {
+            var cars = _carService.FilterCars(filter);
 
-    if (!string.IsNullOrEmpty(search))
-    {
-        search = search.ToLower();
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.ToLower();
 
-        cars = cars.Where(c =>
-            c.Brand.ToLower().Contains(search) ||
-            c.ModelName.ToLower().Contains(search) ||
-            c.Plate.ToLower().Contains(search)
-        ).ToList();
-    }
+                cars = cars.Where(c =>
+                    c.Brand.ToLower().Contains(search) ||
+                    c.ModelName.ToLower().Contains(search) ||
+                    c.Plate.ToLower().Contains(search)
+                ).ToList();
+            }
 
-    return View("~/Views/User/AvailableCars.cshtml", cars);
-}
+            return View("~/Views/User/AvailableCars.cshtml", cars);
+        }
 
     }
 }

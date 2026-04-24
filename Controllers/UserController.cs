@@ -63,7 +63,6 @@ namespace car.Controllers
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToAction("Login", "Auth");
 
-            // Servisten kullanıcının tüm taleplerini çekiyoruz
             var myRequests = _userService.GetMyRentalRequests(userId.Value);
 
             if (filter == "aktif")

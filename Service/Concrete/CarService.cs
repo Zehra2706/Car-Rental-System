@@ -119,7 +119,9 @@ namespace car.Service.Concrete
         public void UpdateCar(CarCreateViewModel model)
         {
             var car = _carRepository.GetCarById(model.Id);
+
             if (car == null) return;
+
 
             car.Brand = model.Brand;
             car.ModelName = model.ModelName;
@@ -127,12 +129,17 @@ namespace car.Service.Concrete
             car.Color = model.Color;
             car.Location = model.Location;
             car.Description = model.Description;
-            car.Plate = model.Plate;
             car.IsInsured = model.IsInsured;
 
-            if (!string.IsNullOrEmpty(model.ImagePath))
-                car.ImagePath = model.ImagePath;
+            if (!string.IsNullOrWhiteSpace(model.Plate))
+            {
+                car.Plate = model.Plate;
+            }
 
+            if (!string.IsNullOrEmpty(model.ImagePath))
+            {
+                car.ImagePath = model.ImagePath;
+            }
             var feature = car.CarFeatures?.FirstOrDefault();
             if (feature != null)
             {
@@ -142,6 +149,19 @@ namespace car.Service.Concrete
                 feature.motorInsurance = model.MotorInsurance;
                 feature.IsChauffeured = model.IsChauffeured;
             }
+            else
+            {
+                var newFeature = new carFeature.Models.CarFeature
+                {
+                    CarId = car.Id,
+                    engineSize = model.EngineSize,
+                    Transmission = model.Transmission,
+                    fuelType = model.FuelType,
+                    motorInsurance = model.MotorInsurance,
+                    IsChauffeured = model.IsChauffeured
+                };
+                _carRepository.AddCarFeature(newFeature);
+            }
 
             var price = car.Prices?.FirstOrDefault();
             if (price != null)
@@ -150,15 +170,29 @@ namespace car.Service.Concrete
                 price.weekly = (float)model.WeeklyPrice;
                 price.monthly = (float)model.MonthlyPrice;
             }
+            else
+            {
+                var newPrice = new price.Models.Price
+                {
+                    CarId = car.Id,
+                    daily = (float)model.DailyPrice,
+                    weekly = (float)model.WeeklyPrice,
+                    monthly = (float)model.MonthlyPrice
+                };
+                _carRepository.AddPrice(newPrice);
+            }
 
             _carRepository.SaveChanges();
         }
-
-
+        public Car GetCarById(int id)
+        {
+            return _carRepository.GetCarById(id);
+        }
         public List<Car> GetAllCarsForUser()
         {
             return _carRepository.GetAllCars();
         }
+
 
         public (decimal TotalPrice, decimal DepositAmount) CalculateRentalFee(int carId, DateTime start, DateTime end)
         {
@@ -191,8 +225,9 @@ namespace car.Service.Concrete
         }
         public List<Car> FilterCars(CarFilter filter)
         {
-             return _carRepository.FilterCars(filter);
+            return _carRepository.FilterCars(filter);
         }
+
 
     }
 }

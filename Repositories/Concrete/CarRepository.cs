@@ -1,8 +1,8 @@
+using Microsoft.EntityFrameworkCore;
 using car.Data;
 using car.Models;
 using Car_reservation_automation_system.Repositories.Interfaces;
 using carFeature.Models;
-using Microsoft.EntityFrameworkCore;
 using price.Models;
 using rental.Models;
 using user.Models;
@@ -78,11 +78,11 @@ public class CarRepository : ICarRepository
             .ToList();
     }
 
-    public Car GetCarById(int id)
+    public Car? GetCarById(int id)
     {
         return _context.Cars
-            .Include(c => c.Prices)
             .Include(c => c.CarFeatures)
+            .Include(c => c.Prices)
             .FirstOrDefault(c => c.Id == id);
     }
     public List<Car> GetCarsByEmail(string email)
@@ -123,104 +123,104 @@ public class CarRepository : ICarRepository
             .ToList();
     }
 
-   public List<Car> FilterCars(CarFilter filter)
-{
-    var query = _context.Cars
-        .Include(c => c.CarFeatures)
-        .Include(c => c.Prices) 
-        .AsQueryable();
-
-    if (!string.IsNullOrEmpty(filter.Brand))
-        query = query.Where(c => c.Brand.ToLower().Contains(filter.Brand.ToLower()));
-    
-    if (!string.IsNullOrEmpty(filter.ModelName))
-        query = query.Where(c => c.ModelName.ToLower().Contains(filter.ModelName.ToLower()));
-
-    if (!string.IsNullOrEmpty(filter.Location))
-        query = query.Where(c => c.Location == filter.Location);
-
-    if (filter.MinYear.HasValue)
-        query = query.Where(c => c.ModelYear >= filter.MinYear.Value);
-
-    if (filter.MaxYear.HasValue)
-        query = query.Where(c => c.ModelYear <= filter.MaxYear.Value);
-
-    if (filter.Transmission.HasValue)
+    public List<Car> FilterCars(CarFilter filter)
     {
-        query = query.Where(c =>
-            c.CarFeatures != null &&
-            c.CarFeatures.Any(f => f.Transmission == filter.Transmission.Value));
-    }
-    if (filter.FuelType.HasValue)
-    {
-        query = query.Where(c =>
-            c.CarFeatures != null &&
-            c.CarFeatures.Any(f => f.fuelType == filter.FuelType.Value));
+        var query = _context.Cars
+            .Include(c => c.CarFeatures)
+            .Include(c => c.Prices)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(filter.Brand))
+            query = query.Where(c => c.Brand.ToLower().Contains(filter.Brand.ToLower()));
+
+        if (!string.IsNullOrEmpty(filter.ModelName))
+            query = query.Where(c => c.ModelName.ToLower().Contains(filter.ModelName.ToLower()));
+
+        if (!string.IsNullOrEmpty(filter.Location))
+            query = query.Where(c => c.Location == filter.Location);
+
+        if (filter.MinYear.HasValue)
+            query = query.Where(c => c.ModelYear >= filter.MinYear.Value);
+
+        if (filter.MaxYear.HasValue)
+            query = query.Where(c => c.ModelYear <= filter.MaxYear.Value);
+
+        if (filter.Transmission.HasValue)
+        {
+            query = query.Where(c =>
+                c.CarFeatures != null &&
+                c.CarFeatures.Any(f => f.Transmission == filter.Transmission.Value));
+        }
+        if (filter.FuelType.HasValue)
+        {
+            query = query.Where(c =>
+                c.CarFeatures != null &&
+                c.CarFeatures.Any(f => f.fuelType == filter.FuelType.Value));
+        }
+
+        if (filter.IsChauffeured.HasValue)
+        {
+            query = query.Where(c =>
+                c.CarFeatures != null &&
+                c.CarFeatures.Any(f => f.IsChauffeured == filter.IsChauffeured.Value));
+        }
+        if (filter.MinPrice.HasValue)
+        {
+            query = query.Where(c =>
+                c.Prices.Any(p => p.daily >= filter.MinPrice.Value));
+        }
+
+        if (filter.MaxPrice.HasValue)
+        {
+            query = query.Where(c =>
+                c.Prices.Any(p => p.daily <= filter.MaxPrice.Value));
+        }
+        if (filter.MinPrice.HasValue)
+        {
+            query = query.Where(c =>
+                c.Prices.Any(p => p.daily >= filter.MinPrice.Value));
+        }
+        if (filter.MinPrice.HasValue)
+        {
+            query = query.Where(c => c.Prices.Any(p =>
+                (filter.PriceType == "weekly" && p.weekly >= filter.MinPrice) ||
+                (filter.PriceType == "monthly" && p.monthly >= filter.MinPrice) ||
+                (filter.PriceType == "daily" && p.daily >= filter.MinPrice)
+            ));
+        }
+
+        if (filter.MaxPrice.HasValue)
+        {
+            query = query.Where(c => c.Prices.Any(p =>
+                (filter.PriceType == "weekly" && p.weekly <= filter.MaxPrice) ||
+                (filter.PriceType == "monthly" && p.monthly <= filter.MaxPrice) ||
+                (filter.PriceType == "daily" && p.daily <= filter.MaxPrice)
+            ));
+        }
+        return query.ToList();
     }
 
-    if (filter.IsChauffeured.HasValue)
+    public List<Car> SearchCars(string search)
     {
-        query = query.Where(c =>
-            c.CarFeatures != null &&
-            c.CarFeatures.Any(f => f.IsChauffeured == filter.IsChauffeured.Value));
-    }
-    if (filter.MinPrice.HasValue)
-    {
-        query = query.Where(c => 
-            c.Prices.Any(p => p.daily >= filter.MinPrice.Value));
-    }
-
-    if (filter.MaxPrice.HasValue)
-    {
-        query = query.Where(c => 
-            c.Prices.Any(p => p.daily <= filter.MaxPrice.Value));
-    }
-    if (filter.MinPrice.HasValue)
-    {
-        query = query.Where(c => 
-            c.Prices.Any(p => p.daily >= filter.MinPrice.Value));
-    }
-    if (filter.MinPrice.HasValue)
-    {
-        query = query.Where(c => c.Prices.Any(p =>
-            (filter.PriceType == "weekly" && p.weekly >= filter.MinPrice) ||
-            (filter.PriceType == "monthly" && p.monthly >= filter.MinPrice) ||
-            (filter.PriceType == "daily" && p.daily >= filter.MinPrice)
-        ));
+        return _context.Cars
+            .Include(c => c.Prices)
+            .Where(c =>
+                c.Brand.Contains(search) ||
+                c.ModelName.Contains(search) ||
+                c.Plate.Contains(search))
+            .ToList();
     }
 
-    if (filter.MaxPrice.HasValue)
+    public User GetOwnerByCarId(int carId)
     {
-        query = query.Where(c => c.Prices.Any(p =>
-            (filter.PriceType == "weekly" && p.weekly <= filter.MaxPrice) ||
-            (filter.PriceType == "monthly" && p.monthly <= filter.MaxPrice) ||
-            (filter.PriceType == "daily" && p.daily <= filter.MaxPrice)
-        ));
+        var car = _context.Cars.FirstOrDefault(x => x.Id == carId);
+
+        if (car == null)
+            return null;
+
+        return _context.Users
+            .Include(u => u.UserInfo)
+            .FirstOrDefault(u => u.Id == car.UserId);
     }
-    return query.ToList();
-}
-
-public List<Car> SearchCars(string search)
-{
-    return _context.Cars
-        .Include(c => c.Prices)
-        .Where(c =>
-            c.Brand.Contains(search) ||
-            c.ModelName.Contains(search) ||
-            c.Plate.Contains(search))
-        .ToList();
-}
-
-public User GetOwnerByCarId(int carId)
-{
-    var car = _context.Cars.FirstOrDefault(x => x.Id == carId);
-
-    if (car == null)
-        return null;
-
-    return _context.Users
-        .Include(u => u.UserInfo)
-        .FirstOrDefault(u => u.Id == car.UserId);
-}
 
 }

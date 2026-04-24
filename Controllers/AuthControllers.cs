@@ -74,11 +74,10 @@ public class AuthController : Controller
         // ==========================================
         // 2. SESSION (GEÇİCİ HAFIZA) İŞLEMLERİ
         // ==========================================
-        // Mevcut projenin diğer yerlerinde (örn. iyzico sepeti) sorun çıkmasın diye Session'a da yazıyoruz
         HttpContext.Session.SetInt32("UserId", user.Id);
         HttpContext.Session.SetString("UserEmail", user.UserInfo.Email);
         HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
-
+        HttpContext.Session.SetString("UserName", user.Name);
         // Yönlendirme (Rol bazlı)
         if (user.UserRole == UserEntity.Role.Admin)
         {
@@ -138,56 +137,56 @@ public class AuthController : Controller
     }
 
 
-[HttpPost]
-public IActionResult ForgotPassword(string email)
-{
-    var user = _userService.GetByEmail(email);
-
-    if (user == null)
+    [HttpPost]
+    public IActionResult ForgotPassword(string email)
     {
-        ViewBag.Error = "Bu email kayıtlı değil";
+        var user = _userService.GetByEmail(email);
+
+        if (user == null)
+        {
+            ViewBag.Error = "Bu email kayıtlı değil";
+            return View();
+        }
+
+        _userService.SendPasswordResetEmail(email);
+
+        ViewBag.Message = "Şifre sıfırlama maili gönderildi";
         return View();
     }
-
-    _userService.SendPasswordResetEmail(email);
-
-    ViewBag.Message = "Şifre sıfırlama maili gönderildi";
-    return View();
-}
-[HttpGet]
-public IActionResult ResetPassword(string token, string password, string confirmPassword)
-{
-    var user = _userService.GetUserByResetToken(token);
-    
-    if (password != confirmPassword)
+    [HttpGet]
+    public IActionResult ResetPassword(string token, string password, string confirmPassword)
     {
-        ViewBag.Error = "Şifreler uyuşmuyor!";
+        var user = _userService.GetUserByResetToken(token);
+
+        if (password != confirmPassword)
+        {
+            ViewBag.Error = "Şifreler uyuşmuyor!";
+            ViewBag.Token = token;
+            return View();
+        }
+
+        if (user == null)
+            return Content("Link geçersiz veya süresi dolmuş");
+
         ViewBag.Token = token;
         return View();
     }
-    
-    if (user == null)
-        return Content("Link geçersiz veya süresi dolmuş");
 
-    ViewBag.Token = token;
-    return View();
-}
-
-[HttpPost]
-public IActionResult ResetPassword(string token, string password)
-{
-    if (string.IsNullOrEmpty(password))
+    [HttpPost]
+    public IActionResult ResetPassword(string token, string password)
     {
-        return Content("Şifre boş olamaz");
+        if (string.IsNullOrEmpty(password))
+        {
+            return Content("Şifre boş olamaz");
+        }
+        try
+        {
+            _userService.ResetPassword(token, password);
+            return RedirectToAction("Login");
+        }
+        catch
+        {
+            return Content("Bir hata oluştu");
+        }
     }
-    try
-    {
-        _userService.ResetPassword(token, password);
-        return RedirectToAction("Login");
-    }
-    catch
-    {
-        return Content("Bir hata oluştu");
-    }
-}
 }
