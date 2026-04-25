@@ -12,6 +12,12 @@ public interface INotificationService
     void RentalFinished(User user, Rental rental);
 
     void OwnerRentalFinished(User owner, Rental rental);
+    void LatePenalty(User user, Rental rental);
 
+    void RentalEndingSoon(User user, Rental rental);
+
+    void WelcomeMail(User user);
+
+    void AccountDeleted(User user);
 
 }

@@ -15,11 +15,14 @@ public class AuthController : Controller
 {
     private readonly IUserService _userService;
     private readonly IConfiguration _configuration;
+    private readonly INotificationService _notificationService;
 
-    public AuthController(IUserService userService, IConfiguration configuration)
+
+    public AuthController(IUserService userService, IConfiguration configuration, INotificationService notificationService)
     {
         _userService = userService;
         _configuration = configuration;
+        _notificationService = notificationService;
     }
 
     [HttpGet]
@@ -122,6 +125,8 @@ public class AuthController : Controller
         {
             _userService.Register(model);
             TempData["Success"] = "Kayıt başarılı! Lütfen giriş yapınız.";
+            var user = _userService.GetByEmail(model.Email);
+            _notificationService.WelcomeMail(user);     
             return RedirectToAction("Login");
         }
         catch (Exception ex)

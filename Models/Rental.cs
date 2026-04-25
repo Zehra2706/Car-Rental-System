@@ -25,5 +25,7 @@ namespace rental.Models
         public int Deposit { get; set; }
         public bool IsReturned { get; set; } = false;
         public string Status { get; set; } = "OnayBekliyor";
+
+        public bool ReminderSent { get; set; } = false;
     }
 }

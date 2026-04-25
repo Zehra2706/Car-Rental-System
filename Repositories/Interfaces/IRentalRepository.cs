@@ -17,5 +17,8 @@ namespace Car_reservation_automation_system.Repositories.Interfaces
         void Update(Rental rental);
         void GetRentalById(int rentalId);
         User GetUserByRental(int rentalId);
+        List<Rental> GetAllActiveRentals();
+        bool HasActiveRentalForCar(int carId);
+        bool HasActiveRentalForUser(int userId);
     }
 }

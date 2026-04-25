@@ -32,4 +32,5 @@ void ResetPassword(string token, string newPassword);
 void SendPasswordResetEmail(string email);
 
 User GetById(int id);   
+bool CanDeleteUser(int userId);
 }

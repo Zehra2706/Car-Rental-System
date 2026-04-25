@@ -124,10 +124,19 @@ namespace car.Controllers
         }
 
         // --- 6. ARAÇ SİLME ---
-        [HttpGet]
+        [HttpPost]
         public IActionResult Delete(int id)
         {
-            _carService.DeleteCar(id);
+            try
+            {
+                _carService.DeleteCar(id);
+                TempData["Success"] = "Araç başarıyla silindi.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
             return RedirectToAction("MyCars");
         }
 

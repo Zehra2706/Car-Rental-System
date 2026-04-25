@@ -6,10 +6,12 @@ using userInfo.Models;
 public class UserRepository : IUserRepository
 {
     private readonly ApplicationDbContext _context;
-
-    public UserRepository(ApplicationDbContext context)
+        private readonly INotificationService _notificationService;
+ 
+    public UserRepository(ApplicationDbContext context, INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public void AddUser(User user)
@@ -67,17 +69,55 @@ public class UserRepository : IUserRepository
             .Include(x => x.UserInfo)
             .ToList();
     }
+public void DeleteUser(int userId)
+{
+    var user = _context.Users
+        .Include(x => x.UserInfo)
+        .Include(x => x.UserConnections)
+        .Include(x => x.Licence)
+        .FirstOrDefault(x => x.Id == userId);
 
-    public void DeleteUser(int id)
-    {
-        var user = _context.Users.Find(id);
-        if (user != null)
-        {
-            _context.Users.Remove(user);
-            _context.SaveChanges();
-        }
-    }
+    if (user == null)
+        throw new Exception("Kullanıcı bulunamadı");
 
+    // kullanıcının arabaları
+    var cars = _context.Cars
+        .Where(c => c.UserId == userId)
+        .ToList();
+
+    var carIds = cars.Select(c => c.Id).ToList();
+
+    // arabaya ait veriler
+    var prices = _context.Prices.Where(p => carIds.Contains(p.CarId));
+    var features = _context.CarFeatures.Where(f => carIds.Contains(f.CarId));
+    var carRentals = _context.Rentals.Where(r => carIds.Contains(r.CarId));
+    var carReviews = _context.Reviews.Where(r => carIds.Contains(r.CarId));
+
+    // kullanıcının kendi kiralamaları
+    var userRentals = _context.Rentals.Where(r => r.UserId == userId);
+
+    // kullanıcının yaptığı yorumlar
+    var userReviews = _context.Reviews.Where(r => r.UserId == userId);
+
+    // silme işlemleri
+    _context.Reviews.RemoveRange(carReviews);
+    _context.Reviews.RemoveRange(userReviews);
+
+    _context.Rentals.RemoveRange(carRentals);
+    _context.Rentals.RemoveRange(userRentals);
+
+    _context.Prices.RemoveRange(prices);
+    _context.CarFeatures.RemoveRange(features);
+
+    _context.Cars.RemoveRange(cars);
+
+    _context.Users.Remove(user);
+
+    _context.SaveChanges();
+
+    _notificationService.AccountDeleted(user);
+}
+        
     public void Save()
     {
         throw new NotImplementedException();

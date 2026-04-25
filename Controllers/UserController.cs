@@ -150,5 +150,34 @@ namespace car.Controllers
             return View(cars);
         }
 
+        public IActionResult Dashboard()
+        {
+            _rentalService.CheckLateRentals();
+            _rentalService.CheckEndingSoonRentals();
+
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult DeleteAccount()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (userId == null)
+                return RedirectToAction("Login", "Auth");
+
+            if (!_userService.CanDeleteUser(userId.Value))
+            {
+                TempData["Error"] = "Aktif kiralama veya kirada aracınız olduğu için hesabınız silinemez.";
+                return RedirectToAction("Index");
+            }
+
+            _userService.DeleteUser(userId.Value);
+
+            HttpContext.Session.Clear();
+
+            return RedirectToAction("Index", "Home");
+        }
+
     }
 }

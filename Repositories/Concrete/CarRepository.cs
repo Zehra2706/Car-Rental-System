@@ -38,17 +38,22 @@ public class CarRepository : ICarRepository
 
     public void DeleteCar(int id)
     {
-        var car = _context.Cars.Find(id);
+        var car = _context.Cars
+            .Include(c => c.CarFeatures)
+            .Include(c => c.Prices)
+            .Include(c => c.Rentals)
+            .Include(c => c.Reviews)
+            .FirstOrDefault(c => c.Id == id);
 
         if (car != null)
         {
-            var features = _context.CarFeatures.Where(x => x.CarId == id);
-            _context.CarFeatures.RemoveRange(features);
-
-            var prices = _context.Prices.Where(x => x.CarId == id);
-            _context.Prices.RemoveRange(prices);
+            _context.CarFeatures.RemoveRange(car.CarFeatures);
+            _context.Prices.RemoveRange(car.Prices);
+            _context.Rentals.RemoveRange(car.Rentals);
+            _context.Reviews.RemoveRange(car.Reviews);
 
             _context.Cars.Remove(car);
+
             _context.SaveChanges();
         }
     }

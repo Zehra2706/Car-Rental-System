@@ -2,6 +2,7 @@ using Car_reservation_automation_system.Repositories.Interfaces;
 using Car_reservation_automation_system.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static user.Models.User;
 using UserModel = user.Models.User;
 [Authorize(Roles = "Admin")]
 public class AdminController : Controller
@@ -83,13 +84,22 @@ public class AdminController : Controller
 
         if (user.UserInfo.Email == "admin@gmail.com")
         {
-            TempData["Error"] = "İlk admin silinemez!";
+            TempData["Error"] = "Sistem yöneticisi silinemez!";
             return RedirectToAction("AdminList");
         }
 
+       if (!_userService.CanDeleteUser(id))
+        {
+            TempData["Error"] = "Kullanıcının aktif kiralaması veya kirada aracı var.";
+            return RedirectToAction("UserList");
+        }
+        var role = user.UserRole;
         _userService.DeleteUser(id);
 
-        return RedirectToAction("AdminList");
+        if (role == Role.Admin)
+            return RedirectToAction("AdminList");
+        else
+            return RedirectToAction("UserList");
     }
 
     [HttpPost]
@@ -134,9 +144,18 @@ public class AdminController : Controller
 
     public IActionResult DeleteCar(int id)
     {
-        _carService.DeleteCar(id);
+        try
+        {
+            _carService.DeleteCar(id);
+            TempData["Success"] = "Araç başarıyla silindi.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
         return RedirectToAction("CarList");
-    }
+    }   
 
     public IActionResult AddCar()
     {

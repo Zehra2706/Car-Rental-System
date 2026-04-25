@@ -152,8 +152,91 @@ Kiralama başarıyla sonlandırıldı ve ödeme işlemleri tamamlandı.
 
     _emailService.SendEmail(owner.UserInfo.Email, subject, body);
 }
+public void LatePenalty(User user, Rental rental)
+{
+    var subject = "Kiralama Süresi Geçti";
 
+    var body = $@"
+    <h2>Kiralama Süreniz Geçmiştir</h2>
 
+    <p>Merhaba {user.Name},</p>
 
+    <p>{rental.Car.Brand} {rental.Car.ModelName} aracının kiralama süresi sona ermiştir.</p>
+
+    <p>Planlanan iade tarihi: {rental.ReturnDate}</p>
+
+    <p>Lütfen aracı en kısa sürede iade ediniz. Gecikme durumunda ek ücret uygulanacaktır.</p>
+    ";
+
+    if(user?.UserInfo?.Email == null)
+        return;
+
+    _emailService.SendEmail(user.UserInfo.Email, subject, body);
+}
+
+public void RentalEndingSoon(User user, Rental rental)
+{
+    var subject = "Kiralamanız Yakında Sona Eriyor";
+
+    var body = $@"
+    <h2>Kiralama Süresi Yakında Bitiyor</h2>
+
+    <p>Merhaba {user.Name},</p>
+
+    <p>{rental.Car.Brand} {rental.Car.ModelName} aracının kiralama süresi
+    <b>1 saat sonra</b> sona erecektir.</p>
+
+    <p>Planlanan iade zamanı: {rental.ReturnDate}</p>
+
+    <p>Lütfen gecikme yaşamamak için aracı zamanında iade edin.</p>
+    ";
+
+    if (user?.UserInfo?.Email == null)
+        return;
+
+    _emailService.SendEmail(user.UserInfo.Email, subject, body);
+}
+
+public void WelcomeMail(User user)
+{
+    var subject = "Araç Kiralama Sistemine Hoş Geldiniz";
+
+    var body = $@"
+    <h2>Hoş Geldiniz {user.Name}</h2>
+
+    <p>Hesabınız başarıyla oluşturuldu.</p>
+
+    <p>Artık platformumuz üzerinden araç kiralayabilir veya aracınızı kiraya verebilirsiniz.</p>
+
+    <p>İyi yolculuklar dileriz 🚗</p>
+    ";
+
+    if (user?.UserInfo?.Email == null)
+        return;
+
+    _emailService.SendEmail(user.UserInfo.Email, subject, body);
+}
+
+public void AccountDeleted(User user)
+{
+    var subject = "Hesabınız Silindi";
+
+    var body = $@"
+    <h2>Hesabınız Silinmiştir</h2>
+
+    <p>Merhaba {user.Name},</p>
+
+    <p>Araç Kiralama Sistemindeki hesabınız başarıyla silinmiştir.</p>
+
+    <p>Eğer bu işlemi siz yapmadıysanız lütfen bizimle iletişime geçin.</p>
+
+    <p>Platformumuzu kullandığınız için teşekkür ederiz.</p>
+    ";
+
+    if (user?.UserInfo?.Email == null)
+        return;
+
+    _emailService.SendEmail(user.UserInfo.Email, subject, body);
+}
 
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using car.Data;
 
@@ -11,9 +12,11 @@ using car.Data;
 namespace car.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260425122410_CarRentalRelation")]
+    partial class CarRentalRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -415,7 +418,7 @@ namespace car.Migrations
             modelBuilder.Entity("car.Models.Review", b =>
                 {
                     b.HasOne("car.Models.Car", "Car")
-                        .WithMany("Reviews")
+                        .WithMany()
                         .HasForeignKey("CarId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -500,8 +503,6 @@ namespace car.Migrations
                     b.Navigation("Prices");
 
                     b.Navigation("Rentals");
-
-                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("user.Models.User", b =>

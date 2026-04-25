@@ -129,12 +129,13 @@ namespace car.Service.Concrete
         }
 
 
-        public List<rental.Models.Rental> GetIncomingRequests(int ownerId)
+        public List<Rental> GetIncomingRequests(int userId)
         {
             return _context.Rentals
                 .Include(r => r.Car)
-                .Where(r => r.Car.UserId == ownerId)
-                .OrderByDescending(r => r.Date)
+                .Include(r => r.User)
+                .ThenInclude(u => u.UserInfo)
+                .Where(r => r.Car.UserId == userId)
                 .ToList();
         }
 
@@ -248,8 +249,14 @@ namespace car.Service.Concrete
         }
 
         public List<User> GetAllUsers() => _userRepository.GetAllUsers();
-        public void DeleteUser(int id) => _userRepository.DeleteUser(id);
+        public void DeleteUser(int userId)
+        {
+                if (!CanDeleteUser(userId))
+                throw new Exception("Kullanıcının aktif kiralaması veya kirada aracı var.");
 
+
+            _userRepository.DeleteUser(userId);
+        }
         public void AddUser(AdminCreateUserViewModel model)
         {
             if (_userRepository.EmailExists(model.Email)) throw new Exception("Bu email zaten kayıtlı");
@@ -409,5 +416,33 @@ namespace car.Service.Concrete
                 .Include(u => u.UserConnections)
                 .FirstOrDefault(u => u.Id == id);
         }
+
+        public bool CanDeleteUser(int userId)
+        {
+            // kullanıcının kendi kiralamaları
+            var activeRentals = _context.Rentals
+                .Any(r => r.UserId == userId &&
+                (r.Status == "Onaylandı" || r.Status == "OnayBekliyor"));
+
+            if (activeRentals)
+                return false;
+
+            // kullanıcının arabaları
+            var userCarIds = _context.Cars
+                .Where(c => c.UserId == userId)
+                .Select(c => c.Id)
+                .ToList();
+
+            // bu arabaların aktif kiralamaları
+            var carActiveRentals = _context.Rentals
+                .Any(r => userCarIds.Contains(r.CarId) &&
+                (r.Status == "Onaylandı" || r.Status == "OnayBekliyor"));
+
+            if (carActiveRentals)
+                return false;
+
+            return true;
+        }
+
     }
 }

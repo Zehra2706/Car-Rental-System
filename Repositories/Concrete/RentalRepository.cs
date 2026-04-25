@@ -91,5 +91,32 @@ namespace Car_reservation_automation_system.Repositories.Concrete
         {
             throw new NotImplementedException();
         }
+
+public List<Rental> GetAllActiveRentals()
+{
+    return _context.Rentals
+        .Include(r => r.Car)
+        .Include(r => r.User)
+        .ThenInclude(u => u.UserInfo)
+        .Where(r => r.Status == "Aktif")
+        .ToList();
+}
+public bool HasActiveRentalForCar(int carId)
+{
+    return _context.Rentals.Any(r =>
+        r.CarId == carId &&
+        (r.Status == "Onaylandı" || r.Status == "Aktif"));
+}
+public bool HasActiveRentalForUser(int userId)
+{
+    return _context.Rentals.Any(r =>
+        r.UserId == userId &&
+        (r.Status == "Onaylandı" || 
+         r.Status == "Aktif" || 
+         r.Status == "OnayBekliyor") &&
+        !r.IsReturned
+    );
+}
+
     }
 }

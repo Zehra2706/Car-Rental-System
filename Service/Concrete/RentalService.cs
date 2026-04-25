@@ -153,6 +153,10 @@ public void CancelRentalRequest(int rentalId)
     }
         public void UpdateRental(Rental rental)
         {
+        
+        if(!CanUserRentCar(rental.UserId))
+            throw new Exception("User already has active rental");
+
             _rentalRepo.Update(rental);
             _rentalRepo.SaveChanges();
 
@@ -225,5 +229,55 @@ public void RejectedRental(int rentalId)
 
     _notificationService.RentalRejected(user, rental);
 }
+
+public void CheckLateRentals()
+{
+    var rentals = _rentalRepo.GetAllActiveRentals();
+
+    foreach (var rental in rentals)
+    {
+        if (DateTime.Now > rental.ReturnDate && rental.Status == "Aktif")
+        {
+            rental.Status = "Gecikmis";
+
+            _rentalRepo.Update(rental);
+            _rentalRepo.SaveChanges();
+
+            var user = _userService.TGetById(rental.UserId);
+
+            _notificationService.LatePenalty(user, rental);
+        }
+    }
+}
+
+public void CheckEndingSoonRentals()
+{
+    var rentals = _rentalRepo.GetAllActiveRentals();
+
+    foreach (var rental in rentals)
+    {
+        var timeLeft = rental.ReturnDate - DateTime.Now;
+
+        if (timeLeft.TotalMinutes <= 60 && !rental.ReminderSent)
+        {
+            var user = _userService.TGetById(rental.UserId);
+
+            _notificationService.RentalEndingSoon(user, rental);
+
+            rental.ReminderSent = true;
+
+            _rentalRepo.Update(rental);
+            _rentalRepo.SaveChanges();
+        }
+    }
+}
+public bool CanUserRentCar(int userId)
+{
+    return !_rentalRepo.HasActiveRentalForUser(userId);
+}
+
+
+
+
     }
 }

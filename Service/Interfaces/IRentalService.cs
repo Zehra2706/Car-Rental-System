@@ -25,5 +25,9 @@ namespace Car_reservation_automation_system.Service.Interfaces
         void RejectedRental(int rentalId);
 
         (double total, double deposit) CalculateHourlyPrice(int carId, double hours);
+
+        void CheckLateRentals();
+        void CheckEndingSoonRentals();
+        bool CanUserRentCar(int userId);
     }
 }

@@ -11,10 +11,12 @@ namespace car.Service.Concrete
     public class CarService : ICarService
     {
         private readonly ICarRepository _carRepository;
+        private readonly IRentalRepository _rentalRepository;
 
-        public CarService(ICarRepository carRepository)
+        public CarService(ICarRepository carRepository, IRentalRepository rentalRepository)
         {
             _carRepository = carRepository;
+            _rentalRepository = rentalRepository;
         }
 
         public List<Car> GetUserCars(string userEmail)
@@ -31,10 +33,14 @@ namespace car.Service.Concrete
         {
             return _carRepository.GetAllCars();
         }
-
-        public void DeleteCar(int id)
+        public void DeleteCar(int carId)
         {
-            _carRepository.DeleteCar(id);
+            if (_rentalRepository.HasActiveRentalForCar(carId))
+            {
+                throw new Exception("Bu araç için aktif veya onaylanmış kiralama bulunduğu için silinemez.");
+            }
+
+            _carRepository.DeleteCar(carId);
         }
         public void AddNewCar(CarCreateViewModel model)
         {
