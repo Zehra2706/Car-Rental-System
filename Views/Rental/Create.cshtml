@@ -188,222 +188,309 @@
                                     </div>
                                 </div>
                             </div>
-
-                            @* --- SAĞ SÜTUN: REZERVASYON FORMU --- *@
                             <div class="col-lg-3">
                                 <div class="card shadow-lg border-0 rounded-4 h-100 border-top border-5 border-primary">
                                     <div class="card-body p-4">
-                                        <h5 class="fw-bold mb-4 text-center text-primary">🕒 Rezervasyon</h5>
 
-                                        <form asp-controller="Rental" asp-action="StartPayment" method="post">
+                                        <h5 class="fw-bold mb-4 text-center text-primary">
+                                            🕒 Rezervasyon
+                                        </h5>
+
+                                        <form asp-controller="Rental" asp-action="StartPayment" method="post" id="rentalForm">
+
                                             <input type="hidden" name="CarId" value="@car?.Id" id="carIdField" />
-                        
-                                            @* BURADAKİ GİZLİ ALANLARA VERİ JAVASCRIPT'TEN GELECEK *@
+
+                                            <!-- Gizli alanlar -->
                                             <input type="hidden" id="hiddenForecast" name="Forecast" value="0" />
                                             <input type="hidden" id="hiddenDeposit" name="Deposit" value="0" />
+                                            <input type="hidden" name="IsContractApproved" id="isApprovedHidden" value="false" />
 
+                                            <!-- ALIŞ TARİHİ -->
                                             <div class="mb-3">
-                                                <label class="form-label small fw-bold text-muted">ALIŞ TARİHİ & SAATİ</label>
+                                                <label class="form-label small fw-bold text-muted">ALIŞ TARİHİ</label>
                                                 <input type="text" id="startDate" name="Date"
                                                        class="form-control bg-white shadow-sm border-primary rounded-3"
                                                        placeholder="Tarih seç..." readonly required>
                                             </div>
 
+                                            <!-- İADE TARİHİ -->
                                             <div class="mb-4">
-                                                <label class="form-label small fw-bold text-muted">İADE TARİHİ & SAATİ</label>
+                                                <label class="form-label small fw-bold text-muted">İADE TARİHİ</label>
                                                 <input type="text" id="endDate" name="ReturnDate"
                                                        class="form-control bg-white shadow-sm border-primary rounded-3"
                                                        placeholder="Önce alış seçin..." readonly required disabled>
                                             </div>
 
+                                            <!-- FİYAT ÖZETİ -->
                                             <div id="priceSummary"
                                                  class="p-3 bg-primary bg-opacity-10 rounded-4 mb-4 d-none border border-primary border-opacity-25 shadow-sm">
+
                                                 <div class="d-flex justify-content-between small mb-1 text-dark">
                                                     <span>Kiralama Süresi:</span>
-                                                    <span class="fw-bold" id="daysCount">0 Saat</span>
+                                                    <span class="fw-bold" id="daysCount">0 Gün</span>
                                                 </div>
+
                                                 <div class="d-flex justify-content-between small mb-2 text-dark border-bottom pb-2">
                                                     <span>Kira Bedeli:</span>
                                                     <span class="fw-bold text-primary" id="totalPrice">0 TL</span>
                                                 </div>
+
                                                 <div class="d-flex justify-content-between text-danger fw-bold pt-1">
-                                                    <span style="font-size:0.9rem;">Ödenecek Depozito:</span>
+                                                    <span style="font-size:0.9rem;">Depozito:</span>
                                                     <span id="depositAmount">0 TL</span>
                                                 </div>
                                             </div>
 
-                                            <button type="submit" id="submitBtn"
-                                                    class="btn btn-primary btn-lg w-100 py-3 fw-bold rounded-pill shadow" disabled>
-                                                <i class="bi bi-credit-card-fill me-2"></i> Ödemeye Başla
+                                            <!-- BUTON -->
+                                            <button type="button" id="submitBtn"
+                                                    class="btn btn-primary btn-lg w-100 py-3 fw-bold rounded-pill shadow" disabled
+                                                    data-bs-toggle="modal" data-bs-target="#contractModal">
+
+                                                <i class="bi bi-file-earmark-text me-2"></i>
+                                                Sözleşmeyi Gör
                                             </button>
+
                                         </form>
                                     </div>
                                 </div>
                             </div>
-
-                        </div>
-
-                        @section Scripts {
-                            <script>
-                                const disabledRangesRaw = @Html.Raw(ViewBag.DisabledDates ?? "[]");
-                                const carId = document.getElementById('carIdField')?.value;
-
-                                // Tarihleri Flatpickr'ın anlayacağı JS formatına çeviriyoruz
-                                const parsedDisabledDates = disabledRangesRaw.map(r => ({
-                                from: new Date(r.from),
-                                to: new Date(r.to)
-                                }));
-
-                                function isDateDisabled(date) {
-                                const time = date.getTime();
-                                return parsedDisabledDates.some(r => time >= r.from.getTime() && time < r.to.getTime());
-                                }
-
-                                function hasRangeConflict(start, end) {
-                                const startTime = start.getTime();
-                                const endTime = end.getTime();
-                                return parsedDisabledDates.some(r => startTime < r.to.getTime() && endTime > r.from.getTime());
-                                }
-
-                                const commonConfig = {
-                                enableTime: true,
-                                time_24hr: true,
-                                minDate: "today",
-                                disable: parsedDisabledDates,
-                                dateFormat: "Y-m-d H:i",
-                                locale: "tr",
-                                minuteIncrement: 30
-                                };
-
-                                const startPicker = flatpickr("#startDate", {
-                                ...commonConfig,
-                                onChange: function (selectedDates) {
-                                if (!selectedDates[0]) return;
+                            @* --- SÖZLEŞME PENCERESİ (MODAL) --- *@
+                            <div class="modal fade" id="contractModal" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content border-0 rounded-4 shadow-lg">
+                                        <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+                                            <h5 class="modal-title fw-bold"><i class="bi bi-file-text"></i> Araç Kiralama Sözleşmesi
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body p-4 bg-light" style="max-height: 50vh; overflow-y: auto;">
+                                            <h6 class="fw-bold text-primary">1. TARAFLAR VE KONU</h6>
+                                            <p class="small text-muted">İşbu sözleşme, ANKA Rent A Car (bundan böyle "Kiralayan" olarak
+                                                anılacaktır) ile aracı kiralayan gerçek veya tüzel kişi (bundan böyle "Kiracı" olarak
+                                                anılacaktır) arasında, aşağıda belirtilen şartlar dâhilinde akdedilmiştir.</p>
                 
-                                const selectedStart = selectedDates[0];
-                                if (isDateDisabled(selectedStart)) {
-                                alert("Bu saat dolu! Lütfen boş bir saat seçin.");
-                                startPicker.clear();
-                                return;
-                                }
-
-                                // Minimum dönüş saati (Alıştan 1 saat sonra)
-                                endPicker.set("minDate", new Date(selectedStart.getTime() + 3600000));
-                                document.getElementById('endDate').disabled = false;
+                                                <h6 class="fw-bold text-primary mt-3">2. KULLANIM ŞARTLARI</h6>
+                                                <p class="small text-muted">Kiracı, kiraladığı aracı Karayolları Trafik Kanunu ve ilgili tüm
+                                                    yasal mevzuatlara uygun olarak, dikkat ve özenle kullanmayı kabul eder. Araç, başkasına
+                                                    kiralanamaz, devredilemez ve yasa dışı işlerde kullanılamaz.</p>
                 
-                                // Eğer daha önce iade tarihi seçildiyse fiyatı tekrar hesapla
-                                if (document.getElementById('endDate').value) {
-                                checkAndCalculate();
-                                } else {
-                                document.getElementById('priceSummary').classList.add('d-none');
-                                document.getElementById('submitBtn').disabled = true;
-                                }
-                                }
-                                });
+                                                    <h6 class="fw-bold text-primary mt-3">3. İADE KOŞULLARI VE CEZAİ ŞARTLAR</h6>
+                                                    <p class="small text-muted">Kiracı, aracı kiralama süresi bitiminde eksiksiz, hasarsız ve
+                                                        teslim
+                                                        aldığı yakıt seviyesinde iade etmekle yükümlüdür. Gecikme durumunda ekstra ücret tahsil
+                                                        edilecektir.</p>
+                                                    </div>
+                                                    <div
+                                                        class="modal-footer bg-white border-top-0 d-flex justify-content-between align-items-center rounded-bottom-4">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input border-primary" type="checkbox" id="modalCheck"
+                                                                   style="transform: scale(1.2);">
+                                                            <label class="form-check-label fw-bold text-dark ms-2" for="modalCheck"
+                                                                   style="cursor: pointer;">
+                                                                Sözleşme şartlarını okudum ve kabul ediyorum.
+                                                            </label>
+                                                        </div>
+                                                        <button type="button" id="confirmContractBtn"
+                                                                class="btn btn-success fw-bold px-4 py-2 rounded-pill shadow-sm" disabled>
+                                                            Onayla ve Ödemeye Geç <i class="bi bi-arrow-right"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @section Scripts {
+                                            <script>
+                                                const disabledRangesRaw = @Html.Raw(ViewBag.DisabledDates ?? "[]");
+                                                const carId = document.getElementById('carIdField')?.value;
 
-                                const endPicker = flatpickr("#endDate", {
-                                ...commonConfig,
-                                onChange: function (selectedDates) {
-                                if (!selectedDates[0]) return;
-                                checkAndCalculate();
-                                }
-                                });
+                                                // Tarihleri Flatpickr'ın anlayacağı JS formatına çeviriyoruz
+                                                const parsedDisabledDates = disabledRangesRaw.map(r => ({
+                                                from: new Date(r.from),
+                                                to: new Date(r.to)
+                                                }));
 
-                                function checkAndCalculate() {
-                                const startStr = document.getElementById('startDate').value;
-                                const endStr = document.getElementById('endDate').value;
-                                const submitBtn = document.getElementById('submitBtn');
+                                                function isDateDisabled(date) {
+                                                return parsedDisabledDates.some(r =>
+                                                date >= r.from && date <= r.to
+                                                );
+                                                }
 
-                                if (!startStr) {
-                                alert("Lütfen önce alış tarihi seçin.");
-                                endPicker.clear();
-                                return;
-                                }
+                                                function hasRangeConflict(start, end) {
+                                                const startTime = start.getTime();
+                                                const endTime = end.getTime();
+                                                return parsedDisabledDates.some(r => startTime < r.to.getTime() && endTime > r.from.getTime());
+                                                }
+                                                const commonConfig = {
+                                                enableTime: true,
+                                                time_24hr: true,
+                                                minuteIncrement: 30,
+                                                minDate: "today",
+                                                disable: parsedDisabledDates,
+                                                dateFormat: "Y-m-d H:i",
+                                                locale: "tr"
+                                                };
+                                                const startPicker = flatpickr("#startDate", {
+                                                ...commonConfig,
+                                                onChange: function (selectedDates) {
+                                                if (!selectedDates[0]) return;
+                
+                                                const selectedStart = selectedDates[0];
+                                                if (isDateDisabled(selectedStart)) {
+                                                alert("Bu saat dolu! Lütfen boş bir saat seçin.");
+                                                startPicker.clear();
+                                                return;
+                                                }
 
-                                const start = new Date(startStr);
-                                const end = new Date(endStr);
+                                                // Minimum dönüş saati (Alıştan 1 saat sonra)
+                                                endPicker.set("minDate", new Date(selectedStart.getTime() + 3600000));
+                                                document.getElementById('endDate').disabled = false;
+                
+                                                // Eğer daha önce iade tarihi seçildiyse fiyatı tekrar hesapla
+                                                if (document.getElementById('endDate').value) {
+                                                checkAndCalculate();
+                                                } else {
+                                                document.getElementById('priceSummary').classList.add('d-none');
+                                                document.getElementById('submitBtn').disabled = true;
+                                                }
+                                                }
+                                                });
 
-                                if (isDateDisabled(end)) {
-                                alert("Seçilen iade saati dolu!");
-                                endPicker.clear();
-                                return;
-                                }
+                                                const endPicker = flatpickr("#endDate", {
+                                                ...commonConfig,
+                                                onChange: function (selectedDates) {
+                                                if (!selectedDates[0]) return;
+                                                checkAndCalculate();
+                                                }
+                                                });
 
-                                if (hasRangeConflict(start, end)) {
-                                alert("Seçilen aralık mevcut bir rezervasyonla çakışıyor! Lütfen aralığı değiştirin.");
-                                endPicker.clear();
-                                document.getElementById('priceSummary').classList.add('d-none');
-                                submitBtn.disabled = true;
-                                return;
-                                }
+                                                function checkAndCalculate() {
+                                                const startStr = document.getElementById('startDate').value;
+                                                const endStr = document.getElementById('endDate').value;
+                                                const submitBtn = document.getElementById('submitBtn');
 
-                                updatePrice(start, end);
-                                }
+                                                if (!startStr) {
+                                                alert("Lütfen önce alış tarihi seçin.");
+                                                endPicker.clear();
+                                                return;
+                                                }
 
-                                function updatePrice(start, end) {
-                                const submitBtn = document.getElementById('submitBtn');
-                                const totalHours = (end - start) / (1000 * 60 * 60);
+                                                const start = new Date(startStr);
+                                                const end = new Date(endStr);
 
-                                // API'ye gönderirken ondalık sorununu çözmek için noktaya çeviriyoruz
-                                const fetchHours = totalHours.toFixed(4).replace(",", ".");
+                                                if (isDateDisabled(end)) {
+                                                alert("Seçilen iade saati dolu!");
+                                                endPicker.clear();
+                                                return;
+                                                }
 
-                                fetch(`/Rental/GetPriceCalculation?carId=${carId}&hours=${fetchHours}`)
-                                .then(r => r.json())
-                                .then(data => {
-                                document.getElementById('priceSummary').classList.remove('d-none');
+                                                if (hasRangeConflict(start, end)) {
+                                                alert("Seçilen aralık mevcut bir rezervasyonla çakışıyor! Lütfen aralığı değiştirin.");
+                                                endPicker.clear();
+                                                document.getElementById('priceSummary').classList.add('d-none');
+                                                submitBtn.disabled = true;
+                                                return;
+                                                }
 
-                                const h = Math.floor(totalHours);
-                                const m = Math.round((totalHours % 1) * 60);
-                                document.getElementById('daysCount').innerText = `${h} Saat ${m} Dakika`;
+                                                updatePrice(start, end);
+                                                }
+                                                function formatDuration(days) {
+                                                let months = Math.floor(days / 30);
+                                                let remainingAfterMonth = days % 30;
 
-                                // UI gösterimi için Türkçe format
-                                document.getElementById('totalPrice').innerText = data.total.toLocaleString('tr-TR') + " TL";
-                                document.getElementById('depositAmount').innerText = data.deposit.toLocaleString('tr-TR') + " TL";
+                                                let weeks = Math.floor(remainingAfterMonth / 7);
+                                                let remainingDays = remainingAfterMonth % 7;
 
-                                // 🚩 KESİN ÇÖZÜM: 
-                                // Fiyatları JavaScript'ten her zaman NOKTA ile string olarak gönderiyoruz. 
-                                // Controller tarafında bunu biz manuel parse edeceğiz.
-                                document.getElementById('hiddenForecast').value = data.total.toString().replace(",", ".");
-                                document.getElementById('hiddenDeposit').value = data.deposit.toString().replace(",", ".");
-                    
-                                submitBtn.disabled = false;
-                                })
-                                .catch(() => {
-                                submitBtn.disabled = true;
-                                alert("Fiyat hesaplanırken hata oluştu.");
-                                });
-                                }
-                                function toggleMenu() {
-                                document.getElementById("sidebar").classList.toggle("active");
-                                }
-                            </script>
-                        }
-                        <style>
-                            .sidebar {
-                            position: fixed;
-                            left: -280px;
-                            /* Kapalıyken solda gizli */
-                            top: 0;
-                            width: 280px;
-                            height: 100%;
-                            background: #1e3a8a;
-                            color: white;
-                            padding: 25px;
-                            transition: 0.4s ease;
-                            z-index: 3000;
-                            }
+                                                let parts = [];
 
-                            .sidebar.active {
-                            left: 0;
-                            /* Açıldığında ekrana gelir */
-                            }
+                                                if (months > 0) parts.push(months + " Ay");
+                                                if (weeks > 0) parts.push(weeks + " Hafta");
+                                                if (remainingDays > 0) parts.push(remainingDays + " Gün");
 
-                            .sidebar a {
-                            display: block;
-                            color: rgba(255, 255, 255, 0.8);
-                            text-decoration: none;
-                            padding: 12px 15px;
-                            margin: 10px 0;
-                            border-radius: 10px;
-                            }
-                        </style>
+                                                return parts.join(" ");
+                                                }
+                                                function updatePrice(start, end) {
+
+                                                const submitBtn = document.getElementById('submitBtn');
+
+                                                const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+                                                fetch(`/Rental/GetPriceCalculation?carId=${carId}&days=${totalDays}`)
+                                                .then(r => r.json())
+                                                .then(data => {
+
+                                                document.getElementById('priceSummary').classList.remove('d-none');
+
+                                                document.getElementById('daysCount').innerText = formatDuration(totalDays);
+
+                                                document.getElementById('totalPrice').innerText =
+                                                data.total.toLocaleString('tr-TR') + " TL";
+
+                                                document.getElementById('depositAmount').innerText =
+                                                data.deposit.toLocaleString('tr-TR') + " TL";
+
+                                                document.getElementById('hiddenForecast').value =
+                                                data.total.toString().replace(",", ".");
+
+                                                document.getElementById('hiddenDeposit').value =
+                                                data.deposit.toString().replace(",", ".");
+
+                                                submitBtn.disabled = false;
+                                                })
+                                                .catch(() => {
+                                                submitBtn.disabled = true;
+                                                alert("Fiyat hesaplanırken hata oluştu.");
+                                                });
+                                                }
+                                                function toggleMenu() {
+                                                document.getElementById("sidebar").classList.toggle("active");
+                                                }
+                                                // --- SÖZLEŞME VE ONAY İŞLEMLERİ ---
+                                                const modalCheck = document.getElementById('modalCheck');
+                                                const confirmContractBtn = document.getElementById('confirmContractBtn');
+                                                const rentalForm = document.getElementById('rentalForm');
+                                                const isApprovedHidden = document.getElementById('isApprovedHidden');
+
+                                                if (modalCheck && confirmContractBtn && rentalForm) {
+                                                // Sözleşme kutucuğu işaretlenince yeşil butonu aktif et
+                                                modalCheck.addEventListener('change', function () {
+                                                confirmContractBtn.disabled = !this.checked;
+                                                });
+
+                                                // Yeşil butona basılınca gizli onayı true yap ve formu gönder!
+                                                confirmContractBtn.addEventListener('click', function () {
+                                                isApprovedHidden.value = "true";
+                                                rentalForm.submit();
+                                                });
+                                                }
+                                            </script>
+                                        }
+                                        <style>
+                                            .sidebar {
+                                            position: fixed;
+                                            left: -280px;
+                                            /* Kapalıyken solda gizli */
+                                            top: 0;
+                                            width: 280px;
+                                            height: 100%;
+                                            background: #1e3a8a;
+                                            color: white;
+                                            padding: 25px;
+                                            transition: 0.4s ease;
+                                            z-index: 3000;
+                                            }
+
+                                            .sidebar.active {
+                                            left: 0;
+                                            /* Açıldığında ekrana gelir */
+                                            }
+
+                                            .sidebar a {
+                                            display: block;
+                                            color: rgba(255, 255, 255, 0.8);
+                                            text-decoration: none;
+                                            padding: 12px 15px;
+                                            margin: 10px 0;
+                                            border-radius: 10px;
+                                            }
+                                        </style>

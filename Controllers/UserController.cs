@@ -29,6 +29,8 @@ namespace car.Controllers
         public IActionResult EditProfile()
         {
             var email = HttpContext.Session.GetString("UserEmail");
+            ViewBag.TC = HttpContext.Session.GetString("TC");
+            ViewBag.LicenceNo = HttpContext.Session.GetString("LicenceNo");
             if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Auth");
             var model = _userService.GetProfileForEdit(email);
             return View(model);

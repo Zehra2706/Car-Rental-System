@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using car.Data;
 
@@ -11,9 +12,11 @@ using car.Data;
 namespace car.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260426103334_ContractAddedAgain")]
+    partial class ContractAddedAgain
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -252,11 +255,11 @@ namespace car.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("Deposit")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("Deposit")
+                        .HasColumnType("int");
 
-                    b.Property<decimal>("Forecast")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double>("Forecast")
+                        .HasColumnType("float");
 
                     b.Property<bool>("IsContractApproved")
                         .HasColumnType("bit");
@@ -308,11 +311,6 @@ namespace car.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TC")
-                        .IsRequired()
-                        .HasMaxLength(11)
-                        .HasColumnType("nvarchar(11)");
-
                     b.Property<int>("UserRole")
                         .HasColumnType("int");
 
@@ -327,7 +325,6 @@ namespace car.Migrations
                             Date = new DateTime(2024, 6, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "deneme",
                             Surname = "deneme",
-                            TC = "00000000000",
                             UserRole = 0
                         });
                 });

@@ -9,13 +9,15 @@ namespace Car_reservation_automation_system.Service.Interfaces
     public interface IRentalService
     {
         void CancelRentalRequest(int rentalId);
-        void ConfirmAndSave(User user,Rental rental);
+        void ConfirmAndSave(User user, Rental rental);
         Rental GetRentalById(int id);
+
         List<object> GetDisabledDatesJson(int carId);
-        List<rental.Models.Rental> GetActiveRentalsByCarId(int carId);
+        List<Rental> GetActiveRentalsByCarId(int carId);
+
         bool IsAvailable(int carId, DateTime start, DateTime end);
 
-        (double total, double deposit) CalculatePrice(int carId, int days);
+        public (decimal baseAmount, decimal penalty, decimal total) GetPaymentBreakdown(Rental rental);
         double GetDailyPrice(int carId);
 
         User GetUserByRental(int rentalId);
@@ -24,7 +26,8 @@ namespace Car_reservation_automation_system.Service.Interfaces
         void ApproveRental(int rentalId);
         void RejectedRental(int rentalId);
 
-        (double total, double deposit) CalculateHourlyPrice(int carId, double hours);
+        (decimal total, decimal deposit) CalculatePrice(int carId, int days);
+        (decimal total, decimal deposit) CalculateHourlyPrice(int carId, double hours);
 
         void CheckLateRentals();
         void CheckEndingSoonRentals();

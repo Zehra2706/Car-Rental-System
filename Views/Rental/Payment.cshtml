@@ -46,8 +46,9 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-pill">
-                            @(Model?.Forecast.ToString("N2")) TL ÖDE
+                            @(Model?.Forecast.ToString("N2", new System.Globalization.CultureInfo("tr-TR"))) TL ÖDE
                         </button>
+                        
                     </form>
                     
                     <div class="text-center mt-3">

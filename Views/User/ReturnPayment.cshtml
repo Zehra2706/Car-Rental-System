@@ -1,30 +1,31 @@
 @model rental.Models.Rental
+
 @{
     Layout = "_Layout";
 
-    // --- CEZA HESAPLAMA MANTIĞI ---
-    double penalty = 0;
+    // --- CEZA HESAPLAMA MANTIĞI (Decimal Düzeni) ---
+    decimal penalty = 0m;
     int delayDays = 0;
     DateTime now = DateTime.Now;
 
+    // 🚩 Model.Forecast artık decimal olduğu için işlemleri decimal tipinde yapıyoruz
     if (now > Model.ReturnDate)
     {
-        // Geciken gün sayısını hesapla
         var timeDiff = now - Model.ReturnDate;
         delayDays = timeDiff.Days;
 
-        // Eğer gün bazında fark yoksa ama saat olarak geçtiyse en az 1 gün say
-        if (delayDays <= 0 && timeDiff.TotalHours > 0)
+        // double olan TotalHours'u decimal'a çevirerek kontrol ediyoruz
+        if (delayDays <= 0 && (decimal)timeDiff.TotalHours > 0m)
         {
             delayDays = 1;
         }
 
-        // Gün başına %10 ceza (Melisa'nın formülü)
-        penalty = delayDays * (Model.Forecast * 0.10);
+        // 🚩 0.10m kullanarak çarpıyoruz (decimal dünyası)
+        penalty = (decimal)delayDays * (Model.Forecast * 0.10m);
     }
 
-    // Toplam ödenecek tutar
-    double totalAmount = Model.Forecast + penalty;
+    // Toplam ödenecek tutar (Decimal + Decimal)
+    decimal totalAmount = Model.Forecast + penalty;
 }
 
 <div class="container mt-5">
@@ -66,7 +67,6 @@
             </div>
 
             <form asp-controller="Rental" asp-action="StartReturnPayment" method="post">
-                @* Controller'a gidecek olan Rental ID *@
                 <input type="hidden" name="rentalId" value="@Model.Id" />
                 
                 <div class="alert alert-warning border-0 small mb-4 shadow-sm">

@@ -19,6 +19,9 @@ namespace user.Models
         public UserConnections? UserConnections { get; set; }
 
         public Licence? Licence { get; set; }
+        [Required]
+        [StringLength(11)]
+        public string TC { get; set; } = "00000000000";
 
 
 

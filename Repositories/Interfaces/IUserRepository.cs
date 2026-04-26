@@ -7,6 +7,7 @@ public interface IUserRepository
     void AddUser(User user);
     User GetById(int id);
     User GetByEmail(string email);
+    public bool TCExists(string tc);
     bool EmailExists(string email);
     bool PhoneExists(string phone);
     bool LicenseExists(string license);

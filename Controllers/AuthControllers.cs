@@ -49,7 +49,9 @@ public class AuthController : Controller
         {
             new Claim("UserId", user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.UserInfo.Email),
-            new Claim(ClaimTypes.Role, user.UserRole.ToString())
+            new Claim(ClaimTypes.Role, user.UserRole.ToString()),
+             new Claim("TC", user.TC ?? "00000000000"),
+  new Claim("LicenceNo", user.Licence?.LicenceNumber ?? "-")
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -81,6 +83,8 @@ public class AuthController : Controller
         HttpContext.Session.SetString("UserEmail", user.UserInfo.Email);
         HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
         HttpContext.Session.SetString("UserName", user.Name);
+        HttpContext.Session.SetString("TC", user.TC ?? "00000000000");
+        HttpContext.Session.SetString("LicenceNo", user.Licence?.LicenceNumber ?? "-");
         // Yönlendirme (Rol bazlı)
         if (user.UserRole == UserEntity.Role.Admin)
         {
@@ -126,7 +130,7 @@ public class AuthController : Controller
             _userService.Register(model);
             TempData["Success"] = "Kayıt başarılı! Lütfen giriş yapınız.";
             var user = _userService.GetByEmail(model.Email);
-            _notificationService.WelcomeMail(user);     
+            _notificationService.WelcomeMail(user);
             return RedirectToAction("Login");
         }
         catch (Exception ex)

@@ -41,6 +41,7 @@ namespace car.Controllers
             };
             return View(model);
         }
+
         [HttpGet]
         public IActionResult Create(int carId)
         {
@@ -104,7 +105,7 @@ namespace car.Controllers
 
             var car = _carService.GetCarById(rental.CarId);
 
-            if(car.UserId == userId.Value)
+            if (car.UserId == userId.Value)
             {
                 TempData["Error"] = "Kendi aracınızı kiralayamazsınız.";
                 return RedirectToAction("Create", new { carId = rental.CarId });
@@ -122,13 +123,13 @@ namespace car.Controllers
 
         }
 
-        [HttpGet]
-        public JsonResult GetPriceCalculation(int carId, double hours)
-        {
-            var calculation = _rentalService.CalculateHourlyPrice(carId, hours);
-            return Json(new { total = calculation.total, deposit = calculation.deposit });
-        }
 
+        [HttpGet]
+        public JsonResult GetPriceCalculation(int carId, int days)
+        {
+            var result = _rentalService.CalculatePrice(carId, days);
+            return Json(new { total = result.total, deposit = result.deposit });
+        }
         [HttpPost]
         public IActionResult ConfirmPayment(rental.Models.Rental rental)
         {
@@ -154,29 +155,37 @@ namespace car.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> StartPayment(int CarId, DateTime Date, DateTime ReturnDate, string Forecast, string Deposit)
+        public async Task<IActionResult> StartPayment(int CarId, DateTime Date, DateTime ReturnDate, string Forecast, string Deposit, bool IsContractApproved = false)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToAction("Login", "Auth");
+
+            if (!IsContractApproved)
+            {
+                TempData["Error"] = "Sözleşmeyi onaylamadan ödeme adımına geçemezsiniz!";
+                return RedirectToAction("Create", new { carId = CarId });
+            }
 
             var rental = new Rental
             {
                 CarId = CarId,
                 Date = Date,
                 ReturnDate = ReturnDate,
-                UserId = userId.Value
+                UserId = userId.Value,
+                IsContractApproved = IsContractApproved // 🚩 Pakete ekledik, callback'te DB'ye gidecek
             };
+
 
             var culture = System.Globalization.CultureInfo.InvariantCulture;
 
             if (double.TryParse(Forecast?.Replace(",", "."), System.Globalization.NumberStyles.Any, culture, out double parsedForecast))
             {
-                rental.Forecast = parsedForecast;
+                rental.Forecast = (decimal)parsedForecast;
             }
 
             if (double.TryParse(Deposit?.Replace(",", "."), System.Globalization.NumberStyles.Any, culture, out double parsedDeposit))
             {
-                rental.Deposit = (int)Math.Round(parsedDeposit);
+                rental.Deposit = (decimal)parsedDeposit;
             }
 
             var options = new Iyzipay.Options
@@ -260,86 +269,82 @@ namespace car.Controllers
         }
 
 
-[HttpPost]
-[AllowAnonymous]
-[IgnoreAntiforgeryToken]
-public async Task<IActionResult> PaymentCallback(string token)
-{
-    if (string.IsNullOrEmpty(token))
-        return RedirectToAction("Fail", new { message = "Token gelmedi" });
-
-    if (!_paymentCache.TryGetValue(token, out string rentalDataString))
-    {
-        return RedirectToAction("Fail", new { message = "Kiralama verisi bulunamadı." });
-    }
-    var rental = JsonConvert.DeserializeObject<Rental>(rentalDataString);
-    
-
-    var options = new Iyzipay.Options
-    {
-        ApiKey = _configuration["Iyzipay:ApiKey"],
-        SecretKey = _configuration["Iyzipay:SecretKey"],
-        BaseUrl = _configuration["Iyzipay:BaseUrl"]
-    };
-
-    var request = new Iyzipay.Request.RetrieveCheckoutFormRequest
-    {
-        Token = token
-    };
-
-    var result = await Iyzipay.Model.CheckoutForm.Retrieve(request, options);
-
-    if (result.Status == "success" && result.PaymentStatus == "SUCCESS")
-    {
-        var car = _carService.GetCarForEdit(rental.CarId);
-
-        if (car.UserId == rental.UserId)
+        [HttpPost]
+        [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> PaymentCallback(string token)
         {
-            _paymentCache.TryRemove(token, out _);
-            return RedirectToAction("Fail", new { message = "Kendi aracınızı kiralayamazsınız." });
+            if (string.IsNullOrEmpty(token))
+                return RedirectToAction("Fail", new { message = "Token gelmedi" });
+
+            if (!_paymentCache.TryGetValue(token, out string rentalDataString))
+            {
+                return RedirectToAction("Fail", new { message = "Kiralama verisi bulunamadı." });
+            }
+            var rental = JsonConvert.DeserializeObject<Rental>(rentalDataString);
+
+
+            var options = new Iyzipay.Options
+            {
+                ApiKey = _configuration["Iyzipay:ApiKey"],
+                SecretKey = _configuration["Iyzipay:SecretKey"],
+                BaseUrl = _configuration["Iyzipay:BaseUrl"]
+            };
+
+            var request = new Iyzipay.Request.RetrieveCheckoutFormRequest
+            {
+                Token = token
+            };
+
+            var result = await Iyzipay.Model.CheckoutForm.Retrieve(request, options);
+
+            if (result.Status == "success" && result.PaymentStatus == "SUCCESS")
+            {
+                var car = _carService.GetCarForEdit(rental.CarId);
+
+                if (car.UserId == rental.UserId)
+                {
+                    _paymentCache.TryRemove(token, out _);
+                    return RedirectToAction("Fail", new { message = "Kendi aracınızı kiralayamazsınız." });
+                }
+
+                if (!_rentalService.CanUserRentCar(rental.UserId))
+                {
+                    _paymentCache.TryRemove(token, out _);
+                    return RedirectToAction("Fail", new { message = "Zaten aktif kiralamanız var" });
+                }
+
+                rental.Status = "OnayBekliyor";
+
+                _rentalService.UpdateRental(rental);
+
+                var user = _userService.TGetById(rental.UserId);
+
+                // araç sahibini bul
+                var owner = _userService.TGetById(car.UserId);
+
+                _notificationService.RentalCreated(user, rental);
+                _notificationService.DepositPaid(user, rental);
+
+                // araç sahibine bildirim
+                _notificationService.NewRentalRequest(owner, rental);
+                _notificationService.OwnerDepositInfo(owner, rental);
+
+                _paymentCache.TryRemove(token, out _);
+
+                TempData["Success"] = "Ödemeniz başarıyla alındı!";
+                return RedirectToAction("Success", new { carId = rental.CarId });
+            }
+            else
+            {
+                _paymentCache.TryRemove(token, out _);
+
+                string errorMessage = result.ErrorMessage ?? "Ödeme hatası.";
+                TempData["Error"] = errorMessage;
+
+                return RedirectToAction("Fail", new { message = errorMessage });
+            }
         }
-
-        if (!_rentalService.CanUserRentCar(rental.UserId))
-        {
-            _paymentCache.TryRemove(token, out _);
-            return RedirectToAction("Fail", new { message = "Zaten aktif kiralamanız var" });
-        }
-
-        rental.Status = "OnayBekliyor";
-
-        _rentalService.UpdateRental(rental);
-
-        var user = _userService.TGetById(rental.UserId);
-
-        // araç sahibini bul
-        var owner = _userService.TGetById(car.UserId);
-
-        _notificationService.RentalCreated(user, rental);
-        _notificationService.DepositPaid(user, rental);
-
-        // araç sahibine bildirim
-        _notificationService.NewRentalRequest(owner, rental);
-        _notificationService.OwnerDepositInfo(owner, rental);
-
-        _paymentCache.TryRemove(token, out _);
-
-        TempData["Success"] = "Ödemeniz başarıyla alındı!";
-        return RedirectToAction("Success", new { carId = rental.CarId });
-    }
-    else
-    {
-        _paymentCache.TryRemove(token, out _);
-
-        string errorMessage = result.ErrorMessage ?? "Ödeme hatası.";
-        TempData["Error"] = errorMessage;
-
-        return RedirectToAction("Fail", new { message = errorMessage });
-    }
-}
-
-
-
-
 
         [HttpGet]
         public IActionResult Fail(string message)
@@ -356,26 +361,21 @@ public async Task<IActionResult> PaymentCallback(string token)
             TempData["Success"] = "Kiralama talebiniz başarıyla iptal edildi.";
             return RedirectToAction("MyRentals", "User");
         }
+
         [HttpPost]
         public async Task<IActionResult> StartReturnPayment(int rentalId)
         {
             var rental = _rentalService.GetRentalById(rentalId);
-            if (rental == null) return RedirectToAction("Fail", new { message = "Kiralama kaydı bulunamadı." });
+            if (rental == null)
+                return RedirectToAction("Fail", new { message = "Kiralama kaydı bulunamadı." });
 
-            double penalty = 0;
-            int delayDays = 0;
-            if (DateTime.Now > rental.ReturnDate)
-            {
-                var timeDiff = DateTime.Now - rental.ReturnDate;
-                delayDays = timeDiff.Days;
-                if (delayDays <= 0 && timeDiff.TotalHours > 0) delayDays = 1;
+            var calc = _rentalService.GetPaymentBreakdown(rental);
 
-                penalty = delayDays * (rental.Forecast * 0.10);
-            }
+            decimal baseAmount = calc.baseAmount;
+            decimal penalty = calc.penalty;
+            decimal totalAmount = calc.total;
 
-            double totalAmount = rental.Forecast + penalty;
             var culture = System.Globalization.CultureInfo.InvariantCulture;
-
 
             var options = new Iyzipay.Options
             {
@@ -387,24 +387,25 @@ public async Task<IActionResult> PaymentCallback(string token)
             var request = new Iyzipay.Request.CreateCheckoutFormInitializeRequest
             {
                 Locale = Iyzipay.Model.Locale.TR.ToString(),
-                ConversationId = "RETURN_" + rentalId + "_" + Guid.NewGuid().ToString().Substring(0, 5),
+                ConversationId = "RETURN_" + rentalId + "_" + Guid.NewGuid().ToString("N").Substring(0, 6),
+
                 Price = totalAmount.ToString("0.00", culture),
                 PaidPrice = totalAmount.ToString("0.00", culture),
                 Currency = Iyzipay.Model.Currency.TRY.ToString(),
+
                 BasketId = "R" + rentalId,
                 PaymentGroup = Iyzipay.Model.PaymentGroup.PRODUCT.ToString(),
-
                 CallbackUrl = "http://localhost:5054/Rental/ReturnCallback"
             };
 
             request.Buyer = new Iyzipay.Model.Buyer
             {
                 Id = rental.UserId.ToString(),
-                Name = "Melisa",
-                Surname = "User",
+                Name = "User",
+                Surname = "Test",
                 Email = "test@test.com",
                 IdentityNumber = "11111111111",
-                RegistrationAddress = "Adres Bilgisi",
+                RegistrationAddress = "Adres",
                 Ip = Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1",
                 City = "Istanbul",
                 Country = "Turkey"
@@ -412,11 +413,12 @@ public async Task<IActionResult> PaymentCallback(string token)
 
             var address = new Iyzipay.Model.Address
             {
-                ContactName = "Melisa User",
+                ContactName = "User Test",
                 City = "Istanbul",
                 Country = "Turkey",
-                Description = "Adres Bilgisi"
+                Description = "Adres"
             };
+
             request.BillingAddress = address;
             request.ShippingAddress = address;
 
@@ -424,8 +426,8 @@ public async Task<IActionResult> PaymentCallback(string token)
     {
         new Iyzipay.Model.BasketItem
         {
-            Id = "FINAL_PAYMENT_" + rentalId,
-            Name = "Araç Kiralama ve Gecikme Bedeli",
+            Id = "FINAL_" + rentalId,
+            Name = "Kiralama + Gecikme Bedeli",
             Category1 = "Car Rental",
             ItemType = Iyzipay.Model.BasketItemType.PHYSICAL.ToString(),
             Price = totalAmount.ToString("0.00", culture)
@@ -437,12 +439,24 @@ public async Task<IActionResult> PaymentCallback(string token)
             if (checkoutForm.Status == "success")
             {
                 _paymentCache[checkoutForm.Token] = rentalId.ToString();
-
                 ViewBag.PaymentForm = checkoutForm.CheckoutFormContent;
                 return View("IyzicoPayment");
             }
 
             return RedirectToAction("Fail", new { message = checkoutForm.ErrorMessage });
+        }
+        [HttpGet]
+        public IActionResult ReturnPaymentConfirm(int rentalId)
+        {
+            var rental = _rentalService.GetRentalById(rentalId);
+
+            var calc = _rentalService.GetPaymentBreakdown(rental);
+
+            ViewBag.BaseAmount = calc.baseAmount;
+            ViewBag.Penalty = calc.penalty;
+            ViewBag.Total = calc.total;
+
+            return View(rental);
         }
         [HttpPost]
         [AllowAnonymous]

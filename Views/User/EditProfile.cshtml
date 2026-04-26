@@ -119,6 +119,23 @@
                                    value="@Context.Session.GetString("UserEmail")" readonly>
                         </div>
                     </div>
+ <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary small">TC (DEĞİŞTİRİLEMEZ)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-light-subtle rounded-start-3"><i class="bi bi-lock-fill text-muted"></i></span>
+                            <input type="text" name="Tc" class="form-control bg-light border-light-subtle rounded-end-3"
+                                   value="@Context.Session.GetString("TC")" readonly>
+                        </div>
+                       
+                         <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary small">EHLİYET NUMARASI (DEĞİŞTİRİLEMEZ)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-light-subtle rounded-start-3"><i class="bi bi-lock-fill text-muted"></i></span>
+                            <input type="text" name="LicenseNumber" class="form-control bg-light border-light-subtle rounded-end-3"
+                                   value="@Context.Session.GetString("LicenceNo")" readonly>
+                        </div>
+                    </div>
+                    </div>
 
                     <div class="mb-4">
                         <label class="form-label fw-bold text-secondary small">TELEFON NUMARASI</label>

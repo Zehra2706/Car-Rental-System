@@ -2,69 +2,113 @@
 
 @{
     Layout = "_Layout";
+
+    // Controller’dan gelecek hesap
+    var baseAmount = ViewBag.BaseAmount != null ? (decimal)ViewBag.BaseAmount : Model.Forecast;
+    var penalty = ViewBag.Penalty != null ? (decimal)ViewBag.Penalty : 0;
+    var total = ViewBag.Total != null ? (decimal)ViewBag.Total : Model.Forecast;
 }
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
+
             <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                @* Başlık Kısmı *@
+
+                <!-- HEADER -->
                 <div class="card-header bg-danger text-white text-center py-4">
-                    <h3 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> İade ve Ödeme Özeti</h3>
+                    <h3 class="mb-0 fw-bold">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        İade ve Ödeme Özeti
+                    </h3>
                 </div>
 
+                <!-- BODY -->
                 <div class="card-body p-4">
+
                     <div class="text-center mb-4">
-                        <p class="text-muted">Sayın kullanıcımız, aracın iade süreci ve hesaplanan toplam tutar
-                            aşağıdadır.</p>
+                        <p class="text-muted">
+                            Sayın kullanıcı, iade sürecine ait ödeme detayları aşağıdadır.
+                        </p>
+                    </div>
+
+                    <!-- BİLGİLER -->
+                    <div class="list-group list-group-flush border rounded-3 mb-4">
+
+                        <div class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Planlanan İade Tarihi:</span>
+                            <span class="fw-bold">@Model.ReturnDate.ToShortDateString()</span>
                         </div>
 
-                        @* Bilgi Listesi *@
-                        <div class="list-group list-group-flush border rounded-3 mb-4">
-                            <div class="list-group-item d-flex justify-content-between">
-                                <span class="text-muted">Planlanan İade Tarihi:</span>
-                                <span class="fw-bold">@Model.ReturnDate.ToShortDateString()</span>
-                            </div>
-                            <div class="list-group-item d-flex justify-content-between bg-light">
-                                <span class="text-muted">Gerçek İade Tarihi:</span>
-                                <span class="fw-bold text-primary">@DateTime.Now.ToShortDateString()</span>
-                            </div>
-                            <div class="list-group-item d-flex justify-content-between">
-                                <span class="text-muted">Ana Kiralama Bedeli:</span>
-                                <span class="fw-bold">@Model.Forecast.ToString("C2")</span>
-                            </div>
+                        <div class="list-group-item d-flex justify-content-between bg-light">
+                            <span class="text-muted">Gerçek İade Tarihi:</span>
+                            <span class="fw-bold text-primary">@DateTime.Now.ToShortDateString()</span>
                         </div>
 
-                        @* Uyarı Mesajı *@
-                        <div class="alert alert-warning text-center">
-                            <h6 class="alert-heading fw-bold">⚠️ Dikkat!</h6>
-                            <p class="mb-0 small">Teslimat tarihini geçirdiğiniz için sistem tarafından otomatik gecikme
-                                cezası uygulanmıştır.</p>
-                            </div>
-
-                            @* Toplam Tutar *@
-                            <div class="text-center py-3">
-                                <h4 class="text-muted mb-1">Toplam Ödenecek</h4>
-                                <h1 class="display-4 fw-bold text-success">@Model.Forecast.ToString("C2")</h1>
-                            </div>
+                        <div class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Ana Kiralama Bedeli:</span>
+                            <span class="fw-bold">@baseAmount.ToString("C2")</span>
                         </div>
 
-                        @* Butonlar Kısmı *@
-                        <div class="card-footer bg-white border-0 p-4 pt-0">
-                            <div class="d-grid gap-2">
-                                @* 🟢 FORM BAŞLANGICI: iyzico'yu tetikleyen kısım *@
-                                <form asp-action="StartReturnPayment" asp-controller="Rental" method="post">
-                                    <input type="hidden" name="rentalId" value="@Model.Id" />
-                                    <button type="submit" class="btn btn-success btn-lg rounded-pill shadow-sm w-100">
-                                        <i class="bi bi-credit-card"></i> Ödemeyi Tamamla ve İade Et
-                                    </button>
-                                </form>
-                        
-                                <a href="/User/MyRentals" class="btn btn-link text-decoration-none text-muted">İşlemi İptal
-                                    Et</a>
-                                </div>
+                        @if (penalty > 0)
+                        {
+                            <div class="list-group-item d-flex justify-content-between text-danger">
+                                <span>Gecikme Cezası (%3/gün):</span>
+                                <span class="fw-bold">@penalty.ToString("C2")</span>
                             </div>
-                        </div> @* Card End *@
-                    </div> @* Col End *@
-                </div> @* Row End *@
-            </div> @* Container End *@
+                        }
+
+                    </div>
+
+                    <!-- UYARI -->
+                    <div class="alert alert-warning text-center">
+                        <h6 class="fw-bold">⚠️ Dikkat!</h6>
+                        <p class="mb-0 small">
+                            Gecikme durumuna göre sistem otomatik ceza uygulamıştır.
+                        </p>
+                    </div>
+
+                    <!-- TOPLAM -->
+                    <div class="text-center py-3">
+                        <h4 class="text-muted mb-2">Toplam Ödenecek</h4>
+
+                        <h1 class="display-4 fw-bold text-success">
+                            @total.ToString("C2")
+                        </h1>
+                    </div>
+
+                </div>
+
+                <!-- FOOTER -->
+                <div class="card-footer bg-white border-0 p-4 pt-0">
+
+                    <div class="d-grid gap-2">
+
+                        <!-- ÖDEME -->
+                        <form asp-action="StartReturnPayment" asp-controller="Rental" method="post">
+
+                            <input type="hidden" name="rentalId" value="@Model.Id" />
+
+                            <button type="submit" class="btn btn-success btn-lg rounded-pill shadow-sm w-100">
+
+                                <i class="bi bi-credit-card"></i>
+                                Ödemeyi Tamamla ve İade Et
+                            </button>
+
+                        </form>
+
+                        <!-- İPTAL -->
+                        <a href="/User/MyRentals" class="btn btn-link text-decoration-none text-muted text-center">
+
+                            İşlemi İptal Et
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>

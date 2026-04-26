@@ -167,12 +167,10 @@
                                         <td class="text-center">
                                             @if (currentStatus == "Onaylandı" || currentStatus == "Gecikmiş" || currentStatus == "Gecikmis" || (currentStatus == "Onaylandi" && !item.IsReturned))
                                             {
-                                                <form asp-action="ProcessReturnPayment" asp-controller="User" method="post" style="display:inline;">
-                                                    <input type="hidden" name="rentalId" value="@item.Id" />
-                                                    <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm border-0">
-                                                        <i class="bi bi-box-arrow-in-left"></i> İade Et ve Öde
-                                                    </button>
-                                                </form>
+                                             <a href="/Rental/ReturnPaymentConfirm?rentalId=@item.Id"
+   class="btn btn-sm btn-success rounded-pill px-3 shadow-sm border-0">
+    <i class="bi bi-box-arrow-in-left"></i> İade Et ve Öde
+</a>
                                             }
                                             else if (currentStatus == "OnayBekliyor")
                                             {
