@@ -31,6 +31,9 @@ namespace rental.Models
 
         public bool IsContractApproved { get; set; }
         public bool ReminderSent { get; set; } = false;
+        public bool IsPaid { get; set; } = false;
+
+        public bool IsCompleted { get; set; }
 
         // 🚩 EKLEDİĞİMİZ AKILLI DURUM: Ekranda süslü yazılar için
         [NotMapped]
@@ -50,5 +53,8 @@ namespace rental.Models
                 return Status;
             }
         }
+
+
+
     }
 }

@@ -146,8 +146,26 @@
                                         }
                                         else if (currentStatus == "Onaylandı" && !item.IsReturned)
                                         {
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">Kullanımda (Aktif)</span>
+                                            @if (!item.IsPaid)
+                                            {
+                                                <span class="badge bg-warning-subtle text-warning border px-3 py-2">
+                                                    Ödeme Bekleniyor
+                                                </span>
+                                            }
+                                            else if (item.IsPaid && item.Date > DateTime.Now)
+                                            {
+                                                <span class="badge bg-info-subtle text-info border px-3 py-2">
+                                                    Ödendi (Başlamadı)
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success-subtle text-success border px-3 py-2">
+                                                    Kullanımda (Aktif)
+                                                </span>
+                                            }
                                         }
+                                                                                
                                         else if (item.IsReturned || currentStatus == "İade Edildi" || currentStatus == "Tamamlandı")
                                         {
                                             <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2">İade Edildi</span>
@@ -165,12 +183,19 @@
                                     @if (isAktifMod)
                                     {
                                         <td class="text-center">
-                                            @if (currentStatus == "Onaylandı" || currentStatus == "Gecikmiş" || currentStatus == "Gecikmis" || (currentStatus == "Onaylandi" && !item.IsReturned))
+                                            @* @if (currentStatus == "Onaylandı" || currentStatus == "Gecikmiş" || currentStatus == "Gecikmis" || (currentStatus == "Onaylandi" && !item.IsReturned))
                                             {
                                              <a href="/Rental/ReturnPaymentConfirm?rentalId=@item.Id"
-   class="btn btn-sm btn-success rounded-pill px-3 shadow-sm border-0">
-    <i class="bi bi-box-arrow-in-left"></i> İade Et ve Öde
+   class="btn btn-sm btn-warning rounded-pill px-3 shadow-sm border-0">
+    <i class="bi bi-box-arrow-in-left"></i>Öde
 </a>
+                                            } *@
+                                            @if (currentStatus == "Onaylandı" && !item.IsPaid)
+                                            {
+                                                <a href="/Rental/ReturnPaymentConfirm?rentalId=@item.Id"
+                                                class="btn btn-sm btn-warning rounded-pill px-3 shadow-sm border-0">
+                                                    <i class="bi bi-credit-card"></i> Öde
+                                                </a>
                                             }
                                             else if (currentStatus == "OnayBekliyor")
                                             {

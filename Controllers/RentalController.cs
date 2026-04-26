@@ -449,12 +449,17 @@ namespace car.Controllers
         public IActionResult ReturnPaymentConfirm(int rentalId)
         {
             var rental = _rentalService.GetRentalById(rentalId);
-
+            rental.IsPaid = true;
             var calc = _rentalService.GetPaymentBreakdown(rental);
 
             ViewBag.BaseAmount = calc.baseAmount;
             ViewBag.Penalty = calc.penalty;
             ViewBag.Total = calc.total;
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (userId == null)
+                return RedirectToAction("Login", "Auth");
+            var rentals = _rentalService.GetMyRentals(userId.Value);
 
             return View(rental);
         }
@@ -488,9 +493,8 @@ namespace car.Controllers
                 var rental = _rentalService.GetRentalById(rentalId);
                 if (rental != null)
                 {
-                    rental.IsReturned = true;           // Araba geri geldi
-                    rental.RealReturnDate = DateTime.Now; // Tam olarak şu an teslim edildi
-                    rental.Status = "Tamamlandı";      // Statüyü kapatıyoruz
+                    rental.Status = "Ödendi"; 
+                    rental.IsPaid = true;     
                     var user = _userService.TGetById(rental.UserId);
 
                     var car = _carService.GetCarForEdit(rental.CarId);

@@ -65,11 +65,10 @@ namespace car.Controllers
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToAction("Login", "Auth");
 
-            var myRequests = _userService.GetMyRentalRequests(userId.Value);
-
+            var myRequests = _rentalService.GetMyRentals(userId.Value);
             if (filter == "aktif")
             {
-                myRequests = myRequests.Where(r => r.Status == "Onaylandı" || r.Status == "OnayBekliyor" || r.Status == "Onaylandi" || r.Status == "Gecikmis").ToList();
+                myRequests = myRequests.Where(r => r.Status == "Onaylandı" || r.Status == "OnayBekliyor" || r.Status == "Aktif" || r.Status == "Gecikmis").ToList();
                 ViewBag.PageTitle = "Aktif Kiralamalarım ve Taleplerim";
             }
             else

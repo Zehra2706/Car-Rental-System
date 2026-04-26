@@ -182,6 +182,30 @@ public class AdminController : Controller
         var allReviews = _reviewService.GetAllReviews();
         return View(allReviews);
     }
+    [HttpPost]
+    public IActionResult ReturnCar(int rentalId)
+    {
+        var rental = _rentalRepo.GetById(rentalId);
+
+        rental.IsReturned = true;
+        rental.IsCompleted = false;
+
+        _rentalService.UpdateRental(rental);
+
+        return RedirectToAction("AllRentalRequests");
+    }
+    [HttpPost]
+    public IActionResult CompleteRental(int rentalId)
+    {
+        var rental = _rentalRepo.GetById(rentalId);
+
+        rental.IsCompleted = true;
+        rental.Status = "Tamamlandı";
+
+        _rentalService.UpdateRental(rental);
+
+        return RedirectToAction("AllRentalRequests");
+    }
 
     public IActionResult DeleteReviewByAdmin(int id)
     {

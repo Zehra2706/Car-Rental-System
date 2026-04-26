@@ -186,6 +186,24 @@ namespace car.Service.Concrete
             }
         }
 
+        public List<Rental> GetMyRentals(int userId)
+        {
+            var rentals = _rentalRepo.GetRentalsByUserId(userId);
+
+            foreach (var rental in rentals)
+            {
+                // sadece ödeme yapılmışsa aktif olabilir
+                if (rental.Status == "Onaylandı" && rental.IsPaid)
+                {
+                    if (DateTime.Now >= rental.Date && DateTime.Now <= rental.ReturnDate)
+                    {
+                        rental.Status = "Aktif";
+                    }
+                }
+            }
+
+            return rentals;
+        }
         public Rental GetRentalById(int id)
         {
             var rental = _rentalRepo.GetById(id);
@@ -327,6 +345,20 @@ namespace car.Service.Concrete
             return !_rentalRepo.HasActiveRentalForUser(userId);
         }
 
+        public void ReturnRental(int id)
+        {
+            var rental = _rentalRepo.GetById(id);
+            rental.IsReturned = true;
+            _rentalRepo.Update(rental);
+        }
+
+        public void CompleteRental(int id)
+        {
+            var rental = _rentalRepo.GetById(id);
+            rental.IsCompleted = true;
+            rental.Status = "Tamamlandı";
+            _rentalRepo.Update(rental);
+        }
 
     }
 }

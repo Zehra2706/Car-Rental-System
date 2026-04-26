@@ -111,12 +111,25 @@ public bool HasActiveRentalForUser(int userId)
 {
     return _context.Rentals.Any(r =>
         r.UserId == userId &&
-        (r.Status == "Onaylandı" || 
-         r.Status == "Aktif" || 
-         r.Status == "OnayBekliyor") &&
+        (
+            r.Status == "Aktif" ||
+            (r.Status == "Onaylandı" && r.IsPaid)
+        ) &&
         !r.IsReturned
     );
 }
+
+public List<Rental> GetRentalsByUserId(int userId)
+{
+    return _context.Rentals
+        .Include(r => r.Car)
+        .Include(r => r.User)
+        .ThenInclude(u => u.UserInfo)
+        .Where(r => r.UserId == userId)
+        .ToList();
+}
+
+
 
     }
 }

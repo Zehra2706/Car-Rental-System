@@ -32,5 +32,7 @@ namespace Car_reservation_automation_system.Service.Interfaces
         void CheckLateRentals();
         void CheckEndingSoonRentals();
         bool CanUserRentCar(int userId);
+
+        List<Rental> GetMyRentals(int userId);
     }
 }

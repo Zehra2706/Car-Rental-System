@@ -20,5 +20,7 @@ namespace Car_reservation_automation_system.Repositories.Interfaces
         List<Rental> GetAllActiveRentals();
         bool HasActiveRentalForCar(int carId);
         bool HasActiveRentalForUser(int userId);
+
+        List<Rental> GetRentalsByUserId(int userId);
     }
 }
