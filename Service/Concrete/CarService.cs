@@ -66,7 +66,7 @@ namespace car.Service.Concrete
             var feature = new CarFeature
             {
                 CarId = car.Id,
-                engineSize = model.EngineSize,
+                enginePower = model.EnginePower,
                 Transmission = model.Transmission,
                 fuelType = model.FuelType,
                 motorInsurance = model.MotorInsurance,
@@ -110,7 +110,7 @@ namespace car.Service.Concrete
                 UserId = car.UserId,
                 IsInsured = car.IsInsured,
 
-                EngineSize = feature?.engineSize ?? 0,
+                EnginePower = feature?.enginePower ?? 0,
                 Transmission = feature?.Transmission ?? 0,
                 FuelType = feature?.fuelType ?? 0,
                 MotorInsurance = feature?.motorInsurance ?? string.Empty,
@@ -149,7 +149,7 @@ namespace car.Service.Concrete
             var feature = car.CarFeatures?.FirstOrDefault();
             if (feature != null)
             {
-                feature.engineSize = model.EngineSize;
+                feature.enginePower = model.EnginePower;
                 feature.Transmission = model.Transmission;
                 feature.fuelType = model.FuelType;
                 feature.motorInsurance = model.MotorInsurance;
@@ -160,7 +160,7 @@ namespace car.Service.Concrete
                 var newFeature = new carFeature.Models.CarFeature
                 {
                     CarId = car.Id,
-                    engineSize = model.EngineSize,
+                    enginePower = model.EnginePower,
                     Transmission = model.Transmission,
                     fuelType = model.FuelType,
                     motorInsurance = model.MotorInsurance,

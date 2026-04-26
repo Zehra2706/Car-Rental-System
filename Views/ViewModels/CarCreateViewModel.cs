@@ -25,7 +25,7 @@ namespace car.ViewModels
         public string? ImagePath { get; set; }
         public bool IsInsured { get; set; }
 
-        public double EngineSize { get; set; }
+        public double EnginePower { get; set; }
         public carFeature.Models.CarFeature.TransmissionType Transmission { get; set; }
         public carFeature.Models.CarFeature.FuelType FuelType { get; set; }
         public string MotorInsurance { get; set; } = string.Empty;

@@ -28,20 +28,31 @@ public class NotificationService : INotificationService
         }
         _emailService.SendEmail(user.UserInfo.Email, "Kiralama Talebi Alındı", body);
     }
-    public void RentalApproved(User user, Rental rental)
+public void RentalApproved(User user, Rental rental)
 {
     Console.WriteLine("APPROVED MAIL TETIKLENDI");
+
     var body = $@"
     <h2>Kiralama Talebiniz Kabul Edildi</h2>
     <p>Sayın {user.Name},</p>
-    <p>{rental.Date} - {rental.ReturnDate} tarihleri arasındaki kiralama talebiniz ONAYLANMIŞTIR.</p>
-    <p>İyi yolculuklar dileriz.</p>
+
+    <p>{rental.Date} - {rental.ReturnDate} tarihleri arasındaki kiralama talebiniz <b>ONAYLANMIŞTIR</b>.</p>
+
+    <p>Aracınızı belirttiğiniz tarih ve saatte <b>bayimizden teslim alabilirsiniz</b>.</p>
+
+    <p>İşlemlerinizin hızlı gerçekleşmesi için lütfen teslim saatinden <b>en az 10 dakika önce</b> bayide hazır bulununuz.</p>
+
+    <p>Herhangi bir sorunuz olursa bizimle iletişime geçebilirsiniz.</p>
+
+    <p>İyi yolculuklar dileriz 🚗</p>
     ";
-        if(user?.UserInfo?.Email == null)
-        {
-            Console.WriteLine("EMAIL BULUNAMADI");
-            return;
-        }
+
+    if (user?.UserInfo?.Email == null)
+    {
+        Console.WriteLine("EMAIL BULUNAMADI");
+        return;
+    }
+
     _emailService.SendEmail(user.UserInfo.Email, "Kiralama Talebi Onaylandı", body);
 }
 public void RentalRejected(User user, Rental rental)
@@ -146,6 +157,8 @@ Aracınızın kiralama süresi tamamlandı.
 Araç: {rental.Car.Brand} {rental.Car.ModelName}
 
 Kiralama başarıyla sonlandırıldı ve ödeme işlemleri tamamlandı.
+
+Tutar, <b>1-3 iş günü içerisinde</b> hesabınıza aktarılacaktır.
 
 İyi günler dileriz.
 ";

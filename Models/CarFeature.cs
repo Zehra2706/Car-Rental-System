@@ -13,7 +13,7 @@ namespace carFeature.Models
         [ForeignKey("CarId")]
         public Car? Car { get; set; }
 
-        public double engineSize { get; set; }
+        public double enginePower { get; set; }
 
         public enum TransmissionType { Automatic, Manual }
         public TransmissionType Transmission { get; set; }
