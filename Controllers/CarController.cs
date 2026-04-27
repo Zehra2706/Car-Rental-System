@@ -281,52 +281,6 @@ namespace car.Controllers
             return View("~/Views/User/AvailableCars.cshtml", cars);
         }
 
-        // public IActionResult ToggleActive(int id)
-        // {
-        //     try
-        //     {
-        //         var car = _carService.GetCarById(id);
-
-        //         if (car == null)
-        //         {
-        //             TempData["Error"] = "Araç bulunamadı.";
-        //             return RedirectToAction("MyCars");
-        //         }
-
-        //         bool newStatus = !car.IsActive;
-
-        //         _carService.UpdateCar(new CarCreateViewModel
-        //         {
-        //             Id = car.Id,
-        //             Brand = car.Brand,
-        //             ModelName = car.ModelName,
-        //             ModelYear = car.ModelYear,
-        //             Color = car.Color,
-        //             Location = car.Location,
-        //             Description = car.Description,
-        //             ImagePath = car.ImagePath,
-        //             Plate = car.Plate,
-        //             UserId = car.UserId,
-        //             IsInsured = car.IsInsured,
-
-        //             // ✅ KRİTİK SATIR
-        //             IsActive = newStatus,
-
-        //             DailyPrice = car.Prices?.FirstOrDefault()?.daily ?? 0,
-        //             WeeklyPrice = car.Prices?.FirstOrDefault()?.weekly ?? 0,
-        //             MonthlyPrice = car.Prices?.FirstOrDefault()?.monthly ?? 0
-        //         });
-
-        //         TempData["Success"] = newStatus ? "İlan açıldı." : "İlan kapatıldı.";
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         TempData["Error"] = ex.Message;
-        //     }
-
-        //     return RedirectToAction("MyCars");
-        // }
-
         public IActionResult ToggleActive(int id)
         {
             var car = _context.Cars.Find(id);

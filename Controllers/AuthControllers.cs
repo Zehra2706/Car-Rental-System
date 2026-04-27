@@ -120,6 +120,11 @@ public class AuthController : Controller
     [HttpPost]
     public IActionResult Register(RegisterViewModel model)
     {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
         if (model.Password != model.ConfirmPassword)
         {
             ViewBag.Error = "Şifreler uyuşmuyor!";
