@@ -251,5 +251,34 @@ public void AccountDeleted(User user)
 
     _emailService.SendEmail(user.UserInfo.Email, subject, body);
 }
+public void EmailVerification(User user, string code)
+{
+    var subject = "Email Doğrulama Kodu";
+
+    var body = $@"
+    <h2>Email Doğrulama</h2>
+
+    <p>Merhaba {user.Name},</p>
+
+    <p>Doğrulama kodunuz:</p>
+
+    <h1 style='color:#1e3a8a'>{code}</h1>
+
+    <p>Bu kodu sistemdeki doğrulama ekranına giriniz.</p>
+
+    <p>Kod 10 dakika geçerlidir.</p>
+    ";
+
+    if (user?.UserInfo?.Email == null)
+        return;
+
+    _emailService.SendEmail(user.UserInfo.Email, subject, body);
+}
+
+
+
+
+
+
 
 }

@@ -19,5 +19,6 @@ public interface INotificationService
     void WelcomeMail(User user);
 
     void AccountDeleted(User user);
+    void EmailVerification(User user, string code);
 
 }

@@ -1,6 +1,3 @@
-
-
-
 @model car.ViewModels.RentalSuccessViewModel
 @{
     Layout = "_Layout";
@@ -27,8 +24,8 @@
                 <h1 class="fw-bold text-dark">Ödeme Başarılı!</h1>
                 
                 <hr class="my-4 opacity-25">
-
-                <div class="review-invite p-4 mb-4" id="inviteBox">
+            @if (ViewBag.ShowReview == null || ViewBag.ShowReview == true)
+            { <div class="review-invite p-4 mb-4" id="inviteBox">
                     <h5 class="fw-bold text-primary mb-2">Deneyiminizi değerlendirmek ister misiniz?</h5>
                     <p class="small text-secondary mb-3">Geri bildirimleriniz bizim için çok değerli.</p>
                     <div class="d-flex justify-content-center gap-3">
@@ -37,7 +34,7 @@
                     </div>
                 </div>
 
-                <div id="commentArea" class="text-start p-4 bg-light rounded-4 border border-primary border-opacity-25 mb-4">
+                <div id="commentArea" class="text-start p-4 bg-light rounded-4 border border-primary border-opacity-25 mb-4 style="display:none;">
                     <h5 class="fw-bold mb-3 border-bottom pb-2">Yorumunuzu Yazın</h5>
                     <form asp-controller="Car" asp-action="AddComment" method="post">
                         @* Kiralama bilgisinden CarId'yi çekiyoruz *@
@@ -53,7 +50,7 @@
                                 <option value="1">⭐ - Çok Kötü</option>
                             </select>
                         </div>
-
+                
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Yorumunuz</label>
                             <textarea name="comment" class="form-control rounded-3" rows="3" placeholder="Araç durumu, teslimat süreci nasıldı?" required></textarea>
@@ -65,7 +62,7 @@
                         </div>
                     </form>
                 </div>
-
+            }
                 <div class="d-grid gap-2">
                     <a href="/User/MyRentals" class="btn btn-dark btn-lg rounded-pill fw-bold">Kiralamalarımı Görüntüle</a>
                     <a href="/User/Index" class="btn btn-link text-decoration-none text-muted">Ana Sayfaya Dön</a>

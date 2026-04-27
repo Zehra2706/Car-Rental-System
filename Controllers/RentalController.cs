@@ -33,12 +33,13 @@ namespace car.Controllers
             _notificationService = notificationService;
         }
 
-        public IActionResult Success(int carId)
+        public IActionResult Success(int carId , bool showReview = true)
         {
-            var model = new car.ViewModels.RentalSuccessViewModel
+            var model = new RentalSuccessViewModel
             {
-                CarId = carId
+                CarId = carId,
             };
+            ViewBag.ShowReview = showReview;
             return View(model);
         }
 
@@ -325,15 +326,15 @@ namespace car.Controllers
 
                 _notificationService.RentalCreated(user, rental);
                 _notificationService.DepositPaid(user, rental);
-
+               
                 // araç sahibine bildirim
                 _notificationService.NewRentalRequest(owner, rental);
                 _notificationService.OwnerDepositInfo(owner, rental);
-
+             
                 _paymentCache.TryRemove(token, out _);
 
                 TempData["Success"] = "Ödemeniz başarıyla alındı!";
-                return RedirectToAction("Success", new { carId = rental.CarId });
+                return RedirectToAction("Success", new { carId = rental.CarId , ShowReview = false });
             }
             else
             {

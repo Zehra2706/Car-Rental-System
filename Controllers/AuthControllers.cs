@@ -41,6 +41,7 @@ public class AuthController : Controller
             ViewBag.Error = "Email veya şifre yanlış";
             return View();
         }
+        
 
         // ==========================================
         // 1. JWT (KİMLİK DOĞRULAMA / GÜVENLİK) İŞLEMLERİ
@@ -130,8 +131,15 @@ public class AuthController : Controller
             _userService.Register(model);
             TempData["Success"] = "Kayıt başarılı! Lütfen giriş yapınız.";
             var user = _userService.GetByEmail(model.Email);
+            var token = Guid.NewGuid().ToString();
+            var code = new Random().Next(100000, 999999).ToString();
+            user.EmailVerificationCode = code;
+            user.EmailConfirmationToken = token;
+            user.IsEmailConfirmed = false;
+            _userService.Update(user);
             _notificationService.WelcomeMail(user);
-            return RedirectToAction("Login");
+            _notificationService.EmailVerification(user, code);
+            return RedirectToAction("VerifyEmail", "Auth", new { email = model.Email });
         }
         catch (Exception ex)
         {
@@ -144,7 +152,6 @@ public class AuthController : Controller
     {
         return View();
     }
-
 
     [HttpPost]
     public IActionResult ForgotPassword(string email)
@@ -198,4 +205,57 @@ public class AuthController : Controller
             return Content("Bir hata oluştu");
         }
     }
+
+            [HttpPost]
+        public IActionResult VerifyEmail(string email, string code)
+        {
+            var user = _userService.GetByEmail(email);
+
+            if (user == null)
+                return Content("User not found");
+
+            if (user.EmailVerificationCode != code)
+            {
+                TempData["Error"] = "Kod yanlış!";
+                return RedirectToAction("VerifyEmail", new { email });
+            }
+
+            user.IsEmailConfirmed = true;
+            user.EmailVerificationCode = null;
+
+            _userService.Update(user);
+            TempData["Success"] = "Email doğrulandı!";
+            return RedirectToAction("Login", "Auth");
+        }
+        [HttpGet]
+        public IActionResult VerifyEmail(string email)
+        {
+            ViewBag.Email = email;
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ResendCode(string email)
+        {
+            var user = _userService.GetByEmail(email);
+
+            if (user == null)
+                return Content("User not found");
+
+            var code = new Random().Next(100000, 999999).ToString();
+
+            user.EmailVerificationCode = code;
+            _userService.Update(user);
+
+            
+            _notificationService.EmailVerification(user, code);
+
+            TempData["Success"] = "Yeni doğrulama kodu gönderildi.";
+
+            return RedirectToAction("VerifyEmail", new { email = email });
+        }
+
+
+
+
 }

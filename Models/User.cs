@@ -23,6 +23,10 @@ namespace user.Models
         [StringLength(11)]
         public string TC { get; set; } = "00000000000";
 
+        public bool IsEmailConfirmed { get; set; } = false;
+
+        public string? EmailConfirmationToken { get; set; }
+        public string? EmailVerificationCode { get; set; }
 
 
 

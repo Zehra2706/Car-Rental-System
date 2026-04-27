@@ -169,16 +169,27 @@ namespace car.Controllers
 
             if (!_userService.CanDeleteUser(userId.Value))
             {
-                TempData["Error"] = "Aktif kiralama veya kirada aracınız olduğu için hesabınız silinemez.";
-                return RedirectToAction("Index");
+                TempData["Error"] = "Aktif kiralamanız var, hesap silinemez.";
+                return RedirectToAction("EditProfile");
             }
 
             _userService.DeleteUser(userId.Value);
 
             HttpContext.Session.Clear();
+            Response.Cookies.Delete("AuthToken");
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("AccountDeleted");
         }
+
+        [HttpGet]
+        public IActionResult AccountDeleted()
+        {
+            return View();
+        }
+
+
+
+
 
     }
 }
