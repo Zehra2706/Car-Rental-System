@@ -166,6 +166,11 @@
                         <button onclick="confirmDelete(@car.Id)" class="btn btn-outline-danger rounded-pill btn-sm flex-fill fw-bold">
                             <i class="bi bi-trash3 me-1"></i> Sil
                         </button>
+                        <a href="/Car/ToggleActive/@car.Id"
+                            class="btn btn-sm @(car.IsActive ? "btn-warning" : "btn-success") rounded-pill flex-fill fw-bold">
+                            <i class="bi @(car.IsActive ? "bi-eye-slash" : "bi-eye") me-1"></i>
+                            @(car.IsActive ? "İlanı Kapat" : "İlanı Aç")
+                        </a>
                     </div>
                 </div>
             </div>

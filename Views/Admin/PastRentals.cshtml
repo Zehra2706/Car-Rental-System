@@ -71,19 +71,6 @@
         letter-spacing: 1px;
         border-bottom: 2px solid #edf2f7;
     }
-    tr:hover {
-    background-color: #f1f5f9;
-    transition: 0.2s;
-    }
-    .overdue-row {
-    background-color: #fee2e2 !important;
-    }
-    .table tbody tr.overdue-row > td {
-    background-color: #fee2e2 !important;
-    }
-    tr.overdue-row:hover td {
-    background-color: #fee2e2 !important;
-    }
 </style>
 
 <div class="custom-topbar">
@@ -138,9 +125,7 @@
                     {
                         foreach (var item in Model)
                         {
-                            <tr onclick="window.location='/Admin/RentalDetail/@item.Id'"
-                                class="@(item.IsPaid && !item.IsReturned && DateTime.Now.Date > item.ReturnDate.Date ? "overdue-row" : "")"
-                                style="cursor:pointer;">                           
+                            <tr>
                                 <td class="ps-4">
                                     <div class="fw-bold text-dark">@item.User?.Name @item.User?.Surname</div>
                                     <small class="text-muted">@item.User?.UserInfo?.Email</small>
@@ -183,7 +168,7 @@
                                         @* 2) İADE BUTONU                        *@
                                         @if (item.IsPaid && !item.IsReturned && DateTime.Now > item.ReturnDate )
                                         {
-                                            <form method="post" action="/Admin/ReturnCar" onclick="event.stopPropagation();">
+                                            <form method="post" action="/Admin/ReturnCar">
                                                 <input type="hidden" name="rentalId" value="@item.Id" />
                                                 <button type="submit" class="btn btn-warning btn-sm mt-2">
                                                     İade Al

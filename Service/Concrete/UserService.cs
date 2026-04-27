@@ -151,7 +151,9 @@ namespace car.Service.Concrete
         }
         public List<car.Models.Car> GetAllCarsForUser()
         {
-            return _context.Cars.ToList();
+            return _context.Cars
+                .Where(c => c.IsActive) 
+                .ToList();
         }
 
 

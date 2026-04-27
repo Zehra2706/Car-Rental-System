@@ -1,7 +1,9 @@
+using car.Data;
 using Car_reservation_automation_system.Repositories.Interfaces;
 using Car_reservation_automation_system.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static user.Models.User;
 using UserModel = user.Models.User;
 [Authorize(Roles = "Admin")]
@@ -18,8 +20,10 @@ public class AdminController : Controller
     private readonly IReviewService _reviewService;
     private readonly IReviewRepository _reviewRepository;
 
+    private readonly ApplicationDbContext _context;
 
-    public AdminController(IUserService userService, ICarService carService, INotificationService notificationService, IRentalService rentalService, IRentalRepository rentalRepo, IReviewService reviewService, IReviewRepository reviewRepository)
+
+    public AdminController(IUserService userService, ICarService carService, INotificationService notificationService, IRentalService rentalService, IRentalRepository rentalRepo, IReviewService reviewService, IReviewRepository reviewRepository, ApplicationDbContext context)
     {
         _userService = userService;
         _carService = carService;
@@ -28,6 +32,7 @@ public class AdminController : Controller
         _rentalRepo = rentalRepo;
         _reviewService = reviewService;
         _reviewRepository = reviewRepository;
+        _context = context;
     }
 
     private bool IsAdmin()
@@ -172,7 +177,13 @@ public class AdminController : Controller
     public IActionResult AllRentalRequests()
     {
         var allRentals = _userService.GetAllRentals();
-        return View(allRentals);
+        var aktifler = allRentals.Where(x => !x.IsReturned).ToList();
+        var gecmisler = allRentals.Where(x => x.IsReturned).ToList();
+
+        ViewBag.Gecmisler = gecmisler;
+
+        return View(aktifler);
+        
     }
     [HttpGet]
     public IActionResult ManageReviews()
@@ -217,5 +228,31 @@ public class AdminController : Controller
         TempData["Success"] = "Yorum admin tarafından başarıyla kaldırıldı.";
         return RedirectToAction("ManageReviews");
     }
+
+    public IActionResult PastRentals()
+    {
+        var rentals = _userService.GetAllRentals()
+                        .Where(x => x.IsReturned)
+                        .ToList();
+
+        return View(rentals);
+    }
+    public IActionResult RentalDetail(int id)
+    {
+        var rental = _context.Rentals
+            .Include(x => x.User)
+                .ThenInclude(u => u.UserInfo)
+            .Include(x => x.User)
+                .ThenInclude(u => u.UserConnections)
+            .Include(x => x.User)
+                .ThenInclude(u => u.Licence)
+            .Include(x => x.Car)
+            .FirstOrDefault(x => x.Id == id);
+        if (rental == null)
+            return NotFound();
+
+        return View(rental);
+    }
+
 
 }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "BUy9n4YArtE=",
+  "dgSpecHash": "5e0KeSa5eOo=",
   "success": true,
-  "projectFilePath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\car-reservation-automation-system\\car.csproj",
+  "projectFilePath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\demir\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\demir\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",
@@ -136,9 +136,9 @@
       "code": "NU1901",
       "level": "Warning",
       "message": "'NuGet.Packaging' 6.12.1 paketinde önem derecesi düşük olan bilinen bir https://github.com/advisories/GHSA-g4vj-cjjj-v7hg güvenlik açığı var",
-      "projectPath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\car-reservation-automation-system\\car.csproj",
+      "projectPath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\car-reservation-automation-system\\car.csproj",
+      "filePath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj",
       "libraryId": "NuGet.Packaging",
       "targetGraphs": [
         "net10.0"
@@ -148,9 +148,9 @@
       "code": "NU1901",
       "level": "Warning",
       "message": "'NuGet.Protocol' 6.12.1 paketinde önem derecesi düşük olan bilinen bir https://github.com/advisories/GHSA-g4vj-cjjj-v7hg güvenlik açığı var",
-      "projectPath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\car-reservation-automation-system\\car.csproj",
+      "projectPath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\car-reservation-automation-system\\car.csproj",
+      "filePath": "C:\\Users\\demir\\Desktop\\Araç Kiralama Sistemi\\Car-reservation-automation-system\\car.csproj",
       "libraryId": "NuGet.Protocol",
       "targetGraphs": [
         "net10.0"

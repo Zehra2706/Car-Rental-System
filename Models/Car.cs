@@ -28,6 +28,7 @@ namespace car.Models
         public ICollection<Rental> Rentals { get; set; } = new List<Rental>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
         public string Plate { get; set; }
+        public bool IsActive { get; set; } = true;
         
     }
 }

@@ -136,6 +136,7 @@ namespace car.Service.Concrete
             car.Location = model.Location;
             car.Description = model.Description;
             car.IsInsured = model.IsInsured;
+            car.IsActive = model.IsActive;
 
             if (!string.IsNullOrWhiteSpace(model.Plate))
             {
@@ -227,7 +228,7 @@ namespace car.Service.Concrete
             var allCars = _carRepository.GetAllCars();
             if (allCars == null) return new List<Car>();
 
-            return allCars.Where(c => c.UserId == userId).ToList();
+            return allCars.Where(c => c.UserId == userId ).ToList();
         }
         public List<Car> FilterCars(CarFilter filter)
         {

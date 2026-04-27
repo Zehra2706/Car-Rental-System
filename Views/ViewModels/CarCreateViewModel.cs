@@ -30,6 +30,7 @@ namespace car.ViewModels
         public carFeature.Models.CarFeature.FuelType FuelType { get; set; }
         public string MotorInsurance { get; set; } = string.Empty;
         public bool IsChauffeured { get; set; }
+        public bool IsActive { get; set; } = true;
 
         [ValidateNever]
         public carFeature.Models.CarFeature? CarFeatures { get; set; }

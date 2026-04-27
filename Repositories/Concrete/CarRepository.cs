@@ -97,7 +97,7 @@ public class CarRepository : ICarRepository
 
         return _context.Cars
             .Include(c => c.Prices)
-            .Where(c => c.UserId == userInfo.UserId)
+            .Where(c => c.UserId == userInfo.UserId && c.IsActive)
             .ToList();
     }
     public string? GetCarsByUserId(int value)
