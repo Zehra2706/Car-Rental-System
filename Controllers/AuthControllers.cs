@@ -36,10 +36,9 @@ public class AuthController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Login(LoginViewModel model)
     {
-        // Model doğruluğunu kontrol et
-        if (!ModelState.IsValid) return View(model);
+        if (!ModelState.IsValid)
+            return View(model);
 
-        // 1. Kullanıcıyı getir
         var user = _userService.GetByEmail(model.Email);
 
         if (user == null)
@@ -48,42 +47,43 @@ public class AuthController : Controller
             return View(model);
         }
 
-        // 2. Kilitleme Kontrolü
+        // 🔒 Hesap kilitli mi?
         if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTime.Now)
         {
-            var kalanDakika = (int)Math.Ceiling((user.LockoutEnd.Value - DateTime.Now).TotalMinutes);
-            ViewBag.Error = $"Çok fazla hatalı deneme! Hesabınız {kalanDakika} dakika kilitlendi.";
+            ViewBag.Error = "Hesabınız kilitli. Şifrenizi sıfırlamanız gerekiyor.";
             ViewBag.IsLocked = true;
             return View(model);
         }
 
-        // 3. Şifre Doğrulama
+        // ❌ Şifre kontrol
         var authenticatedUser = _userService.Login(model.Email, model.Password);
 
         if (authenticatedUser == null)
         {
             user.AccessFailedCount++;
-            if (user.AccessFailedCount >= 5)
+
+            if (user.AccessFailedCount >= 3)
             {
-                user.LockoutEnd = DateTime.Now.AddMinutes(20);
-                ViewBag.Error = "5 kez hatalı giriş yapıldı. Hesabınız 20 dakika kilitlendi.";
+                user.LockoutEnd = DateTime.MaxValue; // 🔒 kalıcı kilit
+                user.AccessFailedCount = 3;
+
+                ViewBag.Error = "3 hatalı giriş. Hesabınız kilitlendi. Şifre sıfırlayın.";
                 ViewBag.IsLocked = true;
             }
             else
             {
-                ViewBag.Error = $"Email veya şifre yanlış. Kalan deneme hakkınız: {5 - user.AccessFailedCount}";
+                ViewBag.Error = $"Hatalı giriş. Kalan hak: {3 - user.AccessFailedCount}";
             }
 
             _userService.Update(user);
             return View(model);
         }
 
-        // 4. Başarılı Giriş: Sayaçları sıfırla
+        // ✅ Başarılı giriş
         user.AccessFailedCount = 0;
         user.LockoutEnd = null;
         _userService.Update(user);
 
-        // 5. JWT Token Oluşturma (Claims)
         var claims = new List<Claim>
     {
         new Claim("UserId", user.Id.ToString()),
@@ -106,7 +106,6 @@ public class AuthController : Controller
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-        // 6. Cookie ve Session İşlemleri
         Response.Cookies.Append("AuthToken", tokenString, new CookieOptions
         {
             HttpOnly = true,
@@ -118,7 +117,6 @@ public class AuthController : Controller
         HttpContext.Session.SetString("UserName", user.Name);
         HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
 
-        // 7. Yönlendirme
         return user.UserRole == UserEntity.Role.Admin
             ? RedirectToAction("Index", "Admin")
             : RedirectToAction("Index", "User");
@@ -205,36 +203,30 @@ public class AuthController : Controller
         ViewBag.Message = "Şifre sıfırlama maili gönderildi";
         return View();
     }
-    [HttpGet]
-    public IActionResult ResetPassword(string token, string password, string confirmPassword)
-    {
-        var user = _userService.GetUserByResetToken(token);
-
-        if (password != confirmPassword)
-        {
-            ViewBag.Error = "Şifreler uyuşmuyor!";
-            ViewBag.Token = token;
-            return View();
-        }
-
-        if (user == null)
-            return Content("Link geçersiz veya süresi dolmuş");
-
-        ViewBag.Token = token;
-        return View();
-    }
-
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult ResetPassword(string token, string password)
     {
         if (string.IsNullOrEmpty(password))
-        {
             return Content("Şifre boş olamaz");
-        }
+
         try
         {
+            var user = _userService.GetUserByResetToken(token);
+
+            if (user == null)
+                return Content("Geçersiz token");
+
             _userService.ResetPassword(token, password);
+
+            // 🔥 EN SAĞLAM KİLİT AÇMA (TEKRAR DB'DEN ÇEK)
+            var updatedUser = _userService.GetByEmail(user.UserInfo.Email);
+
+            updatedUser.AccessFailedCount = 0;
+            updatedUser.LockoutEnd = null;
+
+            _userService.Update(updatedUser);
+
             return RedirectToAction("Login");
         }
         catch
@@ -242,6 +234,14 @@ public class AuthController : Controller
             return Content("Bir hata oluştu");
         }
     }
+    [HttpGet]
+    public IActionResult ResetPassword(string token)
+    {
+        ViewBag.Token = token;
+        return View();
+    }
+
+
 
     [HttpPost]
     [ValidateAntiForgeryToken]
