@@ -39,6 +39,7 @@ namespace car.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult EditProfile(EditProfileViewModel model)
         {
             var email = HttpContext.Session.GetString("UserEmail");
@@ -54,6 +55,7 @@ namespace car.Controllers
 
         // --- ARAÇ LİSTELEME ---
         [HttpGet]
+        
         public IActionResult AvailableCars()
         {
             var email = HttpContext.Session.GetString("UserEmail");
@@ -104,6 +106,7 @@ namespace car.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult UpdateRequestStatus(int rentalId, string status)
         {
             _userService.UpdateRentalStatus(rentalId, status);
@@ -111,6 +114,7 @@ namespace car.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult ReturnCar(int rentalId)
         {
             _userService.ReturnCar(rentalId);
@@ -119,6 +123,7 @@ namespace car.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult ProcessReturnPayment(int rentalId)
         {
             var rentalCalc = _userService.GetReturnCalculation(rentalId);
@@ -127,6 +132,7 @@ namespace car.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult FinalizeReturn(int rentalId, double finalAmount)
         {
             _userService.ConfirmReturnAndPayment(rentalId, finalAmount);
@@ -134,6 +140,7 @@ namespace car.Controllers
             return RedirectToAction("MyRentals");
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult ApproveRental(int rentalId)
         {
             _rentalService.ApproveRental(rentalId);
@@ -141,6 +148,7 @@ namespace car.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult RejectedRental(int rentalId)
         {
             _rentalService.RejectedRental(rentalId);
@@ -162,6 +170,7 @@ namespace car.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult DeleteAccount()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
@@ -198,6 +207,7 @@ namespace car.Controllers
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult AddReviews(int carId, int rating, string comment)
     {
         var userId = HttpContext.Session.GetInt32("UserId");

@@ -90,7 +90,7 @@
         <h2 class="register-title">Kayıt Ol</h2>
 
         <form asp-action="Register" method="post">
-
+        @Html.AntiForgeryToken()
             <div class="form-group">
                 <input asp-for="Name" class="form-control" placeholder="Ad" />
             </div>

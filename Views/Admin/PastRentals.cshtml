@@ -169,6 +169,7 @@
                                         @if (item.IsPaid && !item.IsReturned && DateTime.Now > item.ReturnDate )
                                         {
                                             <form method="post" action="/Admin/ReturnCar">
+                                                @Html.AntiForgeryToken()
                                                 <input type="hidden" name="rentalId" value="@item.Id" />
                                                 <button type="submit" class="btn btn-warning btn-sm mt-2">
                                                     İade Al

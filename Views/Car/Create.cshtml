@@ -95,6 +95,7 @@
             </div>
 
             <form action="/Car/Create" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
                 <div class="form-card card p-5">
                     <h4 class="mb-4 text-primary fw-bold border-bottom pb-3">
                         <i class="bi bi-info-circle-fill me-2"></i>Araç Temel Bilgileri

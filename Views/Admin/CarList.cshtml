@@ -120,6 +120,7 @@
         </div>
         <div class="col-md">
             <form method="get" action="/Car/AdminList">
+                @Html.AntiForgeryToken()
                 <div class="input-group shadow-sm rounded-pill overflow-hidden border bg-white">
                     <input type="text" id="searchBox" name="search" value="@Context.Request.Query["search"]"
                            class="form-control border-0 px-4" placeholder="Marka, model veya plaka ile hızlı ara...">
@@ -165,6 +166,7 @@
                                 <i class="bi bi-pencil-square"></i> Düzenle
                             </a>
                             <form action="/Admin/DeleteCar/@item.Id" method="post" class="flex-fill">
+                                @Html.AntiForgeryToken()    
                                 <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-pill"
                                         onclick="return confirm('Bu aracı silmek istediğine emin misin?')">
                                     <i class="bi bi-trash3"></i> Sil
@@ -192,6 +194,7 @@
     </div>
     <div class="offcanvas-body">
         <form method="get" action="/Car/AdminList">
+            @Html.AntiForgeryToken()
             <div class="mb-3">
                 <label class="form-label small fw-bold">Marka</label>
                 <input type="text" name="Brand" class="form-control rounded-3" placeholder="Örn: BMW">

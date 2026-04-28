@@ -112,6 +112,7 @@
         <h2 class="login-title">Giriş Yap</h2>
 
         <form method="post">
+            @Html.AntiForgeryToken()
 
             <div class="form-group">
                 <label>Email</label>

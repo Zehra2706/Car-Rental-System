@@ -96,6 +96,7 @@
             </div>
 
             <form action="/Car/Edit" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
                 @* KRİTİK: Gizli alanlar korunuyor *@
                 <input type="hidden" name="Id" value="@Model.Id" />
                 <input type="hidden" name="ImagePath" value="@Model.ImagePath" />

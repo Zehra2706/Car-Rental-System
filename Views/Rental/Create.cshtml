@@ -197,7 +197,7 @@
                                         </h5>
 
                                         <form asp-controller="Rental" asp-action="StartPayment" method="post" id="rentalForm">
-
+                                        @Html.AntiForgeryToken()
                                             <input type="hidden" name="CarId" value="@car?.Id" id="carIdField" />
 
                                             <!-- Gizli alanlar -->
@@ -339,7 +339,7 @@
                                         </div>
                                         @section Scripts {
                                             <script>
-                                                const disabledRangesRaw = @Html.Raw(ViewBag.DisabledDates ?? "[]");
+                                                const disabledRangesRaw = JSON.parse('@Html.Raw(ViewBag.DisabledDates ?? "[]")');
                                                 const carId = document.getElementById('carIdField')?.value;
 
                                                 // Tarihleri Flatpickr'ın anlayacağı JS formatına çeviriyoruz

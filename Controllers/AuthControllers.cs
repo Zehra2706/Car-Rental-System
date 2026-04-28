@@ -26,12 +26,14 @@ public class AuthController : Controller
     }
 
     [HttpGet]
+
     public IActionResult Login()
     {
         return View();
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult Login(LoginViewModel model)
     {
         var user = _userService.Login(model.Email, model.Password);
@@ -118,6 +120,7 @@ public class AuthController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult Register(RegisterViewModel model)
     {
         if (!ModelState.IsValid)
@@ -159,6 +162,7 @@ public class AuthController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult ForgotPassword(string email)
     {
         var user = _userService.GetByEmail(email);
@@ -194,6 +198,7 @@ public class AuthController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult ResetPassword(string token, string password)
     {
         if (string.IsNullOrEmpty(password))
@@ -212,6 +217,7 @@ public class AuthController : Controller
     }
 
             [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult VerifyEmail(string email, string code)
         {
             var user = _userService.GetByEmail(email);

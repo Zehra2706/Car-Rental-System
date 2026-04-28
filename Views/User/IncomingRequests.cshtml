@@ -235,11 +235,14 @@
                                             {
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <form asp-action="ApproveRental" asp-controller="User" method="post">
+                                                        
+                                                        @Html.AntiForgeryToken()
                                                         <input type="hidden" name="rentalId" value="@item.Id" />
                                                         <button type="submit"
                                                                 class="btn btn-sm btn-success rounded-pill px-3">Onayla</button>
                                                     </form>
                                                     <form asp-action="RejectedRental" asp-controller="User" method="post">
+                                                        @Html.AntiForgeryToken()
                                                         <input type="hidden" name="rentalId" value="@item.Id" />
                                                         <button type="submit"
                                                                 class="btn btn-sm btn-danger rounded-pill px-3">Reddet</button>

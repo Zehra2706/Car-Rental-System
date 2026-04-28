@@ -86,7 +86,7 @@
 
                         <!-- ÖDEME -->
                         <form asp-action="StartReturnPayment" asp-controller="Rental" method="post">
-
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="rentalId" value="@Model.Id" />
 
                             <button type="submit" class="btn btn-success btn-lg rounded-pill shadow-sm w-100">

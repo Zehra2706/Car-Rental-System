@@ -106,6 +106,7 @@
 
             <div class="admin-form-card card p-4 p-md-5">
                 <form method="post">
+                    @Html.AntiForgeryToken()
                     <div asp-validation-summary="All" class="text-danger small mb-3"></div>
 
                     @* Ad & Soyad *@

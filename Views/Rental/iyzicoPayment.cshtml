@@ -7,8 +7,9 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <h2 class="text-center mb-4">Güvenli Ödeme Sayfası</h2>
+
             <div id="iyzipay-checkout-form" class="responsive"></div>
-            @Html.Raw(ViewBag.PaymentForm)
-        </div>
+
+            @await Html.PartialAsync("_PaymentForm")
     </div>
 </div>

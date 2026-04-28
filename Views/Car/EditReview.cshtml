@@ -77,6 +77,7 @@
 
             <div class="card edit-card p-5">
                 <form asp-action="EditReview" method="post">
+                    @Html.AntiForgeryToken()
                     @* Gizli ID Alanları *@
                     <input type="hidden" name="id" value="@Model.Id" />
                     <input type="hidden" name="CarId" value="@Model.CarId" />

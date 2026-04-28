@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Authorization;
 using car.ViewModels;
+using car.Data;
 
 namespace car.Controllers
 {
@@ -21,16 +22,18 @@ namespace car.Controllers
         private readonly ICarService _carService;
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
+        private readonly ApplicationDbContext _context;
 
         private static readonly ConcurrentDictionary<string, string> _paymentCache = new();
         private readonly INotificationService _notificationService;
-        public RentalController(IRentalService rentalService, ICarService carService, IConfiguration configuration, IUserService userService, INotificationService notificationService)
+        public RentalController(IRentalService rentalService, ICarService carService, IConfiguration configuration, IUserService userService, INotificationService notificationService ,ApplicationDbContext context)
         {
             _rentalService = rentalService;
             _carService = carService;
             _configuration = configuration;
             _userService = userService;
             _notificationService = notificationService;
+            _context = context;
         }
 
         public IActionResult Success(int carId , bool showReview = true)
@@ -86,6 +89,7 @@ namespace car.Controllers
             return View(rental);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult SendRequest(Rental rental)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
@@ -132,6 +136,7 @@ namespace car.Controllers
             return Json(new { total = result.total, deposit = result.deposit });
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult ConfirmPayment(rental.Models.Rental rental)
         {
             if (rental.UserId <= 0)
@@ -156,6 +161,7 @@ namespace car.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> StartPayment(int CarId, DateTime Date, DateTime ReturnDate, string Forecast, string Deposit, bool IsContractApproved = false)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
@@ -273,6 +279,7 @@ namespace car.Controllers
         [HttpPost]
         [AllowAnonymous]
         [IgnoreAntiforgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> PaymentCallback(string token)
         {
             if (string.IsNullOrEmpty(token))
@@ -354,6 +361,7 @@ namespace car.Controllers
             return View();
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult CancelRequest(int rentalId)
         {
 
@@ -364,6 +372,7 @@ namespace car.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> StartReturnPayment(int rentalId)
         {
             var rental = _rentalService.GetRentalById(rentalId);
@@ -467,6 +476,7 @@ namespace car.Controllers
         [HttpPost]
         [AllowAnonymous]
         [IgnoreAntiforgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ReturnCallback(string token)
         {
 
@@ -523,6 +533,12 @@ namespace car.Controllers
             }
         }
 
+        public IActionResult PaymentForm(int rentalId)
+        {
+            var rental = _context.Rentals.FirstOrDefault(x => x.Id == rentalId);
+
+            return PartialView("_PaymentForm", rental);
+        }
 
 
 

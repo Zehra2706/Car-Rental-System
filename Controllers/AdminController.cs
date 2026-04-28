@@ -35,6 +35,7 @@ public class AdminController : Controller
         _context = context;
     }
 
+
     private bool IsAdmin()
     {
         return HttpContext.Session.GetString("UserRole") == "Admin";
@@ -70,6 +71,7 @@ public class AdminController : Controller
 
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult DeleteUser(int id)
     {
         if (!IsAdmin()) return RedirectToAction("Login", "Auth");
@@ -108,6 +110,7 @@ public class AdminController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult AddUser(AdminCreateUserViewModel model)
     {
         if (!IsAdmin()) return RedirectToAction("Login", "Auth");
@@ -194,6 +197,7 @@ public class AdminController : Controller
         return View(allReviews);
     }
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult ReturnCar(int rentalId)
     {
         var rental = _rentalRepo.GetById(rentalId);
@@ -206,6 +210,7 @@ public class AdminController : Controller
         return RedirectToAction("AllRentalRequests");
     }
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult CompleteRental(int rentalId)
     {
         var rental = _rentalRepo.GetById(rentalId);
@@ -218,6 +223,8 @@ public class AdminController : Controller
         return RedirectToAction("AllRentalRequests");
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult DeleteReviewByAdmin(int id)
     {
         if (HttpContext.Session.GetString("UserRole") != "Admin") return Unauthorized();
@@ -237,7 +244,9 @@ public class AdminController : Controller
 
         return View(rentals);
     }
+    [HttpGet]
     public IActionResult RentalDetail(int id)
+    
     {
         var rental = _context.Rentals
             .Include(x => x.User)

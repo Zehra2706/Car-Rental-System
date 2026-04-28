@@ -93,6 +93,7 @@
         }
 
         <form method="post" action="/Auth/VerifyEmail">
+        @Html.AntiForgeryToken()
 
             <input type="hidden" name="email" value="@ViewBag.Email" />
 

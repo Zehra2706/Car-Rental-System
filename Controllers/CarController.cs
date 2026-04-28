@@ -47,6 +47,7 @@ namespace car.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CarCreateViewModel model)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
@@ -100,6 +101,7 @@ namespace car.Controllers
 
         // --- 5. ARAÇ DÜZENLEME (POST) ---
         [HttpPost]
+        [ValidateAntiForgeryToken]  
         public async Task<IActionResult> Edit(CarCreateViewModel model)
         {
             if (model.Id == 0)
@@ -128,6 +130,7 @@ namespace car.Controllers
 
         // --- 6. ARAÇ SİLME ---
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
             try
@@ -170,6 +173,7 @@ namespace car.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult EditReview(int id, int rating, string comment)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
@@ -225,6 +229,7 @@ namespace car.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult AddComment(int carId, int rating, string comment)
         {
 

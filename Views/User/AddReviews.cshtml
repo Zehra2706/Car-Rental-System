@@ -13,6 +13,7 @@
         <div class="p-4">
 
             <form method="post">
+                @Html.AntiForgeryToken()
 
                 <input type="hidden" name="carId" value="@ViewBag.CarId" />
 

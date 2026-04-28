@@ -16,6 +16,7 @@
                     }
 
                     <form asp-controller="Rental" asp-action="CompletePayment" method="post">
+                        @Html.AntiForgeryToken()
                         @* 🚩 KRİTİK: Model verilerini gizli input olarak taşıyoruz *@
                         <input type="hidden" name="CarId" value="@Model?.CarId" />
                         <input type="hidden" name="Date" value="@Model?.Date.ToString("yyyy-MM-dd HH:mm")" />

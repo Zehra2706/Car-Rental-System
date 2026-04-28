@@ -37,6 +37,7 @@
                 <div id="commentArea" class="text-start p-4 bg-light rounded-4 border border-primary border-opacity-25 mb-4 style="display:none;">
                     <h5 class="fw-bold mb-3 border-bottom pb-2">Yorumunuzu Yazın</h5>
                     <form asp-controller="Car" asp-action="AddComment" method="post">
+                        @Html.AntiForgeryToken()
                         @* Kiralama bilgisinden CarId'yi çekiyoruz *@
                         <input type="hidden" name="carId" value="@Model.CarId" />
                         

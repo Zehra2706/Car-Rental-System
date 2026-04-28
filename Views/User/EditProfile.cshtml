@@ -110,7 +110,7 @@
 
             <div class="profile-card card p-4 p-md-5">
                 <form action="/User/EditProfile" method="post">
-                    
+                    @Html.AntiForgeryToken()
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-secondary small">AD</label>
@@ -173,6 +173,7 @@
                 </form>
                     <div class="text-center">
                         <form method="post" action="/User/DeleteAccount" onsubmit="return confirmDelete()">
+                        @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-danger rounded-pill px-4 py-2 fw-bold">
                                 <i class="bi bi-trash"></i> Hesabımı Sil
                             </button>

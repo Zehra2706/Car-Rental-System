@@ -164,6 +164,7 @@
         </div>
         <div class="col-md">
             <form method="get" action="/Car/UserList">
+            @Html.AntiForgeryToken()
                 <div class="input-group shadow-sm rounded-pill overflow-hidden border">
                     <input type="text" id="searchBox" name="search" value="@Context.Request.Query["search"]"
                            class="form-control border-0 px-4" placeholder="Marka, model veya plaka ile ara...">
@@ -228,6 +229,7 @@
     <div class="offcanvas-body">
     
         <form method="get" action="/Car/UserList">
+        @Html.AntiForgeryToken()
 
             <!-- MARKA -->
             <div class="mb-3">
