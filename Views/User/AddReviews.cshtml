@@ -1,0 +1,56 @@
+<div class="container" style="margin-top:100px; max-width:600px;">
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+
+        <!-- HEADER -->
+        <div class="p-4 text-white" style="background: linear-gradient(135deg,#1e3a8a,#3b82f6);">
+            <h4 class="mb-1 fw-bold">
+                <i class="bi bi-chat-dots me-2"></i> Yorum Yap
+            </h4>
+            <small>Deneyimini paylaş, diğer kullanıcılara yardımcı ol.</small>
+        </div>
+
+        <!-- BODY -->
+        <div class="p-4">
+
+            <form method="post">
+
+                <input type="hidden" name="carId" value="@ViewBag.CarId" />
+
+                <!-- PUAN -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Puan</label>
+                    <select name="rating" class="form-select rounded-3">
+                        <option value="5">⭐⭐⭐⭐⭐ Mükemmel</option>
+                        <option value="4">⭐⭐⭐⭐ İyi</option>
+                        <option value="3">⭐⭐⭐ Orta</option>
+                        <option value="2">⭐⭐ Zayıf</option>
+                        <option value="1">⭐ Kötü</option>
+                    </select>
+                </div>
+
+                <!-- YORUM -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Yorumun</label>
+                    <textarea name="comment"
+                              class="form-control rounded-3"
+                              rows="4"
+                              placeholder="Deneyimini yaz..."
+                              required></textarea>
+                </div>
+
+                <!-- BUTONLAR -->
+                <div class="d-flex gap-2">
+                    <a href="/User/MyRentals" class="btn btn-light w-50 rounded-pill shadow-sm">
+                        <i class="bi bi-arrow-left"></i> Geri
+                    </a>
+
+                    <button class="btn w-50 rounded-pill text-white shadow-sm"
+                            style="background:#1e3a8a;">
+                        <i class="bi bi-send"></i> Gönder
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

@@ -12,11 +12,13 @@ namespace car.Controllers
     {
         private readonly IUserService _userService;
         private readonly IRentalService _rentalService;
+        private readonly IReviewService _reviewService;
 
-        public UserController(IUserService userService, IRentalService rentalService)
+        public UserController(IUserService userService, IRentalService rentalService, IReviewService reviewService)
         {
             _userService = userService;
             _rentalService = rentalService;
+            _reviewService = reviewService;
         }
 
         public IActionResult Index()
@@ -187,6 +189,23 @@ namespace car.Controllers
             return View();
         }
 
+    [HttpGet]
+    public IActionResult AddReviews(int carId, int rentalId)
+    {
+        ViewBag.CarId = carId;
+        ViewBag.RentalId = rentalId;
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult AddReviews(int carId, int rating, string comment)
+    {
+        var userId = HttpContext.Session.GetInt32("UserId");
+
+        _reviewService.PostReview(carId, userId.Value, rating, comment);
+
+        return RedirectToAction("MyRentals", "User");
+    }
 
 
 

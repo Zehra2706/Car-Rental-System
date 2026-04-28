@@ -1,14 +1,11 @@
 @{
     Layout = "_Layout";
-    // Session'dan ismi alıyoruz, eğer boşsa fallback olarak e-postayı parçalıyoruz.
     var userNameFromSession = Context.Session.GetString("UserName");
     var userEmail = Context.Session.GetString("UserEmail");
-    
-    // Eğer UserName session'da varsa onu kullan, yoksa Email'in @ öncesini al.
+
     string displayDisplayName = !string.IsNullOrEmpty(userNameFromSession) ? userNameFromSession :
                                (!string.IsNullOrEmpty(userEmail) ? userEmail.Split('@')[0] : "Değerli Üyemiz");
 }
-
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
@@ -18,10 +15,8 @@
         font-family: 'Segoe UI', sans-serif;
         background: #f4f7fa;
         padding-top: 70px;
-        /* Topbar yüksekliği kadar boşluk */
     }
 
-    /* TOPBAR - TAM KÖŞELERE SABİTLEME */
     .custom-topbar {
         position: fixed;
         top: 0;
@@ -33,30 +28,20 @@
         align-items: center;
         justify-content: space-between;
         padding: 0 30px;
-        /* Yanlardan boşluk */
         box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
         z-index: 2000;
     }
 
-    /* SOL ÜST ☰ */
     .topbar-left-btn {
         font-size: 30px;
         cursor: pointer;
         color: #1e3a8a;
-        user-select: none;
     }
 
-    /* SAĞ ÜST KULLANICI & ÇIKIŞ */
     .topbar-right-area {
         display: flex;
         align-items: center;
         gap: 20px;
-    }
-
-    .user-name-tag {
-        font-weight: 600;
-        color: #334155;
-        font-size: 1.1rem;
     }
 
     .logout-btn-new {
@@ -67,19 +52,8 @@
         border-radius: 12px;
         font-weight: 600;
         text-decoration: none;
-        transition: 0.3s;
-        display: flex;
-        align-items: center;
-        gap: 8px;
     }
 
-    .logout-btn-new:hover {
-        background: #dc2626;
-        color: white;
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
-
-    /* SIDEBAR */
     .sidebar {
         position: fixed;
         left: -280px;
@@ -89,7 +63,7 @@
         background: #1e3a8a;
         color: white;
         padding: 25px;
-        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: 0.4s;
         z-index: 3000;
     }
 
@@ -111,7 +85,6 @@
         color: white;
     }
 
-    /* CONTENT KARTLARIMIZ */
     .action-card {
         transition: transform 0.3s ease;
         border: none;
@@ -129,7 +102,6 @@
     </div>
 
     <div class="topbar-right-area">
-      
         <a href="/Auth/Logout" class="logout-btn-new">
             <i class="bi bi-power"></i> Çıkış Yap
         </a>
@@ -161,7 +133,30 @@
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="row g-4">
-                
+
+                <!-- 1. SATIR -->
+                <div class="col-md-6">
+                    <a href="/User/AvailableCars" class="text-decoration-none">
+                        <div class="action-card p-4 rounded-4 bg-white shadow-sm border-top border-primary border-4">
+                            <i class="bi bi-search text-primary display-6 mb-2 d-block"></i>
+                            <h5 class="fw-bold text-dark">Araç Kirala</h5>
+                            <p class="text-muted small">Mevcut araçlar arasından seçim yaparak kiralama işlemini başlat.</p>
+                        </div>
+                    </a>
+                </div>
+
+
+
+                <!-- 2. SATIR -->
+                <div class="col-md-6">
+                    <a href="/User/MyRentals?filter=aktif" class="text-decoration-none">
+                        <div class="action-card p-4 rounded-4 bg-white shadow-sm border-top border-warning border-4">
+                            <i class="bi bi-hourglass-split text-warning display-6 mb-3 d-block"></i>
+                            <h5 class="fw-bold text-dark">Aktif İşlemlerim</h5>
+                            <p class="text-muted small">Onay bekleyen taleplerin ve aktif kiraların.</p>
+                        </div>
+                    </a>
+                </div>
                 <div class="col-md-6">
                     <a href="/User/IncomingRequests?filter=aktif" class="text-decoration-none">
                         <div class="action-card p-4 rounded-4 bg-white shadow-sm border-top border-danger border-4">
@@ -172,35 +167,16 @@
                     </a>
                 </div>
                 <div class="col-md-6">
-                    <a href="/User/MyRentals?filter=aktif" class="text-decoration-none">
-                        <div
-                            class="action-card p-4 rounded-4 bg-white shadow-sm h-100 border-0 border-top border-warning border-4">
-                            <i class="bi bi-hourglass-split text-warning display-6 mb-3 d-block"></i>
-                            <h5 class="fw-bold text-dark">Aktif İşlemlerim</h5>
-                            <p class="text-muted small">Onay bekleyen taleplerin ve aktif kiraların.</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-md-6">
                     <a href="/User/IncomingRequests" class="text-decoration-none">
                         <div class="action-card p-4 rounded-4 bg-white shadow-sm border-top border-dark border-4">
                             <i class="bi bi-archive-fill text-dark display-5 mb-3 d-block"></i>
                             <h5 class="fw-bold text-dark">Gelen Talep Geçmişi</h5>
-                            <p class="text-muted small">Senin araçların için yapılmış tüm eski kayıtlar.</p>
+                            <p class="text-muted small">Tüm eski talepler.</p>
                         </div>
                     </a>
                 </div>
 
-                <div class="col-md-6">
-                    <a href="/User/AvailableCars" class="text-decoration-none">
-                        <div class="action-card p-4 rounded-4 bg-white shadow-sm">
-                            <i class="bi bi-search text-primary display-6 mb-2 d-block"></i>
-                            <h6 class="fw-bold text-dark">Hızlı Araç Kirala</h6>
-                        </div>
-                    </a>
-                </div>
-
+                <!-- 3. SATIR -->
                 <div class="col-md-6">
                     <a href="/User/MyRentals" class="text-decoration-none">
                         <div class="action-card p-4 rounded-4 bg-white shadow-sm">
@@ -209,14 +185,16 @@
                         </div>
                     </a>
                 </div>
+
                 <div class="col-md-6">
                     <a href="/Car/MyReviews" class="text-decoration-none">
                         <div class="action-card p-4 rounded-4 bg-white shadow-sm">
-                            <i class="bi bi-search text-primary display-6 mb-2 d-block"></i>
-                            <h6 class="fw-bold text-dark"> Yorum ve Değerlendirmelerimi gör</h6>
+                            <i class="bi bi-chat-dots text-primary display-6 mb-2 d-block"></i>
+                            <h6 class="fw-bold text-dark">Yorumlarım</h6>
                         </div>
                     </a>
                 </div>
+
             </div>
         </div>
 
@@ -238,7 +216,6 @@
 
 <script>
     function toggleMenu() {
-        var sidebar = document.getElementById("sidebar");
-        sidebar.classList.toggle("active");
+        document.getElementById("sidebar").classList.toggle("active");
     }
 </script>
