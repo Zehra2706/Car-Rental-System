@@ -9,16 +9,16 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 1. SERVİS KAYITLARI (BUILD'DEN ÖNCE) ---
+// ---------------- SERVICES ----------------
 
 builder.Services.AddControllersWithViews();
 
-// Veritabanı bağlantısı
+// DB
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<car.Data.ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Repository ve Service kayıtları
+// Repositories & Services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRentalRepository, RentalRepository>();
@@ -26,15 +26,13 @@ builder.Services.AddScoped<IRentalService, RentalService>();
 builder.Services.AddScoped<ICarRepository, CarRepository>();
 builder.Services.AddScoped<ICarService, CarService>();
 
-// --- KRİTİK: BURAYI EKLEDİK (REVIEW SERVİSLERİ) ---
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
-// ------------------------------------------------
 
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
-// SESSION AYARLARI
+// SESSION
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -43,7 +41,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// AUTHENTICATION (JWT) AYARLARI
+// JWT AUTH
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -55,7 +53,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+            NameClaimType = System.Security.Claims.ClaimTypes.Name,
+            RoleClaimType = System.Security.Claims.ClaimTypes.Role
         };
 
         options.Events = new JwtBearerEvents
@@ -81,7 +82,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// --- 2. MIDDLEWARE (KULLANIM) AYARLARI ---
+// ---------------- MIDDLEWARE PIPELINE ----------------
 
 if (!app.Environment.IsDevelopment())
 {
@@ -94,11 +95,13 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Session, Authentication'dan önce gelmeli
+
 app.UseSession();
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseAuthentication();   // önce auth
+app.UseAuthorization();    // sonra yetki
+
+app.UseMiddleware<RequestLoggingMiddleware>(); // sonra log middleware
 
 app.MapControllerRoute(
     name: "default",

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using car.Data;
 
@@ -11,9 +12,11 @@ using car.Data;
 namespace car.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260428143540_AddLogTable")]
+    partial class AddLogTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -345,9 +348,6 @@ namespace car.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
@@ -359,9 +359,6 @@ namespace car.Migrations
 
                     b.Property<bool>("IsEmailConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LockoutEnd")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -387,7 +384,6 @@ namespace car.Migrations
                         new
                         {
                             Id = 1,
-                            AccessFailedCount = 0,
                             Date = new DateTime(2024, 6, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsEmailConfirmed = false,
                             Name = "deneme",

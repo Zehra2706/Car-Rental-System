@@ -36,26 +36,62 @@ public class AuthController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Login(LoginViewModel model)
     {
-        var user = _userService.Login(model.Email, model.Password);
+        // Model doğruluğunu kontrol et
+        if (!ModelState.IsValid) return View(model);
+
+        // 1. Kullanıcıyı getir
+        var user = _userService.GetByEmail(model.Email);
 
         if (user == null)
         {
-            ViewBag.Error = "Email veya şifre yanlış";
-            return View();
+            ViewBag.Error = "Email veya şifre yanlış.";
+            return View(model);
         }
-        
 
-        // ==========================================
-        // 1. JWT (KİMLİK DOĞRULAMA / GÜVENLİK) İŞLEMLERİ
-        // ==========================================
-        var claims = new List<Claim>
+        // 2. Kilitleme Kontrolü
+        if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTime.Now)
         {
-            new Claim("UserId", user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.UserInfo.Email),
-            new Claim(ClaimTypes.Role, user.UserRole.ToString()),
-             new Claim("TC", user.TC ?? "00000000000"),
-  new Claim("LicenceNo", user.Licence?.LicenceNumber ?? "-")
-        };
+            var kalanDakika = (int)Math.Ceiling((user.LockoutEnd.Value - DateTime.Now).TotalMinutes);
+            ViewBag.Error = $"Çok fazla hatalı deneme! Hesabınız {kalanDakika} dakika kilitlendi.";
+            ViewBag.IsLocked = true;
+            return View(model);
+        }
+
+        // 3. Şifre Doğrulama
+        var authenticatedUser = _userService.Login(model.Email, model.Password);
+
+        if (authenticatedUser == null)
+        {
+            user.AccessFailedCount++;
+            if (user.AccessFailedCount >= 5)
+            {
+                user.LockoutEnd = DateTime.Now.AddMinutes(20);
+                ViewBag.Error = "5 kez hatalı giriş yapıldı. Hesabınız 20 dakika kilitlendi.";
+                ViewBag.IsLocked = true;
+            }
+            else
+            {
+                ViewBag.Error = $"Email veya şifre yanlış. Kalan deneme hakkınız: {5 - user.AccessFailedCount}";
+            }
+
+            _userService.Update(user);
+            return View(model);
+        }
+
+        // 4. Başarılı Giriş: Sayaçları sıfırla
+        user.AccessFailedCount = 0;
+        user.LockoutEnd = null;
+        _userService.Update(user);
+
+        // 5. JWT Token Oluşturma (Claims)
+        var claims = new List<Claim>
+    {
+        new Claim("UserId", user.Id.ToString()),
+        new Claim(ClaimTypes.Email, user.UserInfo.Email),
+        new Claim(ClaimTypes.Role, user.UserRole.ToString()),
+        new Claim(ClaimTypes.Name, user.Name),
+        new Claim("TC", user.TC ?? "00000000000")
+    };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -64,37 +100,28 @@ public class AuthController : Controller
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.Now.AddHours(2), // Token 2 saat geçerli
+            expires: DateTime.Now.AddHours(2),
             signingCredentials: creds
         );
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-        // JWT'yi tarayıcıya güvenli bir Çerez (Cookie) olarak ekliyoruz
+        // 6. Cookie ve Session İşlemleri
         Response.Cookies.Append("AuthToken", tokenString, new CookieOptions
         {
-            HttpOnly = true, // JavaScript sızmalarına karşı koruma
-            Secure = true,   // HTTPS zorunluluğu
-            SameSite = SameSiteMode.Lax,
+            HttpOnly = true,
+            Secure = true,
             Expires = DateTime.Now.AddHours(2)
         });
 
-        // ==========================================
-        // 2. SESSION (GEÇİCİ HAFIZA) İŞLEMLERİ
-        // ==========================================
         HttpContext.Session.SetInt32("UserId", user.Id);
-        HttpContext.Session.SetString("UserEmail", user.UserInfo.Email);
-        HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
         HttpContext.Session.SetString("UserName", user.Name);
-        HttpContext.Session.SetString("TC", user.TC ?? "00000000000");
-        HttpContext.Session.SetString("LicenceNo", user.Licence?.LicenceNumber ?? "-");
-        // Yönlendirme (Rol bazlı)
-        if (user.UserRole == UserEntity.Role.Admin)
-        {
-            return RedirectToAction("Index", "Admin");
-        }
+        HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
 
-        return RedirectToAction("Index", "User");
+        // 7. Yönlendirme
+        return user.UserRole == UserEntity.Role.Admin
+            ? RedirectToAction("Index", "Admin")
+            : RedirectToAction("Index", "User");
     }
 
     [HttpGet]
@@ -216,55 +243,55 @@ public class AuthController : Controller
         }
     }
 
-            [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult VerifyEmail(string email, string code)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult VerifyEmail(string email, string code)
+    {
+        var user = _userService.GetByEmail(email);
+
+        if (user == null)
+            return Content("User not found");
+
+        if (user.EmailVerificationCode != code)
         {
-            var user = _userService.GetByEmail(email);
-
-            if (user == null)
-                return Content("User not found");
-
-            if (user.EmailVerificationCode != code)
-            {
-                TempData["Error"] = "Kod yanlış!";
-                return RedirectToAction("VerifyEmail", new { email });
-            }
-
-            user.IsEmailConfirmed = true;
-            user.EmailVerificationCode = null;
-
-            _userService.Update(user);
-            TempData["Success"] = "Email doğrulandı!";
-            return RedirectToAction("Login", "Auth");
-        }
-        [HttpGet]
-        public IActionResult VerifyEmail(string email)
-        {
-            ViewBag.Email = email;
-            return View();
+            TempData["Error"] = "Kod yanlış!";
+            return RedirectToAction("VerifyEmail", new { email });
         }
 
-        [HttpGet]
-        public IActionResult ResendCode(string email)
-        {
-            var user = _userService.GetByEmail(email);
+        user.IsEmailConfirmed = true;
+        user.EmailVerificationCode = null;
 
-            if (user == null)
-                return Content("User not found");
+        _userService.Update(user);
+        TempData["Success"] = "Email doğrulandı!";
+        return RedirectToAction("Login", "Auth");
+    }
+    [HttpGet]
+    public IActionResult VerifyEmail(string email)
+    {
+        ViewBag.Email = email;
+        return View();
+    }
 
-            var code = new Random().Next(100000, 999999).ToString();
+    [HttpGet]
+    public IActionResult ResendCode(string email)
+    {
+        var user = _userService.GetByEmail(email);
 
-            user.EmailVerificationCode = code;
-            _userService.Update(user);
+        if (user == null)
+            return Content("User not found");
 
-            
-            _notificationService.EmailVerification(user, code);
+        var code = new Random().Next(100000, 999999).ToString();
 
-            TempData["Success"] = "Yeni doğrulama kodu gönderildi.";
+        user.EmailVerificationCode = code;
+        _userService.Update(user);
 
-            return RedirectToAction("VerifyEmail", new { email = email });
-        }
+
+        _notificationService.EmailVerification(user, code);
+
+        TempData["Success"] = "Yeni doğrulama kodu gönderildi.";
+
+        return RedirectToAction("VerifyEmail", new { email = email });
+    }
 
 
 

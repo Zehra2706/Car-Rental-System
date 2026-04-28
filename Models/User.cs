@@ -27,7 +27,8 @@ namespace user.Models
 
         public string? EmailConfirmationToken { get; set; }
         public string? EmailVerificationCode { get; set; }
-
+        public int AccessFailedCount { get; set; } // Hatalı deneme sayısı
+        public DateTime? LockoutEnd { get; set; }
 
 
     }
