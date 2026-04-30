@@ -146,7 +146,7 @@ namespace car.Service.Concrete
             return _context.Rentals
                 .Include(r => r.Car)
                 .Include(r => r.User)
-                .OrderByDescending(r => r.Date)
+                .OrderBy(r => r.ReturnDate) 
                 .ToList();
         }
         public List<car.Models.Car> GetAllCarsForUser()

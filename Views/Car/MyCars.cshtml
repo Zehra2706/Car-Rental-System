@@ -107,9 +107,17 @@
             <h2 class="fw-bold text-dark m-0"><i class="bi bi-tags-fill text-primary"></i> İlanlarımı Yönet</h2>
             <p class="text-muted small">Paylaştığın tüm araçları buradan güncelleyebilir veya silebilirsin.</p>
         </div>
+        <div class="d-flex gap-2">
+        <!-- GERİ DÖN BUTONU -->
+        <a href="/User/Index" class="btn btn-outline-dark rounded-pill px-4 fw-bold shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Geri Dön
+        </a>
+
+        <!-- YENİ İLAN -->
         <a href="/Car/create" class="btn btn-success shadow-sm rounded-pill px-4 fw-bold">
             <i class="bi bi-plus-lg me-2"></i>Yeni İlan Ekle
         </a>
+    </div>
     </div>
 
     @if (TempData["Success"] != null)
@@ -163,9 +171,16 @@
                         <a href="/Car/Edit/@car.Id" class="btn btn-outline-primary rounded-pill btn-sm flex-fill fw-bold">
                             <i class="bi bi-pencil-square me-1"></i> Düzenle
                         </a>
-                        <button onclick="confirmDelete(@car.Id)" class="btn btn-outline-danger rounded-pill btn-sm flex-fill fw-bold">
-                            <i class="bi bi-trash3 me-1"></i> Sil
-                        </button>
+                        <form method="post" action="/Car/Delete" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@car.Id" />
+
+                            <button type="submit"
+                                    class="btn btn-outline-danger rounded-pill btn-sm flex-fill fw-bold"
+                                    onclick="return confirm('Bu ilanı silmek istediğine emin misin?')">
+                                <i class="bi bi-trash3 me-1"></i> Sil
+                            </button>
+                        </form>
                         <a href="/Car/ToggleActive/@car.Id"
                             class="btn btn-sm @(car.IsActive ? "btn-warning" : "btn-success") rounded-pill flex-fill fw-bold">
                             <i class="bi @(car.IsActive ? "bi-eye-slash" : "bi-eye") me-1"></i>
@@ -195,7 +210,6 @@
 
         function confirmDelete(id) {
             if (confirm("Bu ilanı tamamen silmek istediğinize emin misiniz?")) {
-                window.location.href = "/Car/Delete/" + id;
             }
         }
     </script>

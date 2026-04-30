@@ -123,7 +123,7 @@ namespace car.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Hata: " + ex.Message;
+                ViewBag.Error = "Bir hata oluştu. Lütfen tekrar deneyin." ;
                 return View(model);
             }
         }
@@ -140,7 +140,7 @@ namespace car.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = ex.Message;
+                TempData["Error"] = "İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin.";
             }
 
             return RedirectToAction("MyCars");
@@ -271,6 +271,7 @@ namespace car.Controllers
         public IActionResult UserList(string search, CarFilter filter)
         {
             var cars = _carService.FilterCars(filter);
+            cars = cars.Where(x => x.IsActive == true).ToList();
 
             if (!string.IsNullOrEmpty(search))
             {

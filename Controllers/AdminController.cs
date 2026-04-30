@@ -129,8 +129,11 @@ public class AdminController : Controller
         }
         catch (Exception ex)
         {
-            var error = ex.InnerException?.Message ?? ex.Message;
-            ModelState.AddModelError("", error);
+            // Gerçek hatayı logla (console veya db)
+            Console.WriteLine(ex); 
+
+            ModelState.AddModelError("", "Bir hata oluştu. Lütfen tekrar deneyin.");
+
             return View(model);
         }
     }
@@ -159,7 +162,7 @@ public class AdminController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Error"] = ex.Message;
+            TempData["Error"] = "İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin.";
         }
 
         return RedirectToAction("CarList");

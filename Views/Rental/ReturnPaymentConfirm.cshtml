@@ -19,7 +19,7 @@
                 <div class="card-header bg-danger text-white text-center py-4">
                     <h3 class="mb-0 fw-bold">
                         <i class="bi bi-exclamation-triangle-fill"></i>
-                        İade ve Ödeme Özeti
+                        Ödeme Özeti
                     </h3>
                 </div>
 
@@ -28,7 +28,7 @@
 
                     <div class="text-center mb-4">
                         <p class="text-muted">
-                            Sayın kullanıcı, iade sürecine ait ödeme detayları aşağıdadır.
+                            Sayın kullanıcı,araç kiralama sürecine ait ödeme detayları aşağıdadır.
                         </p>
                     </div>
 
@@ -41,32 +41,25 @@
                         </div>
 
                         <div class="list-group-item d-flex justify-content-between bg-light">
-                            <span class="text-muted">Gerçek İade Tarihi:</span>
+                            <span class="text-muted">Ödeme Tarihi:</span>
                             <span class="fw-bold text-primary">@DateTime.Now.ToShortDateString()</span>
                         </div>
 
                         <div class="list-group-item d-flex justify-content-between">
-                            <span class="text-muted">Ana Kiralama Bedeli:</span>
+                            <span class="text-muted">Kiralama Bedeli:</span>
                             <span class="fw-bold">@baseAmount.ToString("C2")</span>
                         </div>
-
+@* 
                         @if (penalty > 0)
                         {
                             <div class="list-group-item d-flex justify-content-between text-danger">
                                 <span>Gecikme Cezası (%3/gün):</span>
                                 <span class="fw-bold">@penalty.ToString("C2")</span>
                             </div>
-                        }
+                        } *@
 
                     </div>
 
-                    <!-- UYARI -->
-                    <div class="alert alert-warning text-center">
-                        <h6 class="fw-bold">⚠️ Dikkat!</h6>
-                        <p class="mb-0 small">
-                            Gecikme durumuna göre sistem otomatik ceza uygulamıştır.
-                        </p>
-                    </div>
 
                     <!-- TOPLAM -->
                     <div class="text-center py-3">
@@ -92,7 +85,7 @@
                             <button type="submit" class="btn btn-success btn-lg rounded-pill shadow-sm w-100">
 
                                 <i class="bi bi-credit-card"></i>
-                                Ödemeyi Tamamla ve İade Et
+                                Ödemeyi Tamamla 
                             </button>
 
                         </form>

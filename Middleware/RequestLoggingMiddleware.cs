@@ -18,6 +18,13 @@ public class RequestLoggingMiddleware
 
         if (context.Request.Method == "POST")
         {
+            var path = context.Request.Path.Value.ToLower();
+
+            if (path.Contains("login") ||
+                path.Contains("register") ||
+                path.Contains("payment") ||
+                path.Contains("token"))
+                return;
             // 1. Önce Identity'den ismi almayı dene
             string userName = context.User.Identity?.Name;
 
@@ -33,8 +40,8 @@ public class RequestLoggingMiddleware
             var log = new Log
             {
                 Username = userName, // Artık Session'dan "Melisa" vb. gelecek
-                Action = context.GetEndpoint()?.DisplayName ?? context.Request.Path,
-                Path = context.Request.Path,
+                Action = context.GetEndpoint()?.DisplayName ?? "Unknown",
+                Path = context.Request.Path.Value,
                 Method = context.Request.Method,
                 IPAddress = context.Connection.RemoteIpAddress?.ToString(),
                 StatusCode = context.Response.StatusCode,

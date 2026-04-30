@@ -49,7 +49,7 @@ public class EmailService
         catch (Exception ex)
         {
             log.IsSuccess = false;
-            log.ErrorMessage = ex.Message;
+            log.ErrorMessage = "Mail gönderilemedi";
 
             Console.WriteLine("EMAIL HATA:");
             Console.WriteLine(ex.ToString());

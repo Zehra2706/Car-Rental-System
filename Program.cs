@@ -6,6 +6,7 @@ using Car_reservation_automation_system.Repositories.Concrete;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +32,7 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
-
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 // SESSION
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -42,44 +43,58 @@ builder.Services.AddSession(options =>
 });
 
 // JWT AUTH
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-            NameClaimType = System.Security.Claims.ClaimTypes.Name,
-            RoleClaimType = System.Security.Claims.ClaimTypes.Role
-        };
+// builder.Services.AddAuthentication("Cookies")
+//     .AddCookie("Cookies", options =>
+//     {
+//         options.LoginPath = "/Auth/Login";
+//         options.AccessDeniedPath = "/Auth/AccessDenied";
+//     })    
+//     .AddJwtBearer(options =>
+//     {
+//         options.TokenValidationParameters = new TokenValidationParameters
+//         {
+//             ValidateIssuer = true,
+//             ValidateAudience = true,
+//             ValidateLifetime = true,
+//             ValidateIssuerSigningKey = true,
+//             ValidIssuer = builder.Configuration["Jwt:Issuer"],
+//             ValidAudience = builder.Configuration["Jwt:Audience"],
+//             IssuerSigningKey = new SymmetricSecurityKey(
+//                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+//             NameClaimType = System.Security.Claims.ClaimTypes.Name,
+//             RoleClaimType = System.Security.Claims.ClaimTypes.Role
+//         };
 
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                context.Token = context.Request.Cookies["AuthToken"];
-                return Task.CompletedTask;
-            },
-            OnChallenge = context =>
-            {
-                context.HandleResponse();
-                context.Response.Redirect("/Auth/Login");
-                return Task.CompletedTask;
-            },
-            OnForbidden = context =>
-            {
-                context.Response.Redirect("/Auth/AccessDenied");
-                return Task.CompletedTask;
-            }
-        };
+//         options.Events = new JwtBearerEvents
+//         {
+//             OnMessageReceived = context =>
+//             {
+//                 context.Token = context.Request.Cookies["AuthToken"];
+//                 return Task.CompletedTask;
+//             },
+//             OnChallenge = context =>
+//             {
+//                 context.HandleResponse();
+//                 context.Response.Redirect("/Auth/Login");
+//                 return Task.CompletedTask;
+//             },
+//             OnForbidden = context =>
+//             {
+//                 context.Response.Redirect("/Auth/AccessDenied");
+//                 return Task.CompletedTask;
+//             }
+//         };
+//     });
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie("Cookies", options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.LogoutPath = "/Auth/Logout";
+        options.AccessDeniedPath = "/Auth/AccessDenied";
     });
 
+builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // ---------------- MIDDLEWARE PIPELINE ----------------
@@ -90,7 +105,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();

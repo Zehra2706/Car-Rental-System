@@ -222,10 +222,6 @@ namespace car.Service.Concrete
         }
         public void UpdateRental(Rental rental)
         {
-
-            if (!CanUserRentCar(rental.UserId))
-                throw new Exception("User already has active rental");
-
             _rentalRepo.Update(rental);
             _rentalRepo.SaveChanges();
 

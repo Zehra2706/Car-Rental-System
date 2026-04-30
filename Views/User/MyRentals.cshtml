@@ -125,7 +125,6 @@
                             <th class="py-3">Bitiş</th>
                             <th class="py-3">Öngörülen Tutar</th>
                             <th class="py-3">Durum</th>
-                            <th class="text-center py-3"></th>
                             @if (isAktifMod)
                             {
                                 <th class="text-center py-3">İşlem</th>
@@ -188,16 +187,10 @@
                                         }
                                     </td>
                                     
+                                        <td class="text-center">
                                     @if (isAktifMod)
                                     {
-                                        <td class="text-center">
-                                            @* @if (currentStatus == "Onaylandı" || currentStatus == "Gecikmiş" || currentStatus == "Gecikmis" || (currentStatus == "Onaylandi" && !item.IsReturned))
-                                            {
-                                             <a href="/Rental/ReturnPaymentConfirm?rentalId=@item.Id"
-   class="btn btn-sm btn-warning rounded-pill px-3 shadow-sm border-0">
-    <i class="bi bi-box-arrow-in-left"></i>Öde
-</a>
-                                            } *@
+
                                             @if (currentStatus == "Onaylandı" && !item.IsPaid)
                                             {
                                                 <a href="/Rental/ReturnPaymentConfirm?rentalId=@item.Id"
@@ -216,8 +209,8 @@
                                                     </button>
                                                 </form>
                                             }
-                                        </td>
                                     }
+                                        </td>
                                         <td class="text-center">
                                             @if (item.IsReturned || currentStatus == "Tamamlandı")
                                             {

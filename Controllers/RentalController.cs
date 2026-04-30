@@ -279,7 +279,7 @@ namespace car.Controllers
         [HttpPost]
         [AllowAnonymous]
         [IgnoreAntiforgeryToken]
-        [ValidateAntiForgeryToken]
+
         public async Task<IActionResult> PaymentCallback(string token)
         {
             if (string.IsNullOrEmpty(token))
@@ -341,7 +341,7 @@ namespace car.Controllers
                 _paymentCache.TryRemove(token, out _);
 
                 TempData["Success"] = "Ödemeniz başarıyla alındı!";
-                return RedirectToAction("Success", new { carId = rental.CarId , ShowReview = false });
+                return RedirectToAction("Success", new { carId = rental.CarId , showReview = false });
             }
             else
             {
@@ -450,6 +450,7 @@ namespace car.Controllers
             {
                 _paymentCache[checkoutForm.Token] = rentalId.ToString();
                 ViewBag.PaymentForm = checkoutForm.CheckoutFormContent;
+                ViewBag.Rental = rental;
                 return View("IyzicoPayment");
             }
 
@@ -476,7 +477,6 @@ namespace car.Controllers
         [HttpPost]
         [AllowAnonymous]
         [IgnoreAntiforgeryToken]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ReturnCallback(string token)
         {
 
@@ -537,7 +537,7 @@ namespace car.Controllers
         {
             var rental = _context.Rentals.FirstOrDefault(x => x.Id == rentalId);
 
-            return PartialView("_PaymentForm", rental);
+            return View("IyzicoPayment", rental);
         }
 
 

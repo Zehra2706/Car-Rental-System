@@ -10,6 +10,9 @@ using System.Text;
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 public class AuthController : Controller
 {
@@ -26,65 +29,146 @@ public class AuthController : Controller
     }
 
     [HttpGet]
-
     public IActionResult Login()
     {
-        return View();
+var token = Request.Cookies["AuthToken"];
+var remember = Request.Cookies["RememberMe"];
+
+if (!string.IsNullOrEmpty(token) && remember == "true")
+{
+    try
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+
+        tokenHandler.ValidateToken(token, new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = _configuration["Jwt:Issuer"],
+            ValidAudience = _configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ClockSkew = TimeSpan.Zero
+        }, out SecurityToken validatedToken);
+
+        var jwtToken = (JwtSecurityToken)validatedToken;
+        var role = jwtToken.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Role)?.Value;
+
+        return role == "Admin"
+            ? RedirectToAction("Index", "Admin")
+            : RedirectToAction("Index", "User");
+    }
+    catch
+    {
+        Response.Cookies.Delete("AuthToken");
+    }
+}
+
+        // 🔽 EMAIL REMEMBER (senin mevcut sistemin)
+        var email = Request.Cookies["RememberEmail"];
+
+        var model = new LoginViewModel();
+
+        if (!string.IsNullOrEmpty(email))
+        {
+            model.Email = email;
+            model.RememberMe = true;
+        }
+
+        return View(model);
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public IActionResult Login(LoginViewModel model)
+[HttpPost]
+public async Task<IActionResult> Login(LoginViewModel model)
+{
+    Console.WriteLine("GELEN EMAIL: " + model.Email);
+
+    if (!ModelState.IsValid)
     {
-        if (!ModelState.IsValid)
-            return View(model);
+        Console.WriteLine("ModelState Hatalı: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+        ViewBag.Error = "Formda eksik veya hatalı alan var.";
+        return View(model);
+    }
 
-        var user = _userService.GetByEmail(model.Email);
+    // 1. Önce kullanıcıyı Getir
+    var user = _userService.GetByEmail(model.Email);
 
-        if (user == null)
+    if (user == null)
+    {
+        Console.WriteLine("❌ USER BULUNAMADI: " + model.Email);
+        ViewBag.Error = "Email veya şifre yanlış.";
+        return View(model);
+    }
+
+    Console.WriteLine("✅ USER BULUNDU: " + user.Name);
+
+    // 2. 🔒 Hesap kilitli mi kontrol et?
+    if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTime.Now)
+    {
+        Console.WriteLine($"Hesap kilitli: {user.UserInfo.Email}, LockoutEnd: {user.LockoutEnd}");
+        ViewBag.Error = "Hesabınız kilitli. Şifrenizi sıfırlamanız gerekiyor.";
+        ViewBag.IsLocked = true;
+        return View(model);
+    }
+
+    // 3. Şifre Doğrulamayı Yap
+    var authenticatedUser = _userService.Login(model.Email, model.Password);
+
+    // 4. Şifre Yanlışsa (authenticatedUser null ise)
+    if (authenticatedUser == null)
+    {
+        Console.WriteLine($"Şifre yanlış: {model.Email}");
+        user.AccessFailedCount++;
+
+        if (user.AccessFailedCount >= 3)
         {
-            ViewBag.Error = "Email veya şifre yanlış.";
-            return View(model);
-        }
-
-        // 🔒 Hesap kilitli mi?
-        if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTime.Now)
-        {
-            ViewBag.Error = "Hesabınız kilitli. Şifrenizi sıfırlamanız gerekiyor.";
+            user.LockoutEnd = DateTime.MaxValue; // 🔒 kalıcı kilit
+            user.AccessFailedCount = 3;
+            ViewBag.Error = "3 hatalı giriş. Hesabınız kilitlendi. Şifre sıfırlayın.";
             ViewBag.IsLocked = true;
-            return View(model);
         }
-
-        // ❌ Şifre kontrol
-        var authenticatedUser = _userService.Login(model.Email, model.Password);
-
-        if (authenticatedUser == null)
+        else
         {
-            user.AccessFailedCount++;
-
-            if (user.AccessFailedCount >= 3)
-            {
-                user.LockoutEnd = DateTime.MaxValue; // 🔒 kalıcı kilit
-                user.AccessFailedCount = 3;
-
-                ViewBag.Error = "3 hatalı giriş. Hesabınız kilitlendi. Şifre sıfırlayın.";
-                ViewBag.IsLocked = true;
-            }
-            else
-            {
-                ViewBag.Error = $"Hatalı giriş. Kalan hak: {3 - user.AccessFailedCount}";
-            }
-
-            _userService.Update(user);
-            return View(model);
+            ViewBag.Error = $"Hatalı giriş. Kalan hak: {3 - user.AccessFailedCount}";
+            Console.WriteLine($"Hatalı giriş. Kalan hak: {3 - user.AccessFailedCount}");
         }
 
-        // ✅ Başarılı giriş
-        user.AccessFailedCount = 0;
-        user.LockoutEnd = null;
-        _userService.Update(user);
+        _userService.Update(user); // Hata sayısını DB'ye işle
+        return View(model);
+    }
 
-        var claims = new List<Claim>
+    // 5. ✅ Başarılı giriş (Buraya geldiyse şifre doğrudur)
+    Console.WriteLine($"Başarılı giriş: {user.UserInfo.Email}");
+    user.AccessFailedCount = 0;
+    user.LockoutEnd = null;
+    _userService.Update(user); // Kilitleri ve sayaçları sıfırla
+
+    // --- Cookie ve Hatırlama Ayarları ---
+    if (model.RememberMe)
+    {
+        Response.Cookies.Append("RememberMe", "true", new CookieOptions
+        {
+            Expires = DateTime.Now.AddDays(7),
+            HttpOnly = true,
+            Secure = Request.IsHttps
+        });
+    }
+    else
+    {
+        Response.Cookies.Delete("RememberMe");
+    }
+
+    Response.Cookies.Append("RememberEmail", model.Email, new CookieOptions
+    {
+        Expires = DateTime.Now.AddDays(7),
+        HttpOnly = true,
+        Secure = Request.IsHttps
+    });
+
+    // --- JWT Token Oluşturma ---
+    var claims = new List<Claim>
     {
         new Claim("UserId", user.Id.ToString()),
         new Claim(ClaimTypes.Email, user.UserInfo.Email),
@@ -93,34 +177,26 @@ public class AuthController : Controller
         new Claim("TC", user.TC ?? "00000000000")
     };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+    var claimsIdentity = new ClaimsIdentity(claims, "Cookies");
+    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+    await HttpContext.SignInAsync("Cookies", claimsPrincipal);
 
-        var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.Now.AddHours(2),
-            signingCredentials: creds
-        );
 
-        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+    // --- Session Ayarları ---
+    HttpContext.Session.SetInt32("UserId", user.Id);
+    HttpContext.Session.SetString("UserName", user.Name);
+    HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
+    HttpContext.Session.SetString("UserEmail", user.UserInfo.Email);
+    HttpContext.Session.SetString("TC", user.TC ?? "");
 
-        Response.Cookies.Append("AuthToken", tokenString, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            Expires = DateTime.Now.AddHours(2)
-        });
+    Console.WriteLine("DB PASSWORD: " + user.UserInfo.Password);
+    Console.WriteLine("GELEN PASSWORD: " + model.Password);
 
-        HttpContext.Session.SetInt32("UserId", user.Id);
-        HttpContext.Session.SetString("UserName", user.Name);
-        HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
-
-        return user.UserRole == UserEntity.Role.Admin
-            ? RedirectToAction("Index", "Admin")
-            : RedirectToAction("Index", "User");
-    }
+    // --- Yönlendirme ---
+    return user.UserRole == UserEntity.Role.Admin
+        ? RedirectToAction("Index", "Admin")
+        : RedirectToAction("Index", "User");
+}
 
     [HttpGet]
     public IActionResult Logout()
@@ -134,6 +210,8 @@ public class AuthController : Controller
 
         // 2. Tüm Session'ı boşalt
         HttpContext.Session.Clear();
+        Response.Cookies.Delete("UserEmail");
+        Response.Cookies.Delete("UserName");
 
         return RedirectToAction("Login");
     }
@@ -145,11 +223,28 @@ public class AuthController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
+    
     public IActionResult Register(RegisterViewModel model)
     {
         if (!ModelState.IsValid)
         {
+            return View(model);
+        }
+        if (!Regex.IsMatch(model.TC, @"^\d{11}$"))
+        {
+            ViewBag.Error = "TC 11 haneli olmalı";
+            return View(model);
+        }
+
+        if (!Regex.IsMatch(model.PhoneNumber, @"^0\d{10}$"))
+        {
+            ViewBag.Error = "Telefon 0 ile başlamalı ve 11 haneli olmalı";
+            return View(model);
+        }
+
+        if (!Regex.IsMatch(model.LicenseNumber, @"^\d{6}$"))
+        {
+            ViewBag.Error = "Ehliyet numarası 6 haneli olmalı";
             return View(model);
         }
 
@@ -176,7 +271,7 @@ public class AuthController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = ex.Message;
+            ViewBag.Error = "İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin.";
             return View(model);
         }
     }
@@ -205,19 +300,37 @@ public class AuthController : Controller
     }
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult ResetPassword(string token, string password)
+    public IActionResult ResetPassword(ResetPasswordViewModel model)
     {
-        if (string.IsNullOrEmpty(password))
+        if (!ModelState.IsValid)
+            return View(model);
+        if (string.IsNullOrEmpty(model.Password))
             return Content("Şifre boş olamaz");
+        if (model.Password != model.ConfirmPassword)
+        {
+            ViewBag.Error = "Şifreler uyuşmuyor";
+            return View(model);
+        }    
+
+        // 🔐 BURAYA KOYUYORSUN
+        bool isStrongPassword = Regex.IsMatch(model.Password,
+            @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{6,}$");
+
+        if (!isStrongPassword)
+        {
+            ViewBag.Error = "Şifre en az 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir.";
+            ViewBag.Token = model.Token;
+            return View();
+        }    
 
         try
         {
-            var user = _userService.GetUserByResetToken(token);
+            var user = _userService.GetUserByResetToken(model.Token);
 
             if (user == null)
                 return Content("Geçersiz token");
 
-            _userService.ResetPassword(token, password);
+            _userService.ResetPassword(model.Token, model.Password);
 
             // 🔥 EN SAĞLAM KİLİT AÇMA (TEKRAR DB'DEN ÇEK)
             var updatedUser = _userService.GetByEmail(user.UserInfo.Email);
@@ -231,14 +344,21 @@ public class AuthController : Controller
         }
         catch
         {
-            return Content("Bir hata oluştu");
+            ModelState.AddModelError("", "Bir hata oluştu");
+            ViewBag.Token = model.Token;
+            return View(model);
         }
     }
     [HttpGet]
-    public IActionResult ResetPassword(string token)
+    public IActionResult ResetPassword([FromQuery] string token)
     {
-        ViewBag.Token = token;
-        return View();
+    if (string.IsNullOrEmpty(token))
+        return RedirectToAction("Login", "Auth");
+
+    return View(new ResetPasswordViewModel
+    {
+        Token = token
+    });
     }
 
 

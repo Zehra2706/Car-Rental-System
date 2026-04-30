@@ -99,7 +99,13 @@
                 <input asp-for="Surname" class="form-control" placeholder="Soyad" />
             </div>
             <div class="form-group">
-                <input asp-for="TC" class="form-control" placeholder="TC Kimlik No" maxlength="11" />
+                <input asp-for="TC"
+                    class="form-control"
+                    placeholder="TC Kimlik No"
+                    maxlength="11"
+                    pattern="\d{11}"
+                    title="TC 11 haneli olmalıdır"
+                    inputmode="numeric" />
             </div>
             <div class="form-group">
                 <input asp-for="Email" class="form-control" placeholder="Email" />
@@ -110,11 +116,23 @@
             </div>
 
             <div class="form-group">
-                <input asp-for="PhoneNumber" class="form-control" placeholder="Telefon Numarası" />
+                <input asp-for="PhoneNumber"
+                    class="form-control"
+                    placeholder="Telefon (05XXXXXXXXX)"
+                    maxlength="11"
+                    pattern="0\d{10}"
+                    title="Telefon 0 ile başlamalı ve 11 haneli olmalı"
+                    inputmode="numeric" />
             </div>
 
             <div class="form-group">
-                <input asp-for="LicenseNumber" class="form-control" placeholder="Ehliyet Numarası" />
+                <input asp-for="LicenseNumber"
+                    class="form-control"
+                    placeholder="Ehliyet Numarası"
+                    maxlength="6"
+                    pattern="\d{6}"
+                    title="Ehliyet numarası 6 haneli olmalı"
+                    inputmode="numeric" />
             </div>
 
             <div class="form-group">
@@ -134,7 +152,9 @@
 
         @if (ViewBag.Error != null)
         {
-            <div class="error">@ViewBag.Error</div>
+            <div class="alert alert-danger small">
+                @Html.Encode(ViewBag.Error)
+            </div>
         }
 
         <div class="links">

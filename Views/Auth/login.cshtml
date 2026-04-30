@@ -128,19 +128,26 @@
                 Giriş Yap
             </button>
 
+        <div class="form-check mb-3">
+            <input type="checkbox" asp-for="RememberMe" />
+            <label asp-for="RememberMe">Beni hatırla</label>
+        </div>
         </form>
 
         @if (ViewBag.Error != null)
         {
-            <div class="error">@ViewBag.Error</div>
+        <div class="alert alert-danger small">
+            @Html.Encode(ViewBag.Error)
+        </div>
         }
+
 
         <div class="extra-links">
             <a href="/Auth/ForgotPassword">Şifremi unuttum</a>
         </div>
 
         <div class="extra-links">
-            Kayıt yok mu?
+            Hesabın yok mu?
             <a href="/Auth/Register">Kayıt Ol</a>
         </div>
 

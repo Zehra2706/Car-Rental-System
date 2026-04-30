@@ -1,3 +1,5 @@
+@model rental.Models.Rental
+
 @{
     ViewData["Title"] = "Ödeme Sayfası";
     Layout = "_Layout";
@@ -9,7 +11,11 @@
             <h2 class="text-center mb-4">Güvenli Ödeme Sayfası</h2>
 
             <div id="iyzipay-checkout-form" class="responsive"></div>
+            @Html.Raw(ViewBag.PaymentForm)
 
-            @await Html.PartialAsync("_PaymentForm")
+            <div class="text-center mt-4">
+                <a href="/Rental/MyRentals" class="btn btn-secondary">Kiralamalarıma Dön</a>
+            </div>
+        </div>
     </div>
 </div>

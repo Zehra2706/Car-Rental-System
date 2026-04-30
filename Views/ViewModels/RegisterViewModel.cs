@@ -18,9 +18,16 @@ public class RegisterViewModel
     public required string Surname { get; set; }
 
     public required string Address { get; set; }
+    
+    [Required(ErrorMessage = "Telefon zorunlu")]
+    [RegularExpression(@"^0\d{10}$", ErrorMessage = "Telefon 0 ile başlamalı ve 11 haneli olmalı")]
     public required string PhoneNumber { get; set; }
 
-    public required string TC { get; set; }
+    [Required(ErrorMessage = "TC zorunlu")]
+    [RegularExpression(@"^\d{11}$", ErrorMessage = "TC 11 haneli olmalı")]
+    public string TC { get; set; }
 
+    [Required(ErrorMessage = "Ehliyet numarası zorunlu")]
+    [RegularExpression(@"^\d{6}$", ErrorMessage = "Ehliyet numarası 6 haneli olmalı")]
     public required string LicenseNumber { get; set; }
 }

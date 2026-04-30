@@ -38,9 +38,7 @@
         <i class="bi bi-list"></i>
     </div>
     <div class="d-flex align-items-center gap-3">
-        <a href="/Admin/Index" class="btn btn-outline-primary btn-sm rounded-pill px-4 fw-bold">
-            <i class="bi bi-house-door me-1"></i> Ana Sayfaya Dön
-        </a>
+       
         <span class="fw-bold text-dark border-start ps-3">
             <i class="bi bi-shield-lock-fill text-danger me-1"></i> Admin: @userNameFromSession
         </span>
@@ -66,8 +64,12 @@
             <h2 class="fw-bold text-dark m-0">Sistemdeki Tüm Yorumlar</h2>
             <p class="text-muted small">Uygunsuz içerikleri buradan takip edebilir ve silebilirsiniz.</p>
         </div>
+    
+        <a href="javascript:history.back()" 
+         class="btn btn-outline-dark rounded-pill px-4 shadow-sm fw-bold">
+            <i class="bi bi-arrow-left me-2"></i> Geri Dön
+        </a>
     </div>
-
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4">

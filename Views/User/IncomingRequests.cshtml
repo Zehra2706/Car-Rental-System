@@ -227,6 +227,23 @@
                                             <span
                                             class="badge-status bg-danger-subtle text-danger border border-danger-subtle">Reddedildi</span>
                                         }
+                                        else if (item.Status == "Ödendi")
+                                        {
+                                            <span
+                                            class="badge-status bg-primary-subtle text-primary border border-primary-subtle">Ödendi</span>
+                                        }
+                                        else if (item.Status == "Tamamlandı")
+                                        {
+                                            <span
+                                            class="badge-status bg-secondary-subtle text-secondary border border-secondary-subtle">Tamamlandı</span>
+                                        }
+                                        else if (item.Status == "Aktif")
+                                        {
+                                            <span
+                                            class="badge-status bg-info-subtle text-info border border-info-subtle">Aktif</span>
+                                        }
+
+
                                     </td>
                                     @if (isAktifMod)
                                     {

@@ -3,7 +3,7 @@
         <div class="card-header bg-danger text-white">Ödeme Başarısız!</div>
         <div class="card-body text-danger">
             <h5 class="card-title">Hata Detayı:</h5>
-            <p class="card-text">@ViewBag.ErrorMessage</p>
+            <p class="card-text">@Html.Encode(ViewBag.Error)</p>
             @* Fail.cshtml içinde uygun bir yere ekle *@
             <div class="alert alert-warning mt-3">
                 <strong>Sistem Mesajı:</strong> @ViewBag.Message
