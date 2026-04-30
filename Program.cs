@@ -42,52 +42,9 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// JWT AUTH
-// builder.Services.AddAuthentication("Cookies")
-//     .AddCookie("Cookies", options =>
-//     {
-//         options.LoginPath = "/Auth/Login";
-//         options.AccessDeniedPath = "/Auth/AccessDenied";
-//     })    
-//     .AddJwtBearer(options =>
-//     {
-//         options.TokenValidationParameters = new TokenValidationParameters
-//         {
-//             ValidateIssuer = true,
-//             ValidateAudience = true,
-//             ValidateLifetime = true,
-//             ValidateIssuerSigningKey = true,
-//             ValidIssuer = builder.Configuration["Jwt:Issuer"],
-//             ValidAudience = builder.Configuration["Jwt:Audience"],
-//             IssuerSigningKey = new SymmetricSecurityKey(
-//                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-//             NameClaimType = System.Security.Claims.ClaimTypes.Name,
-//             RoleClaimType = System.Security.Claims.ClaimTypes.Role
-//         };
-
-//         options.Events = new JwtBearerEvents
-//         {
-//             OnMessageReceived = context =>
-//             {
-//                 context.Token = context.Request.Cookies["AuthToken"];
-//                 return Task.CompletedTask;
-//             },
-//             OnChallenge = context =>
-//             {
-//                 context.HandleResponse();
-//                 context.Response.Redirect("/Auth/Login");
-//                 return Task.CompletedTask;
-//             },
-//             OnForbidden = context =>
-//             {
-//                 context.Response.Redirect("/Auth/AccessDenied");
-//                 return Task.CompletedTask;
-//             }
-//         };
-//     });
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie("Cookies", options =>
+    .AddCookie(options =>
     {
         options.LoginPath = "/Auth/Login";
         options.LogoutPath = "/Auth/Logout";

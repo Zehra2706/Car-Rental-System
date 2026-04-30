@@ -34,6 +34,8 @@ public class AuthController : Controller
 var token = Request.Cookies["AuthToken"];
 var remember = Request.Cookies["RememberMe"];
 
+
+
 if (!string.IsNullOrEmpty(token) && remember == "true")
 {
     try
@@ -131,8 +133,8 @@ public async Task<IActionResult> Login(LoginViewModel model)
         }
         else
         {
-            ViewBag.Error = $"Hatalı giriş. Kalan hak: {3 - user.AccessFailedCount}";
-            Console.WriteLine($"Hatalı giriş. Kalan hak: {3 - user.AccessFailedCount}");
+            ViewBag.Error = $"Incorrect entry. Kalan hak: {3 - user.AccessFailedCount}";
+            Console.WriteLine($"Incorrect entry. Kalan hak: {3 - user.AccessFailedCount}");
         }
 
         _userService.Update(user); // Hata sayısını DB'ye işle
@@ -154,18 +156,19 @@ public async Task<IActionResult> Login(LoginViewModel model)
             HttpOnly = true,
             Secure = Request.IsHttps
         });
+
+        Response.Cookies.Append("RememberEmail", model.Email, new CookieOptions
+        {
+            Expires = DateTime.Now.AddDays(7),
+            HttpOnly = true,
+            Secure = Request.IsHttps
+        });
     }
     else
     {
         Response.Cookies.Delete("RememberMe");
+        Response.Cookies.Delete("RememberEmail");
     }
-
-    Response.Cookies.Append("RememberEmail", model.Email, new CookieOptions
-    {
-        Expires = DateTime.Now.AddDays(7),
-        HttpOnly = true,
-        Secure = Request.IsHttps
-    });
 
     // --- JWT Token Oluşturma ---
     var claims = new List<Claim>
@@ -179,10 +182,23 @@ public async Task<IActionResult> Login(LoginViewModel model)
 
     var claimsIdentity = new ClaimsIdentity(claims, "Cookies");
     var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-    await HttpContext.SignInAsync("Cookies", claimsPrincipal);
+    if (model.RememberMe)
+    {
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            claimsPrincipal,
+            new AuthenticationProperties
+            {
+                IsPersistent = model.RememberMe, // 🔥 kritik
+                ExpiresUtc = DateTime.UtcNow.AddDays(7)
+            });
+    }
+    else
+    {
+        await HttpContext.SignInAsync("Cookies", claimsPrincipal);
+    }
 
 
-    // --- Session Ayarları ---
     HttpContext.Session.SetInt32("UserId", user.Id);
     HttpContext.Session.SetString("UserName", user.Name);
     HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
@@ -191,6 +207,7 @@ public async Task<IActionResult> Login(LoginViewModel model)
 
     Console.WriteLine("DB PASSWORD: " + user.UserInfo.Password);
     Console.WriteLine("GELEN PASSWORD: " + model.Password);
+    Console.WriteLine("ROLE: " + user.UserRole.ToString());
 
     // --- Yönlendirme ---
     return user.UserRole == UserEntity.Role.Admin
@@ -212,6 +229,8 @@ public async Task<IActionResult> Login(LoginViewModel model)
         HttpContext.Session.Clear();
         Response.Cookies.Delete("UserEmail");
         Response.Cookies.Delete("UserName");
+        Response.Cookies.Delete("RememberMe");
+        Response.Cookies.Delete("RememberEmail");
 
         return RedirectToAction("Login");
     }
