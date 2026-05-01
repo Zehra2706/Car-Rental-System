@@ -4,39 +4,42 @@
     dynamic car = ViewBag.Car;
     Layout = "_Layout";
 }
-<style>.custom-topbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 70px;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 30px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-    z-index: 2000;
-}
+<style>
+    .custom-topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 70px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+        z-index: 2000;
+    }
 
-.topbar-left-btn {
-    font-size: 30px;
-    cursor: pointer;
-    color: #1e3a8a;
-}
+    .topbar-left-btn {
+        font-size: 30px;
+        cursor: pointer;
+        color: #1e3a8a;
+    }
 
-.topbar-right-area {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+    .topbar-right-area {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
 
-body {
-    padding-top: 80px;
-}
-.topbar-left-btn i {
-    display: block;
-}
-}</style>
+    body {
+        padding-top: 80px;
+    }
+
+    .topbar-left-btn i {
+        display: block;
+    }
+</style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <div class="container-fluid mb-4">
@@ -62,508 +65,534 @@ body {
         <a href="/User/AvailableCars"><i class="bi bi-car-front me-2"></i> Araç Kirala</a>
         <a href="/User/MyRentals"><i class="bi bi-list-check me-2"></i> Kiralamalarım</a>
         <hr class="opacity-25">
-        <a href="/User/IncomingRequests?filter=aktif"><i class="bi bi-bell-fill me-2 text-warning"></i> Talepleri Yönet</a>
-        <a href="/Car/MyCars"><i class="bi bi-tags me-2"></i> İlanlarım</a>
-        <a href="/Car/Create"><i class="bi bi-plus-square me-2"></i> Araç Ekle</a>
-        <a href="/User/EditProfile"><i class="bi bi-gear me-2"></i> Ayarlar</a>
-    </div>
+        <a href="/User/IncomingRequests?filter=aktif"><i class="bi bi-bell-fill me-2 text-warning"></i> Talepleri
+            Yönet</a>
+            <a href="/Car/MyCars"><i class="bi bi-tags me-2"></i> İlanlarım</a>
+            <a href="/Car/Create"><i class="bi bi-plus-square me-2"></i> Araç Ekle</a>
+            <a href="/User/EditProfile"><i class="bi bi-gear me-2"></i> Ayarlar</a>
+        </div>
 
  
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/tr.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script src="https://npmcdn.com/flatpickr/dist/l10n/tr.js"></script>
 
-    <div class="container-fluid px-4">
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 mb-4">
-                <i class="bi bi-exclamation-octagon-fill me-2"></i> @TempData["Error"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-        <div class="row g-4">
-            <div class="col-lg-4">
-                <div class="card shadow-sm border-0 rounded-4 h-100">
-                    <div class="card-body p-4">
-                        <h5 class="fw-bold border-bottom pb-2 mb-3 text-primary">🔍 Araç Detayları</h5>
+        <div class="container-fluid px-4">
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 mb-4">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="card shadow-sm border-0 rounded-4 h-100">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold border-bottom pb-2 mb-3 text-primary">🔍 Araç Detayları</h5>
 
-                        @{
-                            var arac = ViewBag.Car as car.Models.Car;
-                            var oz = arac?.CarFeatures?.FirstOrDefault();
-                            var fiyat = arac?.Prices?.FirstOrDefault();
-                        }
+                            @{
+                                var arac = ViewBag.Car as car.Models.Car;
+                                var oz = arac?.CarFeatures?.FirstOrDefault();
+                                var fiyat = arac?.Prices?.FirstOrDefault();
+                            }
 
-                        @if (arac != null)
-                        {
-                            <div class="row g-3">
-                                @* Marka & Model *@
-                                <div class="col-12">
-                                    <small class="text-muted d-block font-monospace">Marka & Model</small>
-                                    <span class="fw-bold h5 text-uppercase">@arac.Brand @arac.ModelName
-                                        (@arac.ModelYear)</span>
-                                    </div>
+                            @if (arac != null)
+                            {
+                                <div class="row g-3">
+                                    @* Marka & Model *@
+                                    <div class="col-12">
+                                        <small class="text-muted d-block font-monospace">Marka & Model</small>
+                                        <span class="fw-bold h5 text-uppercase">@arac.Brand @arac.ModelName
+                                            (@arac.ModelYear)</span>
+                                        </div>
 
-                                    @* Teknik Detaylar *@
-                                    <div class="col-6">
-                                        <small class="text-muted d-block font-monospace">Renk</small>
-                                        <span class="fw-bold text-dark">@(arac.Color ?? "Belirtilmedi")</span>
-                                    </div>
+                                        @* Teknik Detaylar *@
+                                        <div class="col-6">
+                                            <small class="text-muted d-block font-monospace">Renk</small>
+                                            <span class="fw-bold text-dark">@(arac.Color ?? "Belirtilmedi")</span>
+                                        </div>
 
-                                    <div class="col-6">
-                                        <small class="text-muted d-block font-monospace">Motor Gücü</small>
-                                        <span class="fw-bold text-dark">
-                                            @(oz != null ? oz.enginePower.ToString("0.0") : "---") HP
-                                        </span>
-                                    </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block font-monospace">Motor Gücü</small>
+                                            <span class="fw-bold text-dark">
+                                                @(oz != null ? oz.enginePower.ToString("0.0") : "---") HP
+                                            </span>
+                                        </div>
 
-                                    <div class="col-6">
-                                        <small class="text-muted d-block font-monospace">Vites Tipi</small>
-                                        <span class="fw-bold text-dark">
-                                            @(oz != null ? oz.Transmission.ToString() : "---")
-                                        </span>
-                                    </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block font-monospace">Vites Tipi</small>
+                                            <span class="fw-bold text-dark">
+                                                @(oz != null ? oz.Transmission.ToString() : "---")
+                                            </span>
+                                        </div>
 
-                                    <div class="col-6">
-                                        <small class="text-muted d-block font-monospace">Yakıt Tipi</small>
-                                        <span class="fw-bold text-dark">
-                                            @(oz != null ? oz.fuelType.ToString() : "---")
-                                        </span>
-                                    </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block font-monospace">Yakıt Tipi</small>
+                                            <span class="fw-bold text-dark">
+                                                @(oz != null ? oz.fuelType.ToString() : "---")
+                                            </span>
+                                        </div>
 
-                                    @* TÜM ÜCRETLER (Günlük, Haftalık, Aylık) *@
-                                    <div class="col-12 mt-2">
-                                        <div class="p-3 bg-light rounded-3 border shadow-sm">
-                                            <small
-                                                class="text-muted d-block mb-2 fw-bold text-uppercase text-center border-bottom pb-1">
-                                                <i class="bi bi-tags-fill"></i> Kiralama Tarifeleri
-                                            </small>
-                                            <div class="row text-center g-2">
-                                                <div class="col-4 border-end">
-                                                    <small class="text-muted d-block" style="font-size:0.7rem;">GÜNLÜK</small>
-                                                    <span class="fw-bold text-primary"
-                                                          style="font-size:0.9rem;">@(fiyat?.daily.ToString("N0") ?? "0") ₺</span>
-                                                </div>
-                                                <div class="col-4 border-end">
-                                                    <small class="text-muted d-block" style="font-size:0.7rem;">HAFTALIK</small>
-                                                    <span class="fw-bold text-primary"
-                                                          style="font-size:0.9rem;">@(fiyat?.weekly.ToString("N0") ?? "0")
-                                                        ₺</span>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <small class="text-muted d-block" style="font-size:0.7rem;">AYLIK</small>
+                                        @* TÜM ÜCRETLER (Günlük, Haftalık, Aylık) *@
+                                        <div class="col-12 mt-2">
+                                            <div class="p-3 bg-light rounded-3 border shadow-sm">
+                                                <small
+                                                    class="text-muted d-block mb-2 fw-bold text-uppercase text-center border-bottom pb-1">
+                                                    <i class="bi bi-tags-fill"></i> Kiralama Tarifeleri
+                                                </small>
+                                                <div class="row text-center g-2">
+                                                    <div class="col-4 border-end">
+                                                        <small class="text-muted d-block" style="font-size:0.7rem;">GÜNLÜK</small>
                                                         <span class="fw-bold text-primary"
-                                                              style="font-size:0.9rem;">@(fiyat?.monthly.ToString("N0") ?? "0")
+                                                              style="font-size:0.9rem;">@(fiyat?.daily.ToString("N0") ?? "0") ₺</span>
+                                                    </div>
+                                                    <div class="col-4 border-end">
+                                                        <small class="text-muted d-block" style="font-size:0.7rem;">HAFTALIK</small>
+                                                        <span class="fw-bold text-primary"
+                                                              style="font-size:0.9rem;">@(fiyat?.weekly.ToString("N0") ?? "0")
                                                             ₺</span>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            @* Plaka *@
-                                            <div class="col-12">
-                                                <small class="text-muted d-block font-monospace">Plaka Bilgisi</small>
-                                                <span class="badge bg-dark fs-6 w-100 py-2" style="letter-spacing:2px;">
-                                                    @(string.IsNullOrEmpty(arac.Plate) ? "PLAKA TANIMLANMAMIŞ" : arac.Plate)
-                                                </span>
-                                            </div>
-
-                                            @* KONUM VE BİLGİ *@
-                                            <div class="col-12 mt-3">
-                                                <div class="p-3 bg-white rounded-3 border-start border-3 border-primary shadow-sm">
-                                                    <small class="text-muted d-block mb-1 fw-bold text-uppercase">📍 Konum &
-                                                        Bilgi</small>
-                                                        <p class="small mb-1 text-dark fw-bold">
-                                                            <i class="bi bi-geo-alt-fill text-danger"></i> @arac.Location
-                                                        </p>
-                                                        <hr class="my-2 opacity-25">
-                                                        <p class="small mb-0 text-secondary" style="font-style:italic; line-height:1.4;">
-                                                            <i class="bi bi-info-circle-fill text-primary me-1"></i> @arac.Description
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
-                    else
-                                        {
-                                            <div class="alert alert-danger">⚠️ Araç verileri boru hattında kayboldu!</div>
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-5">
-                                <div class="card shadow-sm border-0 rounded-4 h-100 p-3">
-                                    <img src="@(arac?.ImagePath ?? "/images/default-car.png")" class="img-fluid rounded-4 shadow"
-                                         style="max-height:520px; object-fit:contain; width:100%;" />
-
-                                    <div class="mt-4 p-3 bg-white rounded-3 border shadow-sm">
-                                        <small class="text-muted d-block mb-2 fw-bold">Satıcı Bilgileri</small>
-
-                                        <div class="d-flex justify-content-between mb-1">
-                                            <span>Ad Soyad:</span>
-                                            <b>@ViewBag.SellerName</b>
-                                        </div>
-
-                                        <div class="d-flex justify-content-between mb-1">
-                                            <span>Telefon:</span>
-                                            <b>@ViewBag.SellerPhone</b>
-                                        </div>
-            
-                                        <div class="d-flex justify-content-between mb-3">
-                                            <span>Email:</span>
-                                            <b>@ViewBag.SellerEmail</b>
-                                        </div>
-
-                                        <hr class="opacity-25">
-                                        <a href="/Car/ViewCarReviews?carId=@arac?.Id"
-                                               class="btn btn-outline-primary w-100 rounded-pill shadow-sm py-2">
-                                            <i class="bi bi-chat-left-text-fill me-2"></i>Müşteri Yorumlarını Gör
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-3">
-                                <div class="card shadow-lg border-0 rounded-4 h-100 border-top border-5 border-primary">
-                                    <div class="card-body p-4">
-
-                                        <h5 class="fw-bold mb-4 text-center text-primary">
-                                            🕒 Rezervasyon
-                                        </h5>
-
-                                        <form asp-controller="Rental" asp-action="StartPayment" method="post" id="rentalForm">
-                                        @Html.AntiForgeryToken()
-                                            <input type="hidden" name="CarId" value="@car?.Id" id="carIdField" />
-
-                                            <!-- Gizli alanlar -->
-                                            <input type="hidden" id="hiddenForecast" name="Forecast" value="0" />
-                                            <input type="hidden" id="hiddenDeposit" name="Deposit" value="0" />
-                                            <input type="hidden" name="IsContractApproved" id="isApprovedHidden" value="false" />
-
-                                            <!-- ALIŞ TARİHİ -->
-                                            <div class="mb-3">
-                                                <label class="form-label small fw-bold text-muted">ALIŞ TARİHİ</label>
-                                                <input type="text" id="startDate" name="Date"
-                                                       class="form-control bg-white shadow-sm border-primary rounded-3"
-                                                       placeholder="Tarih seç..." readonly required>
-                                            </div>
-
-                                            <!-- İADE TARİHİ -->
-                                            <div class="mb-4">
-                                                <label class="form-label small fw-bold text-muted">İADE TARİHİ</label>
-                                                <input type="text" id="endDate" name="ReturnDate"
-                                                       class="form-control bg-white shadow-sm border-primary rounded-3"
-                                                       placeholder="Önce alış seçin..." readonly required disabled>
-                                            </div>
-
-                                            <!-- FİYAT ÖZETİ -->
-                                            <div id="priceSummary"
-                                                 class="p-3 bg-primary bg-opacity-10 rounded-4 mb-4 d-none border border-primary border-opacity-25 shadow-sm">
-
-                                                <div class="d-flex justify-content-between small mb-1 text-dark">
-                                                    <span>Kiralama Süresi:</span>
-                                                    <span class="fw-bold" id="daysCount">0 Gün</span>
-                                                </div>
-
-                                                <div class="d-flex justify-content-between small mb-2 text-dark border-bottom pb-2">
-                                                    <span>Kira Bedeli:</span>
-                                                    <span class="fw-bold text-primary" id="totalPrice">0 TL</span>
-                                                </div>
-
-                                                <div class="d-flex justify-content-between text-danger fw-bold pt-1">
-                                                    <span style="font-size:0.9rem;">Depozito:</span>
-                                                    <span id="depositAmount">0 TL</span>
-                                                </div>
-                                            </div>
-
-                                            <!-- BUTON -->
-                                            <button type="button" id="submitBtn"
-                                                    class="btn btn-primary btn-lg w-100 py-3 fw-bold rounded-pill shadow" disabled
-                                                    data-bs-toggle="modal" data-bs-target="#contractModal">
-
-                                                <i class="bi bi-file-earmark-text me-2"></i>
-                                                Sözleşmeyi Gör
-                                            </button>
-
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            @* --- SÖZLEŞME PENCERESİ (MODAL) --- *@
-                            <div class="modal fade" id="contractModal" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-lg">
-                                    <div class="modal-content border-0 rounded-4 shadow-lg">
-                                        <div class="modal-header bg-primary text-white border-0 rounded-top-4">
-                                            <h5 class="modal-title fw-bold"><i class="bi bi-file-text"></i> Araç Kiralama Sözleşmesi
-                                            </h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body p-4 bg-light" style="max-height: 50vh; overflow-y: auto;">
-
-                                            <h6 class="fw-bold text-primary">1. TARAFLAR VE KONU</h6>
-                                            <p class="small text-muted">
-                                                İşbu sözleşme, ANKA Rent A Car (bundan böyle "Kiralayan" olarak anılacaktır) ile aracı kiralayan gerçek veya tüzel kişi (bundan böyle "Kiracı" olarak anılacaktır) arasında akdedilmiştir.
-                                            </p>
-
-                                            <h6 class="fw-bold text-primary mt-3">2. KULLANIM ŞARTLARI</h6>
-                                            <p class="small text-muted">
-                                                Kiracı, aracı Karayolları Trafik Kanunu ve ilgili mevzuatlara uygun şekilde kullanmayı kabul eder.
-                                                Araç; üçüncü kişilere devredilemez, kiralanamaz ve yasa dışı faaliyetlerde kullanılamaz.
-                                            </p>
-
-                                            <h6 class="fw-bold text-primary mt-3">3. SİGORTA VE SORUMLULUK</h6>
-                                            <p class="small text-muted">
-                                                Araç, zorunlu trafik sigortası kapsamında kiralanmaktadır. Kiracı, kendi kusurundan kaynaklanan hasarlardan sorumludur.
-                                                Alkol, uyuşturucu etkisi altında kullanım veya trafik kurallarına aykırı davranışlar sigorta kapsamı dışındadır.
-                                            </p>
-
-                                            <h6 class="fw-bold text-primary mt-3">4. YURT DIŞI KULLANIM YASAĞI</h6>
-                                            <p class="small text-muted">
-                                                Kiralanan araç, Kiralayan'ın yazılı izni olmaksızın Türkiye sınırları dışına çıkarılamaz.
-                                                Aksi durumda doğabilecek tüm hukuki ve maddi sorumluluk Kiracıya aittir.
-                                            </p>
-
-                                            <h6 class="fw-bold text-primary mt-3">5. İADE KOŞULLARI</h6>
-                                            <p class="small text-muted">
-                                                Kiracı, aracı kiralama süresi sonunda hasarsız, eksiksiz ve teslim aldığı yakıt seviyesinde iade etmekle yükümlüdür.
-                                            </p>
-
-                                            <h6 class="fw-bold text-primary mt-3">6. GECİKME VE CEZAİ ŞARTLAR</h6>
-                                            <p class="small text-muted">
-                                                Araç zamanında teslim edilmediği takdirde günlük kira bedelinin %50 fazlası gecikme ücreti olarak tahsil edilir.
-                                                Gecikme süresinin 24 saati aşması durumunda Kiralayan, aracı izinsiz kullanma gerekçesiyle yasal işlem başlatma hakkını saklı tutar.
-                                            </p>
-
-                                            <h6 class="fw-bold text-primary mt-3">7. TRAFİK CEZALARI</h6>
-                                            <p class="small text-muted">
-                                                Kiralama süresi boyunca oluşabilecek tüm trafik cezaları ve otoyol geçiş ücretleri Kiracıya aittir.
-                                            </p>
-
-                                            <h6 class="fw-bold text-primary mt-3">8. ARAÇTA HASAR DURUMU</h6>
-                                            <p class="small text-muted">
-                                                Araçta oluşabilecek her türlü hasar derhal Kiralayana bildirilmelidir. Aksi durumda tüm sorumluluk Kiracıya aittir.
-                                            </p>
-
-                                            <h6 class="fw-bold text-primary mt-3">9. FESİH VE HUKUKİ İŞLEM</h6>
-                                            <p class="small text-muted">
-                                                Kiracı sözleşme şartlarına aykırı hareket ettiği takdirde Kiralayan sözleşmeyi tek taraflı feshedebilir.
-                                                Gerekli görülmesi halinde hukuki ve cezai işlem başlatılır.
-                                            </p>
-                                            <p class="small text-center text-muted mt-3">
-                                                Bu sözleşme elektronik ortamda onaylanmış olup taraflar için bağlayıcıdır.
-                                            </p>
-                                        </div>
-                                                    <div
-                                                        class="modal-footer bg-white border-top-0 d-flex justify-content-between align-items-center rounded-bottom-4">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input border-primary" type="checkbox" id="modalCheck"
-                                                                   style="transform: scale(1.2);">
-                                                            <label class="form-check-label fw-bold text-dark ms-2" for="modalCheck"
-                                                                   style="cursor: pointer;">
-                                                                Sözleşme şartlarını okudum ve kabul ediyorum.
-                                                            </label>
+                                                        <div class="col-4">
+                                                            <small class="text-muted d-block" style="font-size:0.7rem;">AYLIK</small>
+                                                            <span class="fw-bold text-primary"
+                                                                  style="font-size:0.9rem;">@(fiyat?.monthly.ToString("N0") ?? "0")
+                                                                ₺</span>
+                                                            </div>
                                                         </div>
-                                                        <button type="button" id="confirmContractBtn"
-                                                                class="btn btn-success fw-bold px-4 py-2 rounded-pill shadow-sm" disabled>
-                                                            Onayla ve Ödemeye Geç <i class="bi bi-arrow-right"></i>
-                                                        </button>
                                                     </div>
                                                 </div>
+
+                                                @* Plaka *@
+                                                <div class="col-12">
+                                                    <small class="text-muted d-block font-monospace">Plaka Bilgisi</small>
+                                                    <span class="badge bg-dark fs-6 w-100 py-2" style="letter-spacing:2px;">
+                                                        @(string.IsNullOrEmpty(arac.Plate) ? "PLAKA TANIMLANMAMIŞ" : arac.Plate)
+                                                    </span>
+                                                </div>
+
+                                                @* KONUM VE BİLGİ *@
+                                                <div class="col-12 mt-3">
+                                                    <div class="p-3 bg-white rounded-3 border-start border-3 border-primary shadow-sm">
+                                                        <small class="text-muted d-block mb-1 fw-bold text-uppercase">📍 Konum &
+                                                            Bilgi</small>
+                                                            <p class="small mb-1 text-dark fw-bold">
+                                                                <i class="bi bi-geo-alt-fill text-danger"></i> @arac.Location
+                                                            </p>
+                                                            <hr class="my-2 opacity-25">
+                                                            <p class="small mb-0 text-secondary" style="font-style:italic; line-height:1.4;">
+                                                                <i class="bi bi-info-circle-fill text-primary me-1"></i> @arac.Description
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                    else
+                                            {
+                                                <div class="alert alert-danger">⚠️ Araç verileri boru hattında kayboldu!</div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-5">
+                                    <div class="card shadow-sm border-0 rounded-4 h-100 p-3">
+                                        <img src="@(arac?.ImagePath ?? "/images/default-car.png")" class="img-fluid rounded-4 shadow"
+                                             style="max-height:520px; object-fit:contain; width:100%;" />
+
+                                        <div class="mt-4 p-3 bg-white rounded-3 border shadow-sm">
+                                            <small class="text-muted d-block mb-2 fw-bold">Satıcı Bilgileri</small>
+
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Ad Soyad:</span>
+                                                <b>@ViewBag.SellerName</b>
+                                            </div>
+
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Telefon:</span>
+                                                <b>@ViewBag.SellerPhone</b>
+                                            </div>
+            
+                                            <div class="d-flex justify-content-between mb-3">
+                                                <span>Email:</span>
+                                                <b>@ViewBag.SellerEmail</b>
+                                            </div>
+
+                                            <hr class="opacity-25">
+                                            <a href="/Car/ViewCarReviews?carId=@arac?.Id"
+                                                   class="btn btn-outline-primary w-100 rounded-pill shadow-sm py-2">
+                                                <i class="bi bi-chat-left-text-fill me-2"></i>Müşteri Yorumlarını Gör
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3">
+                                    <div class="card shadow-lg border-0 rounded-4 h-100 border-top border-5 border-primary">
+                                        <div class="card-body p-4">
+
+                                            <h5 class="fw-bold mb-4 text-center text-primary">
+                                                🕒 Rezervasyon
+                                            </h5>
+
+                                            <form asp-controller="Rental" asp-action="StartPayment" method="post" id="rentalForm">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="CarId" value="@car?.Id" id="carIdField" />
+
+                                                <!-- Gizli alanlar -->
+                                                <input type="hidden" id="hiddenForecast" name="Forecast" value="0" />
+                                                <input type="hidden" id="hiddenDeposit" name="Deposit" value="0" />
+                                                <input type="hidden" name="IsContractApproved" id="isApprovedHidden" value="false" />
+
+                                                <!-- ALIŞ TARİHİ -->
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-bold text-muted">ALIŞ TARİHİ</label>
+                                                    <input type="text" id="startDate" name="Date"
+                                                           class="form-control bg-white shadow-sm border-primary rounded-3"
+                                                           placeholder="Tarih seç..." readonly required>
+                                                </div>
+
+                                                <!-- İADE TARİHİ -->
+                                                <div class="mb-4">
+                                                    <label class="form-label small fw-bold text-muted">İADE TARİHİ</label>
+                                                    <input type="text" id="endDate" name="ReturnDate"
+                                                           class="form-control bg-white shadow-sm border-primary rounded-3"
+                                                           placeholder="Önce alış seçin..." readonly required disabled>
+                                                </div>
+
+                                                <!-- FİYAT ÖZETİ -->
+                                                <div id="priceSummary"
+                                                     class="p-3 bg-primary bg-opacity-10 rounded-4 mb-4 d-none border border-primary border-opacity-25 shadow-sm">
+
+                                                    <div class="d-flex justify-content-between small mb-1 text-dark">
+                                                        <span>Kiralama Süresi:</span>
+                                                        <span class="fw-bold" id="daysCount">0 Gün</span>
+                                                    </div>
+
+                                                    <div class="d-flex justify-content-between small mb-2 text-dark border-bottom pb-2">
+                                                        <span>Kira Bedeli:</span>
+                                                        <span class="fw-bold text-primary" id="totalPrice">0 TL</span>
+                                                    </div>
+
+                                                    <div class="d-flex justify-content-between text-danger fw-bold pt-1">
+                                                        <span style="font-size:0.9rem;">Depozito:</span>
+                                                        <span id="depositAmount">0 TL</span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- BUTON -->
+                                                <button type="button" id="submitBtn"
+                                                        class="btn btn-primary btn-lg w-100 py-3 fw-bold rounded-pill shadow" disabled
+                                                        data-bs-toggle="modal" data-bs-target="#contractModal">
+
+                                                    <i class="bi bi-file-earmark-text me-2"></i>
+                                                    Sözleşmeyi Gör
+                                                </button>
+
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                @* --- SÖZLEŞME PENCERESİ (MODAL) --- *@
+                                <div class="modal fade" id="contractModal" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                                        <div class="modal-content border-0 rounded-4 shadow-lg">
+                                            <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+                                                <h5 class="modal-title fw-bold"><i class="bi bi-file-text"></i> Araç Kiralama Sözleşmesi
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body p-4 bg-light" style="max-height: 50vh; overflow-y: auto;">
+
+                                                <h6 class="fw-bold text-primary">1. TARAFLAR VE KONU</h6>
+                                                <p class="small text-muted">
+                                                    İşbu sözleşme, ANKA Rent A Car (bundan böyle "Kiralayan" olarak anılacaktır) ile aracı
+                                                    kiralayan gerçek veya tüzel kişi (bundan böyle "Kiracı" olarak anılacaktır) arasında
+                                                    akdedilmiştir.
+                                                </p>
+
+                                                <h6 class="fw-bold text-primary mt-3">2. KULLANIM ŞARTLARI</h6>
+                                                <p class="small text-muted">
+                                                    Kiracı, aracı Karayolları Trafik Kanunu ve ilgili mevzuatlara uygun şekilde kullanmayı
+                                                    kabul eder.
+                                                    Araç; üçüncü kişilere devredilemez, kiralanamaz ve yasa dışı faaliyetlerde kullanılamaz.
+                                                </p>
+
+                                                <h6 class="fw-bold text-primary mt-3">3. SİGORTA VE SORUMLULUK</h6>
+                                                <p class="small text-muted">
+                                                    Araç, zorunlu trafik sigortası kapsamında kiralanmaktadır. Kiracı, kendi kusurundan
+                                                    kaynaklanan hasarlardan sorumludur.
+                                                    Alkol, uyuşturucu etkisi altında kullanım veya trafik kurallarına aykırı davranışlar
+                                                    sigorta kapsamı dışındadır.
+                                                </p>
+
+                                                <h6 class="fw-bold text-primary mt-3">4. YURT DIŞI KULLANIM YASAĞI</h6>
+                                                <p class="small text-muted">
+                                                    Kiralanan araç, Kiralayan'ın yazılı izni olmaksızın Türkiye sınırları dışına
+                                                    çıkarılamaz.
+                                                    Aksi durumda doğabilecek tüm hukuki ve maddi sorumluluk Kiracıya aittir.
+                                                </p>
+
+                                                <h6 class="fw-bold text-primary mt-3">5. İADE KOŞULLARI</h6>
+                                                <p class="small text-muted">
+                                                    Kiracı, aracı kiralama süresi sonunda hasarsız, eksiksiz ve teslim aldığı yakıt
+                                                    seviyesinde iade etmekle yükümlüdür.
+                                                </p>
+
+                                                <h6 class="fw-bold text-primary mt-3">6. GECİKME VE CEZAİ ŞARTLAR</h6>
+                                                <p class="small text-muted">
+                                                    Araç zamanında teslim edilmediği takdirde günlük kira bedelinin %50 fazlası gecikme
+                                                    ücreti olarak tahsil edilir.
+                                                    Gecikme süresinin 24 saati aşması durumunda Kiralayan, aracı izinsiz kullanma
+                                                    gerekçesiyle yasal işlem başlatma hakkını saklı tutar.
+                                                </p>
+
+                                                <h6 class="fw-bold text-primary mt-3">7. TRAFİK CEZALARI</h6>
+                                                <p class="small text-muted">
+                                                    Kiralama süresi boyunca oluşabilecek tüm trafik cezaları ve otoyol geçiş ücretleri
+                                                    Kiracıya aittir.
+                                                </p>
+
+                                                <h6 class="fw-bold text-primary mt-3">8. ARAÇTA HASAR DURUMU</h6>
+                                                <p class="small text-muted">
+                                                    Araçta oluşabilecek her türlü hasar derhal Kiralayana bildirilmelidir. Aksi durumda tüm
+                                                    sorumluluk Kiracıya aittir.
+                                                </p>
+
+                                                <h6 class="fw-bold text-primary mt-3">9. FESİH VE HUKUKİ İŞLEM</h6>
+                                                <p class="small text-muted">
+                                                    Kiracı sözleşme şartlarına aykırı hareket ettiği takdirde Kiralayan sözleşmeyi tek
+                                                    taraflı feshedebilir.
+                                                    Gerekli görülmesi halinde hukuki ve cezai işlem başlatılır.
+                                                </p>
+                                                <p class="small text-center text-muted mt-3">
+                                                    Bu sözleşme elektronik ortamda onaylanmış olup taraflar için bağlayıcıdır.
+                                                </p>
+                                            </div>
+                                            <div
+                                                class="modal-footer bg-white border-top-0 d-flex justify-content-between align-items-center rounded-bottom-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input border-primary" type="checkbox" id="modalCheck"
+                                                           style="transform: scale(1.2);">
+                                                    <label class="form-check-label fw-bold text-dark ms-2" for="modalCheck"
+                                                           style="cursor: pointer;">
+                                                        Sözleşme şartlarını okudum ve kabul ediyorum.
+                                                    </label>
+                                                </div>
+                                                <button type="button" id="confirmContractBtn"
+                                                        class="btn btn-success fw-bold px-4 py-2 rounded-pill shadow-sm" disabled>
+                                                    Onayla ve Ödemeye Geç <i class="bi bi-arrow-right"></i>
+                                                </button>
                                             </div>
                                         </div>
-                                        @section Scripts {
-                                            <script>
-                                                const disabledRangesRaw = JSON.parse('@Html.Raw(ViewBag.DisabledDates ?? "[]")');
-                                                const carId = document.getElementById('carIdField')?.value;
+                                    </div>
+                                </div>
+                                @section Scripts {
+                                    <script>
+                                        const disabledRangesRaw = JSON.parse('@Html.Raw(ViewBag.DisabledDates ?? "[]")');
+                                        const carId = document.getElementById('carIdField')?.value;
 
-                                                // Tarihleri Flatpickr'ın anlayacağı JS formatına çeviriyoruz
-                                                const parsedDisabledDates = disabledRangesRaw.map(r => ({
-                                                from: new Date(r.from),
-                                                to: new Date(r.to)
-                                                }));
-
-                                                function isDateDisabled(date) {
-                                                return parsedDisabledDates.some(r =>
-                                                date >= r.from && date <= r.to
-                                                );
-                                                }
-
-                                                function hasRangeConflict(start, end) {
-                                                const startTime = start.getTime();
-                                                const endTime = end.getTime();
-                                                return parsedDisabledDates.some(r => startTime < r.to.getTime() && endTime > r.from.getTime());
-                                                }
-                                                const commonConfig = {
-                                                enableTime: true,
-                                                time_24hr: true,
-                                                minuteIncrement: 30,
-                                                minDate: "today",
-                                                disable: parsedDisabledDates,
-                                                dateFormat: "Y-m-d H:i",
-                                                locale: "tr"
-                                                };
-                                                const startPicker = flatpickr("#startDate", {
-                                                ...commonConfig,
-                                                onChange: function (selectedDates) {
-                                                if (!selectedDates[0]) return;
-                
-                                                const selectedStart = selectedDates[0];
-                                                if (isDateDisabled(selectedStart)) {
-                                                alert("Bu saat dolu! Lütfen boş bir saat seçin.");
-                                                startPicker.clear();
-                                                return;
-                                                }
-
-                                                // Minimum dönüş saati (Alıştan 1 saat sonra)
-                                                endPicker.set("minDate", new Date(selectedStart.getTime() + 3600000));
-                                                document.getElementById('endDate').disabled = false;
-                
-                                                // Eğer daha önce iade tarihi seçildiyse fiyatı tekrar hesapla
-                                                if (document.getElementById('endDate').value) {
-                                                checkAndCalculate();
-                                                } else {
-                                                document.getElementById('priceSummary').classList.add('d-none');
-                                                document.getElementById('submitBtn').disabled = true;
-                                                }
-                                                }
-                                                });
-
-                                                const endPicker = flatpickr("#endDate", {
-                                                ...commonConfig,
-                                                onChange: function (selectedDates) {
-                                                if (!selectedDates[0]) return;
-                                                checkAndCalculate();
-                                                }
-                                                });
-
-                                                function checkAndCalculate() {
-                                                const startStr = document.getElementById('startDate').value;
-                                                const endStr = document.getElementById('endDate').value;
-                                                const submitBtn = document.getElementById('submitBtn');
-
-                                                if (!startStr) {
-                                                alert("Lütfen önce alış tarihi seçin.");
-                                                endPicker.clear();
-                                                return;
-                                                }
-
-                                                const start = new Date(startStr);
-                                                const end = new Date(endStr);
-
-                                                if (isDateDisabled(end)) {
-                                                alert("Seçilen iade saati dolu!");
-                                                endPicker.clear();
-                                                return;
-                                                }
-
-                                                if (hasRangeConflict(start, end)) {
-                                                alert("Seçilen aralık mevcut bir rezervasyonla çakışıyor! Lütfen aralığı değiştirin.");
-                                                endPicker.clear();
-                                                document.getElementById('priceSummary').classList.add('d-none');
-                                                submitBtn.disabled = true;
-                                                return;
-                                                }
-
-                                                updatePrice(start, end);
-                                                }
-                                                function formatDuration(days) {
-                                                let months = Math.floor(days / 30);
-                                                let remainingAfterMonth = days % 30;
-
-                                                let weeks = Math.floor(remainingAfterMonth / 7);
-                                                let remainingDays = remainingAfterMonth % 7;
-
-                                                let parts = [];
-
-                                                if (months > 0) parts.push(months + " Ay");
-                                                if (weeks > 0) parts.push(weeks + " Hafta");
-                                                if (remainingDays > 0) parts.push(remainingDays + " Gün");
-
-                                                return parts.join(" ");
-                                                }
-                                                function updatePrice(start, end) {
-
-                                                const submitBtn = document.getElementById('submitBtn');
-
-                                                const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-
-                                                fetch(`/Rental/GetPriceCalculation?carId=${carId}&days=${totalDays}`)
-                                                .then(r => r.json())
-                                                .then(data => {
-
-                                                document.getElementById('priceSummary').classList.remove('d-none');
-
-                                                document.getElementById('daysCount').innerText = formatDuration(totalDays);
-
-                                                document.getElementById('totalPrice').innerText =
-                                                data.total.toLocaleString('tr-TR') + " TL";
-
-                                                document.getElementById('depositAmount').innerText =
-                                                data.deposit.toLocaleString('tr-TR') + " TL";
-
-                                                document.getElementById('hiddenForecast').value =
-                                                data.total.toString().replace(",", ".");
-
-                                                document.getElementById('hiddenDeposit').value =
-                                                data.deposit.toString().replace(",", ".");
-
-                                                submitBtn.disabled = false;
-                                                })
-                                                .catch(() => {
-                                                submitBtn.disabled = true;
-                                                alert("Fiyat hesaplanırken hata oluştu.");
-                                                });
-                                                }
-                                                function toggleMenu() {
-                                                document.getElementById("sidebar").classList.toggle("active");
-                                                }
-                                                // --- SÖZLEŞME VE ONAY İŞLEMLERİ ---
-                                                const modalCheck = document.getElementById('modalCheck');
-                                                const confirmContractBtn = document.getElementById('confirmContractBtn');
-                                                const rentalForm = document.getElementById('rentalForm');
-                                                const isApprovedHidden = document.getElementById('isApprovedHidden');
-
-                                                if (modalCheck && confirmContractBtn && rentalForm) {
-                                                // Sözleşme kutucuğu işaretlenince yeşil butonu aktif et
-                                                modalCheck.addEventListener('change', function () {
-                                                confirmContractBtn.disabled = !this.checked;
-                                                });
-
-                                                // Yeşil butona basılınca gizli onayı true yap ve formu gönder!
-                                                confirmContractBtn.addEventListener('click', function () {
-                                                isApprovedHidden.value = "true";
-                                                rentalForm.submit();
-                                                });
-                                                }
-                                            </script>
+                                        // 🔥 gerçek datetime parse
+                                        function parse(dt) {
+                                        return new Date(dt.replace(" ", "T"));
                                         }
-                                        <style>
-                                            .sidebar {
-                                            position: fixed;
-                                            left: -280px;
-                                            /* Kapalıyken solda gizli */
-                                            top: 0;
-                                            width: 280px;
-                                            height: 100%;
-                                            background: #1e3a8a;
-                                            color: white;
-                                            padding: 25px;
-                                            transition: 0.4s ease;
-                                            z-index: 3000;
-                                            }
 
-                                            .sidebar.active {
-                                            left: 0;
-                                            /* Açıldığında ekrana gelir */
-                                            }
+                                        // 🔥 tüm rezervasyonları gerçek saatleriyle tut
+                                        const ranges = disabledRangesRaw.map(r => {
+                                        let from = parse(r.from);
+                                        let to = parse(r.to);
 
-                                            .sidebar a {
-                                            display: block;
-                                            color: rgba(255, 255, 255, 0.8);
-                                            text-decoration: none;
-                                            padding: 12px 15px;
-                                            margin: 10px 0;
-                                            border-radius: 10px;
-                                            }
-                                        </style>
+                                        if (from > to) [from, to] = [to, from];
+
+                                        return { from, to };
+                                        });
+
+                                        // 🔥 overlap kontrol
+                                        function hasConflict(start, end) {
+                                        return ranges.some(r =>
+                                        start < r.to && end > r.from
+                                        );
+                                        }
+
+                                        // 🔥 start için kontrol
+                                        function isStartInvalid(date) {
+                                        return ranges.some(r =>
+                                        date >= r.from && date < r.to
+                                        );
+                                        }
+
+                                        // 🔥 end için kontrol
+                                        function isEndInvalid(date) {
+                                        return ranges.some(r =>
+                                        date > r.from && date <= r.to
+                                        );
+                                        }
+
+                                        const commonConfig = {
+                                        enableTime: true,
+                                        time_24hr: true,
+                                        minuteIncrement: 30,
+                                        minDate: "today",
+                                        dateFormat: "Y-m-d H:i",
+                                        locale: "tr"
+                                        };
+
+                                        // ================= START =================
+                                        const startPicker = flatpickr("#startDate", {
+                                        ...commonConfig,
+
+                                        onChange: function (selectedDates) {
+                                        if (!selectedDates[0]) return;
+
+                                        const start = selectedDates[0];
+
+                                        if (isStartInvalid(start)) {
+                                        alert("Bu saatten itibaren dolu!");
+                                        startPicker.clear();
+                                        return;
+                                        }
+
+                                        document.getElementById("endDate").disabled = false;
+
+                                        if (document.getElementById("endDate").value) {
+                                        checkAndCalculate();
+                                        }
+                                        }
+                                        });
+
+                                        // ================= END =================
+                                        const endPicker = flatpickr("#endDate", {
+                                        ...commonConfig,
+
+                                        onChange: function (selectedDates) {
+                                        if (!selectedDates[0]) return;
+                                        checkAndCalculate();
+                                        }
+                                        });
+
+                                        // ================= CHECK =================
+                                        function checkAndCalculate() {
+                                        const startStr = document.getElementById("startDate").value;
+                                        const endStr = document.getElementById("endDate").value;
+                                        const submitBtn = document.getElementById("submitBtn");
+
+                                        if (!startStr || !endStr) return;
+
+                                        const start = parse(startStr);
+                                        const end = parse(endStr);
+
+                                        if (start >= end) {
+                                        alert("Bitiş başlangıçtan büyük olmalı!");
+                                        submitBtn.disabled = true;
+                                        return;
+                                        }
+
+                                        if (hasConflict(start, end)) {
+                                        alert("Seçtiğiniz saatler dolu!");
+                                        endPicker.clear();
+                                        submitBtn.disabled = true;
+                                        return;
+                                        }
+
+                                        updatePrice(start, end);
+                                        }
+
+                                        // ================= FORMAT =================
+                                        function formatDuration(days) {
+                                        let months = Math.floor(days / 30);
+                                        let weeks = Math.floor((days % 30) / 7);
+                                        let remainingDays = days % 7;
+
+                                        let parts = [];
+                                        if (months) parts.push(months + " Ay");
+                                        if (weeks) parts.push(weeks + " Hafta");
+                                        if (remainingDays) parts.push(remainingDays + " Gün");
+
+                                        return parts.join(" ");
+                                        }
+
+                                        // ================= PRICE =================
+                                        function updatePrice(start, end) {
+
+                                        const submitBtn = document.getElementById("submitBtn");
+
+                                        const totalHours = Math.ceil((end - start) / (1000 * 60 * 60));
+                                        const days = Math.ceil(totalHours / 24);
+
+                                        fetch(`/Rental/GetPriceCalculation?carId=${carId}&days=${days}`)
+                                        .then(r => r.json())
+                                        .then(data => {
+
+                                        document.getElementById("priceSummary").classList.remove("d-none");
+
+                                        document.getElementById("daysCount").innerText = formatDuration(days);
+                                        document.getElementById("totalPrice").innerText =
+                                        data.total.toLocaleString("tr-TR") + " TL";
+
+                                        document.getElementById("depositAmount").innerText =
+                                        data.deposit.toLocaleString("tr-TR") + " TL";
+
+                                        document.getElementById("hiddenForecast").value = data.total;
+                                        document.getElementById("hiddenDeposit").value = data.deposit;
+
+                                        submitBtn.disabled = false;
+                                        })
+                                        .catch(() => {
+                                        submitBtn.disabled = true;
+                                        alert("Fiyat hesaplama hatası");
+                                        });
+                                        }
+
+                                        // ================= MENU =================
+                                        function toggleMenu() {
+                                        document.getElementById("sidebar").classList.toggle("active");
+                                        }
+
+                                        // ================= CONTRACT =================
+                                        const modalCheck = document.getElementById("modalCheck");
+                                        const confirmContractBtn = document.getElementById("confirmContractBtn");
+                                        const rentalForm = document.getElementById("rentalForm");
+                                        const isApprovedHidden = document.getElementById("isApprovedHidden");
+
+                                        if (modalCheck && confirmContractBtn) {
+                                        modalCheck.addEventListener("change", function () {
+                                        confirmContractBtn.disabled = !this.checked;
+                                        });
+
+                                        confirmContractBtn.addEventListener("click", function () {
+                                        isApprovedHidden.value = "true";
+                                        rentalForm.submit();
+                                        });
+                                        }
+                                    </script>
+                                }
+                                <style>
+                                    .sidebar {
+                                    position: fixed;
+                                    left: -280px;
+                                    /* Kapalıyken solda gizli */
+                                    top: 0;
+                                    width: 280px;
+                                    height: 100%;
+                                    background: #1e3a8a;
+                                    color: white;
+                                    padding: 25px;
+                                    transition: 0.4s ease;
+                                    z-index: 3000;
+                                    }
+
+                                    .sidebar.active {
+                                    left: 0;
+                                    /* Açıldığında ekrana gelir */
+                                    }
+
+                                    .sidebar a {
+                                    display: block;
+                                    color: rgba(255, 255, 255, 0.8);
+                                    text-decoration: none;
+                                    padding: 12px 15px;
+                                    margin: 10px 0;
+                                    border-radius: 10px;
+                                    }
+                                </style>

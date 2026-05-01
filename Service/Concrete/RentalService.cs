@@ -61,7 +61,7 @@ namespace car.Service.Concrete
             return rentals.Select(r => (object)new
             {
                 from = r.Date.ToString("yyyy-MM-dd HH:mm"),
-                to = r.ReturnDate.ToString("yyyy-MM-dd HH:mm")
+                to = r.ReturnDate.AddMinutes(-1).ToString("yyyy-MM-dd HH:mm")
             }).ToList();
         }
         public (decimal total, decimal deposit) CalculatePrice(int carId, int days)
@@ -117,6 +117,12 @@ namespace car.Service.Concrete
 
         public void ConfirmAndSave(User user, Rental rental)
         {
+            if (rental.Date > rental.ReturnDate)
+            {
+                var temp = rental.Date;
+                rental.Date = rental.ReturnDate;
+                rental.ReturnDate = temp;
+            }
             _rentalRepo.Add(rental);
             _rentalRepo.SaveChanges();
 

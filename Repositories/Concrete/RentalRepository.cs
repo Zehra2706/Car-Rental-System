@@ -36,10 +36,14 @@ namespace Car_reservation_automation_system.Repositories.Concrete
         }
         public bool CheckAvailability(int carId, DateTime start, DateTime end)
         {
-
             return !_context.Rentals.Any(r =>
                 r.CarId == carId &&
                 r.Status != "Reddedildi" &&
+                !r.IsReturned &&
+                r.Status != "Tamamlandı" &&
+
+                r.ReturnDate > r.Date && // 🔥 BOZUK DATAYI ELE
+
                 start < r.ReturnDate &&
                 end > r.Date
             );
@@ -48,8 +52,16 @@ namespace Car_reservation_automation_system.Repositories.Concrete
 
         public List<Rental> GetActiveRentalsByCarId(int carId)
         {
+            var now = DateTime.Now;
+
             return _context.Rentals
-                .Where(r => r.CarId == carId && r.Status != "Reddedildi")
+                .Where(r =>
+                    r.CarId == carId &&
+                    r.Status != "Reddedildi" &&
+                    !r.IsReturned &&                // 🔥 EKLE
+                    r.Status != "Tamamlandı" &&     // 🔥 EKLE
+                    r.ReturnDate > now              // 🔥 EN KRİTİK
+                )
                 .ToList();
         }
         public void Delete(int id)
@@ -92,42 +104,42 @@ namespace Car_reservation_automation_system.Repositories.Concrete
             throw new NotImplementedException();
         }
 
-public List<Rental> GetAllActiveRentals()
-{
-    return _context.Rentals
-        .Include(r => r.Car)
-        .Include(r => r.User)
-        .ThenInclude(u => u.UserInfo)
-        .Where(r => r.Status == "Aktif")
-        .ToList();
-}
-public bool HasActiveRentalForCar(int carId)
-{
-    return _context.Rentals.Any(r =>
-        r.CarId == carId &&
-        (r.Status == "Onaylandı" || r.Status == "Aktif"));
-}
-public bool HasActiveRentalForUser(int userId)
-{
-    return _context.Rentals.Any(r =>
-        r.UserId == userId &&
-        (
-            r.Status == "Aktif" ||
-            (r.Status == "Onaylandı" && r.IsPaid)
-        ) &&
-        !r.IsReturned
-    );
-}
+        public List<Rental> GetAllActiveRentals()
+        {
+            return _context.Rentals
+                .Include(r => r.Car)
+                .Include(r => r.User)
+                .ThenInclude(u => u.UserInfo)
+                .Where(r => r.Status == "Aktif")
+                .ToList();
+        }
+        public bool HasActiveRentalForCar(int carId)
+        {
+            return _context.Rentals.Any(r =>
+                r.CarId == carId &&
+                (r.Status == "Onaylandı" || r.Status == "Aktif"));
+        }
+        public bool HasActiveRentalForUser(int userId)
+        {
+            return _context.Rentals.Any(r =>
+                r.UserId == userId &&
+                (
+                    r.Status == "Aktif" ||
+                    (r.Status == "Onaylandı" && r.IsPaid)
+                ) &&
+                !r.IsReturned
+            );
+        }
 
-public List<Rental> GetRentalsByUserId(int userId)
-{
-    return _context.Rentals
-        .Include(r => r.Car)
-        .Include(r => r.User)
-        .ThenInclude(u => u.UserInfo)
-        .Where(r => r.UserId == userId)
-        .ToList();
-}
+        public List<Rental> GetRentalsByUserId(int userId)
+        {
+            return _context.Rentals
+                .Include(r => r.Car)
+                .Include(r => r.User)
+                .ThenInclude(u => u.UserInfo)
+                .Where(r => r.UserId == userId)
+                .ToList();
+        }
 
 
 

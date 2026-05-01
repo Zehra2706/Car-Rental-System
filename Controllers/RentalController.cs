@@ -26,7 +26,7 @@ namespace car.Controllers
 
         private static readonly ConcurrentDictionary<string, string> _paymentCache = new();
         private readonly INotificationService _notificationService;
-        public RentalController(IRentalService rentalService, ICarService carService, IConfiguration configuration, IUserService userService, INotificationService notificationService ,ApplicationDbContext context)
+        public RentalController(IRentalService rentalService, ICarService carService, IConfiguration configuration, IUserService userService, INotificationService notificationService, ApplicationDbContext context)
         {
             _rentalService = rentalService;
             _carService = carService;
@@ -36,7 +36,7 @@ namespace car.Controllers
             _context = context;
         }
 
-        public IActionResult Success(int carId , bool showReview = true)
+        public IActionResult Success(int carId, bool showReview = true)
         {
             var model = new RentalSuccessViewModel
             {
@@ -49,7 +49,7 @@ namespace car.Controllers
         [HttpGet]
         public IActionResult Create(int carId)
         {
-            if (carId == 0) return Content("ID gelmedi, linki kontrol et Melisa!");
+            if (carId == 0) return Content("ID gelmedi!");
 
             var car = _carService.GetCarById(carId);
 
@@ -333,15 +333,15 @@ namespace car.Controllers
 
                 _notificationService.RentalCreated(user, rental);
                 _notificationService.DepositPaid(user, rental);
-               
+
                 // araç sahibine bildirim
                 _notificationService.NewRentalRequest(owner, rental);
                 _notificationService.OwnerDepositInfo(owner, rental);
-             
+
                 _paymentCache.TryRemove(token, out _);
 
                 TempData["Success"] = "Ödemeniz başarıyla alındı!";
-                return RedirectToAction("Success", new { carId = rental.CarId , showReview = false });
+                return RedirectToAction("Success", new { carId = rental.CarId, showReview = false });
             }
             else
             {
@@ -504,8 +504,8 @@ namespace car.Controllers
                 var rental = _rentalService.GetRentalById(rentalId);
                 if (rental != null)
                 {
-                    rental.Status = "Ödendi"; 
-                    rental.IsPaid = true;     
+                    rental.Status = "Ödendi";
+                    rental.IsPaid = true;
                     var user = _userService.TGetById(rental.UserId);
 
                     var car = _carService.GetCarForEdit(rental.CarId);
