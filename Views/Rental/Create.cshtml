@@ -393,40 +393,42 @@
                                         const disabledRangesRaw = JSON.parse('@Html.Raw(ViewBag.DisabledDates ?? "[]")');
                                         const carId = document.getElementById('carIdField')?.value;
 
-                                        // ================= PARSE =================
                                         function parse(dt) {
                                         return new Date(dt.replace(" ", "T"));
                                         }
 
-                                        // ================= RANGE DATA =================
                                         const ranges = disabledRangesRaw.map(r => {
                                         let from = parse(r.from);
                                         let to = parse(r.to);
-
                                         if (from > to) [from, to] = [to, from];
-
                                         return { from, to };
                                         });
 
-                                        // ================= OVERLAP =================
-                                        function hasConflict(start, end) {
-                                        return ranges.some(r =>
-                                        start < r.to && end > r.from
-                                        );
+                                        let alertCooldown = false;
+
+                                        function showAlert(msg) {
+                                        if (alertCooldown) return;
+                                        alertCooldown = true;
+                                        alert(msg);
+                                        setTimeout(() => alertCooldown = false, 800);
                                         }
 
-                                        // ================= SAME DAY CHECK =================
-                                        function isSameDay(a, b) {
-                                        return a.getFullYear() === b.getFullYear() &&
-                                        a.getMonth() === b.getMonth() &&
-                                        a.getDate() === b.getDate();
+                                        function isDayFullyBooked(date) {
+                                        const start = new Date(date); start.setHours(0, 0, 0, 0);
+                                        const end = new Date(date); end.setHours(23, 59, 59, 999);
+                                        return ranges.some(r => r.from <= start && r.to >= end);
                                         }
 
-                                        // ================= START INVALID =================
                                         function isStartInvalid(date) {
-                                        return ranges.some(r =>
-                                        date >= r.from && date < r.to
-                                        );
+                                        return ranges.some(r => date >= r.from && date < r.to);
+                                        }
+
+                                        function hasConflict(start, end) {
+                                        return ranges.some(r => start < r.to && end > r.from);
+                                        }
+
+                                        function isSameDay(a, b) {
+                                        return a.toDateString() === b.toDateString();
                                         }
 
                                         const commonConfig = {
@@ -438,49 +440,41 @@
                                         locale: "tr"
                                         };
 
-                                        // ================= START =================
+                                        const endPicker = flatpickr("#endDate", {
+                                        ...commonConfig,
+                                        onChange: function () {
+                                        validateAll();
+                                        }
+                                        });
+
                                         const startPicker = flatpickr("#startDate", {
                                         ...commonConfig,
-
                                         onChange: function (selectedDates) {
                                         if (!selectedDates[0]) return;
 
                                         const start = selectedDates[0];
 
-                                        if (isStartInvalid(start)) {
-                                        alert("Bu saatten itibaren dolu!");
-                                        startPicker.clear();
+                                        // 🔥 EN KRİTİK FIX: endDate aktif et
+                                        document.getElementById("endDate").disabled = false;
+                                        endPicker.set("minDate", start);
+
+                                        if (isDayFullyBooked(start)) {
+                                        startPicker.setDate(null, false);
+                                        endPicker.setDate(null, false);
+                                        showAlert("⚠️ Bu gün tamamen dolu!");
                                         return;
                                         }
 
-                                        document.getElementById("endDate").disabled = false;
-
-                                        // 🔥 KRİTİK DÜZELTME
-                                        endPicker.clear();
-                                        endPicker.set("minDate", start);
+                                        if (isStartInvalid(start)) {
+                                        startPicker.setDate(null, false);
+                                        endPicker.setDate(null, false);
+                                        showAlert("⚠️ Bu saat dolu!");
+                                        return;
+                                        }
                                         }
                                         });
 
-                                        // ================= END =================
-                                        const endPicker = flatpickr("#endDate", {
-                                        ...commonConfig,
-
-                                        onOpen: function () {
-                                        const startStr = document.getElementById("startDate").value;
-                                        if (!startStr) return;
-
-                                        const start = parse(startStr);
-                                        this.set("minDate", start);
-                                        },
-
-                                        onChange: function (selectedDates) {
-                                        if (!selectedDates[0]) return;
-                                        checkAndCalculate();
-                                        }
-                                        });
-
-                                        // ================= CHECK =================
-                                        function checkAndCalculate() {
+                                        function validateAll() {
                                         const startStr = document.getElementById("startDate").value;
                                         const endStr = document.getElementById("endDate").value;
                                         const submitBtn = document.getElementById("submitBtn");
@@ -491,20 +485,21 @@
                                         const end = parse(endStr);
 
                                         if (isSameDay(start, end)) {
-                                        alert("❌ Aynı gün kiralama yapılamaz!");
+                                        showAlert("❌ Aynı gün kiralama yapılamaz!");
                                         endPicker.clear();
                                         submitBtn.disabled = true;
                                         return;
                                         }
 
                                         if (start >= end) {
-                                        alert("Bitiş başlangıçtan büyük olmalı!");
+                                        showAlert("❌ Bitiş tarihi başlangıçtan büyük olmalı!");
+                                        endPicker.clear();
                                         submitBtn.disabled = true;
                                         return;
                                         }
 
                                         if (hasConflict(start, end)) {
-                                        alert("Seçtiğiniz saatler dolu!");
+                                        showAlert("❌ Bu aralık dolu!");
                                         endPicker.clear();
                                         submitBtn.disabled = true;
                                         return;
@@ -513,13 +508,11 @@
                                         updatePrice(start, end);
                                         }
 
-                                        // ================= PRICE =================
                                         function updatePrice(start, end) {
-
                                         const submitBtn = document.getElementById("submitBtn");
 
-                                        const totalHours = Math.ceil((end - start) / (1000 * 60 * 60));
-                                        const days = Math.ceil(totalHours / 24);
+                                        const hours = Math.ceil((end - start) / (1000 * 60 * 60));
+                                        const days = Math.ceil(hours / 24);
 
                                         fetch(`/Rental/GetPriceCalculation?carId=${carId}&days=${days}`)
                                         .then(r => r.json())
@@ -541,16 +534,14 @@
                                         })
                                         .catch(() => {
                                         submitBtn.disabled = true;
-                                        alert("Fiyat hesaplama hatası");
+                                        showAlert("Fiyat hesaplanamadı!");
                                         });
                                         }
 
-                                        // ================= MENU =================
                                         function toggleMenu() {
                                         document.getElementById("sidebar").classList.toggle("active");
                                         }
 
-                                        // ================= CONTRACT =================
                                         const modalCheck = document.getElementById("modalCheck");
                                         const confirmContractBtn = document.getElementById("confirmContractBtn");
                                         const rentalForm = document.getElementById("rentalForm");
