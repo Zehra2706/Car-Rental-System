@@ -393,12 +393,12 @@
                                         const disabledRangesRaw = JSON.parse('@Html.Raw(ViewBag.DisabledDates ?? "[]")');
                                         const carId = document.getElementById('carIdField')?.value;
 
-                                        // 🔥 gerçek datetime parse
+                                        // ================= PARSE =================
                                         function parse(dt) {
                                         return new Date(dt.replace(" ", "T"));
                                         }
 
-                                        // 🔥 tüm rezervasyonları gerçek saatleriyle tut
+                                        // ================= RANGE DATA =================
                                         const ranges = disabledRangesRaw.map(r => {
                                         let from = parse(r.from);
                                         let to = parse(r.to);
@@ -408,24 +408,24 @@
                                         return { from, to };
                                         });
 
-                                        // 🔥 overlap kontrol
+                                        // ================= OVERLAP =================
                                         function hasConflict(start, end) {
                                         return ranges.some(r =>
                                         start < r.to && end > r.from
                                         );
                                         }
 
-                                        // 🔥 start için kontrol
+                                        // ================= SAME DAY CHECK =================
+                                        function isSameDay(a, b) {
+                                        return a.getFullYear() === b.getFullYear() &&
+                                        a.getMonth() === b.getMonth() &&
+                                        a.getDate() === b.getDate();
+                                        }
+
+                                        // ================= START INVALID =================
                                         function isStartInvalid(date) {
                                         return ranges.some(r =>
                                         date >= r.from && date < r.to
-                                        );
-                                        }
-
-                                        // 🔥 end için kontrol
-                                        function isEndInvalid(date) {
-                                        return ranges.some(r =>
-                                        date > r.from && date <= r.to
                                         );
                                         }
 
@@ -455,15 +455,23 @@
 
                                         document.getElementById("endDate").disabled = false;
 
-                                        if (document.getElementById("endDate").value) {
-                                        checkAndCalculate();
-                                        }
+                                        // 🔥 KRİTİK DÜZELTME
+                                        endPicker.clear();
+                                        endPicker.set("minDate", start);
                                         }
                                         });
 
                                         // ================= END =================
                                         const endPicker = flatpickr("#endDate", {
                                         ...commonConfig,
+
+                                        onOpen: function () {
+                                        const startStr = document.getElementById("startDate").value;
+                                        if (!startStr) return;
+
+                                        const start = parse(startStr);
+                                        this.set("minDate", start);
+                                        },
 
                                         onChange: function (selectedDates) {
                                         if (!selectedDates[0]) return;
@@ -482,6 +490,13 @@
                                         const start = parse(startStr);
                                         const end = parse(endStr);
 
+                                        if (isSameDay(start, end)) {
+                                        alert("❌ Aynı gün kiralama yapılamaz!");
+                                        endPicker.clear();
+                                        submitBtn.disabled = true;
+                                        return;
+                                        }
+
                                         if (start >= end) {
                                         alert("Bitiş başlangıçtan büyük olmalı!");
                                         submitBtn.disabled = true;
@@ -498,20 +513,6 @@
                                         updatePrice(start, end);
                                         }
 
-                                        // ================= FORMAT =================
-                                        function formatDuration(days) {
-                                        let months = Math.floor(days / 30);
-                                        let weeks = Math.floor((days % 30) / 7);
-                                        let remainingDays = days % 7;
-
-                                        let parts = [];
-                                        if (months) parts.push(months + " Ay");
-                                        if (weeks) parts.push(weeks + " Hafta");
-                                        if (remainingDays) parts.push(remainingDays + " Gün");
-
-                                        return parts.join(" ");
-                                        }
-
                                         // ================= PRICE =================
                                         function updatePrice(start, end) {
 
@@ -526,7 +527,7 @@
 
                                         document.getElementById("priceSummary").classList.remove("d-none");
 
-                                        document.getElementById("daysCount").innerText = formatDuration(days);
+                                        document.getElementById("daysCount").innerText = days + " Gün";
                                         document.getElementById("totalPrice").innerText =
                                         data.total.toLocaleString("tr-TR") + " TL";
 
