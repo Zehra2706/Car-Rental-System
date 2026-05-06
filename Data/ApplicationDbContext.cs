@@ -7,7 +7,6 @@ using user.Models;
 using userConnections.Models;
 using userInfo.Models;
 
-
 namespace car.Data
 {
     public class ApplicationDbContext : DbContext
@@ -34,6 +33,7 @@ namespace car.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // --- CAR İLİŞKİLERİ ---
             modelBuilder.Entity<Car>()
                 .HasMany(c => c.Rentals)
                 .WithOne(r => r.Car)
@@ -58,6 +58,14 @@ namespace car.Data
                 .HasForeignKey(p => p.CarId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // --- RENTAL VE USER ARASINDAKİ DÖNGÜYÜ (CASCADE PATH) KIRAN YENİ KURAL ---
+            modelBuilder.Entity<rental.Models.Rental>()
+                .HasOne(r => r.User)
+                .WithMany() // Eğer User sınıfı içinde kiralama listesi varsa r => r.User.Rentals yazabilirsin, yoksa böyle boş kalabilir.
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.NoAction); // Döngüsel silme hatasını çözen sihirli satır 👈
+
+            // --- TOHUM (SEED) VERİLERİ ---
             modelBuilder.Entity<User>().HasData(
                 new User { Id = 1, Name = "deneme", Surname = "deneme", UserRole = User.Role.Customer, Date = new DateTime(2024, 6, 25) }
             );

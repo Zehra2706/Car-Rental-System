@@ -12,8 +12,8 @@ using car.Data;
 namespace car.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260421193954_AddMailLogTable")]
-    partial class AddMailLogTable
+    [Migration("20260506151836_InitialLocalCreate")]
+    partial class InitialLocalCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,45 @@ namespace car.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Log", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IPAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StatusCode")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Logs");
+                });
 
             modelBuilder.Entity("MailLog", b =>
                 {
@@ -82,6 +121,9 @@ namespace car.Migrations
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsInsured")
                         .HasColumnType("bit");
 
@@ -110,6 +152,37 @@ namespace car.Migrations
                     b.ToTable("Cars");
                 });
 
+            modelBuilder.Entity("car.Models.Review", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CarId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarId");
+
+                    b.ToTable("Reviews");
+                });
+
             modelBuilder.Entity("carFeature.Models.CarFeature", b =>
                 {
                     b.Property<int>("Id")
@@ -127,7 +200,7 @@ namespace car.Migrations
                     b.Property<int>("Transmission")
                         .HasColumnType("int");
 
-                    b.Property<double>("engineSize")
+                    b.Property<double>("enginePower")
                         .HasColumnType("float");
 
                     b.Property<int>("fuelType")
@@ -224,17 +297,29 @@ namespace car.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Deposit")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Deposit")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<double>("Forecast")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Forecast")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsContractApproved")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsReturned")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("RealReturnDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("ReminderSent")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("ReturnDate")
                         .HasColumnType("datetime2");
@@ -263,7 +348,22 @@ namespace car.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EmailConfirmationToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmailVerificationCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsEmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LockoutEnd")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -273,6 +373,11 @@ namespace car.Migrations
                     b.Property<string>("Surname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TC")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
 
                     b.Property<int>("UserRole")
                         .HasColumnType("int");
@@ -285,9 +390,12 @@ namespace car.Migrations
                         new
                         {
                             Id = 1,
+                            AccessFailedCount = 0,
                             Date = new DateTime(2024, 6, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsEmailConfirmed = false,
                             Name = "deneme",
                             Surname = "deneme",
+                            TC = "00000000000",
                             UserRole = 0
                         });
                 });
@@ -381,6 +489,17 @@ namespace car.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("car.Models.Review", b =>
+                {
+                    b.HasOne("car.Models.Car", "Car")
+                        .WithMany("Reviews")
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Car");
+                });
+
             modelBuilder.Entity("carFeature.Models.CarFeature", b =>
                 {
                     b.HasOne("car.Models.Car", "Car")
@@ -417,7 +536,7 @@ namespace car.Migrations
             modelBuilder.Entity("rental.Models.Rental", b =>
                 {
                     b.HasOne("car.Models.Car", "Car")
-                        .WithMany()
+                        .WithMany("Rentals")
                         .HasForeignKey("CarId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -456,18 +575,19 @@ namespace car.Migrations
                     b.Navigation("CarFeatures");
 
                     b.Navigation("Prices");
+
+                    b.Navigation("Rentals");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("user.Models.User", b =>
                 {
-                    b.Navigation("Licence")
-                        .IsRequired();
+                    b.Navigation("Licence");
 
-                    b.Navigation("UserConnections")
-                        .IsRequired();
+                    b.Navigation("UserConnections");
 
-                    b.Navigation("UserInfo")
-                        .IsRequired();
+                    b.Navigation("UserInfo");
                 });
 #pragma warning restore 612, 618
         }

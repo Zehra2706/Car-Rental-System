@@ -15,9 +15,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // DB
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<car.Data.ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+var connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=CarReservationDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"; builder.Services.AddDbContext<car.Data.ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString, sql =>
+    {
+        sql.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null);
+    }));
 
 // Repositories & Services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -53,6 +58,22 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 var app = builder.Build();
+// ------------ OTOMATİK VERİTABANI OLUŞTURMA (BYPASS) ------------
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<car.Data.ApplicationDbContext>();
+        // Eğer veritabanı yoksa yerel LocalDB üzerinde sıfırdan oluşturur:
+        context.Database.EnsureCreated();
+    }
+    catch (Exception ex)
+    {
+        // Hata oluşursa konsola yazdırır ama uygulamanın çökmesini engeller
+        Console.WriteLine($"Veritabanı oluşturulurken bir hata meydana geldi: {ex.Message}");
+    }
+}
 
 // ---------------- MIDDLEWARE PIPELINE ----------------
 

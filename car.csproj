@@ -6,6 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>8bcdd0f1-fc93-4640-855c-2be3873cf94a</UserSecretsId>
   </PropertyGroup>
+	<PropertyGroup>
+		<NoWarn>$(NoWarn);NU1901</NoWarn>
+	</PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Iyzipay" Version="2.1.78" />
