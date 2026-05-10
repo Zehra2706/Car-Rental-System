@@ -292,7 +292,12 @@ public class AuthController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin.";
+            // Hatayı ekrana yazdır ki nedenini görelim
+            ViewBag.Error = "Hata Detayı: " + ex.Message;
+            if (ex.InnerException != null)
+            {
+                ViewBag.Error += " İç Hata: " + ex.InnerException.Message;
+            }
             return View(model);
         }
     }

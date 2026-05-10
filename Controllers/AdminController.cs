@@ -52,7 +52,7 @@ public class AdminController : Controller
         if (!IsAdmin()) return RedirectToAction("Login", "Auth");
 
         var users = _userService.GetAllUsers()
-            .Where(u => u.UserRole != null && u.UserRole.RoleName == "Customer")
+            .Where(u => u.UserRole != null && u.UserRole.RoleName == "User")
             .ToList();
 
         return View(users);

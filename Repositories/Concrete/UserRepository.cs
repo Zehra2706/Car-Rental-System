@@ -23,7 +23,7 @@ public class UserRepository : IUserRepository
             .Include(x => x.UserRole) // 👈 Bu satırı EKLE
             .FirstOrDefault(x => x.UserInfo.Email == email);
     }
-
+   
     public List<User> GetAllUsers()
     {
         return _context.Users

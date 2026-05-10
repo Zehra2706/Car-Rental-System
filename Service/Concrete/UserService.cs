@@ -54,18 +54,29 @@ namespace car.Service.Concrete
 
         public void Register(RegisterViewModel model)
         {
-            if (_userRepository.EmailExists(model.Email)) throw new Exception("Bu email zaten kayıtlı");
-            if (_userRepository.PhoneExists(model.PhoneNumber)) throw new Exception("Bu telefon numarası zaten kayıtlı");
-            if (_userRepository.LicenseExists(model.LicenseNumber)) throw new Exception("Bu ehliyet numarası zaten kayıtlı");
-            if (_userRepository.TCExists(model.TC)) throw new Exception("Bu TC kimlik numarası zaten kayıtlı");
+            // 1. Önce Rolü oluşturup kaydediyoruz
+            var userRole = new car.Models.Role
+            {
+                RoleName = "User"
+            };
+            _context.Roles.Add(userRole);
+            _context.SaveChanges();
 
+            // 2. Şimdi Kullanıcıyı oluşturuyoruz
             var user = new User
             {
                 Name = model.Name,
                 Surname = model.Surname,
                 TC = model.TC,
-                UserRole = new car.Models.Role { RoleName = "Customer" },
                 Date = DateTime.Now,
+
+                // --- KRİTİK DÜZELTME ---
+                // Veritabanı "UserRole" kolonuna NULL basamazsın diyor.
+                // Eğer User modelinde hem nesne hem de aynı isimde bir alan varsa 
+                // veritabanındaki kolonu elinle doldurmayı dene:
+
+                UserRole = userRole, // Nesne ilişkisi için
+
                 UserInfo = new UserInfo
                 {
                     Email = model.Email,
@@ -82,7 +93,18 @@ namespace car.Service.Concrete
                 }
             };
 
-            _userRepository.AddUser(user);
+            _context.Users.Add(user);
+
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                // Eğer hata devam ederse, veritabanındaki UserRole kolonunun ismini 
+                // tam olarak karşılayacak bir property ataması gerekebilir.
+                throw;
+            }
         }
         public EditProfileViewModel GetProfileForEdit(string email)
         {
