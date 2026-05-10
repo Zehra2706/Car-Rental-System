@@ -64,7 +64,7 @@ namespace car.Service.Concrete
                 Name = model.Name,
                 Surname = model.Surname,
                 TC = model.TC,
-                UserRole = Role.Customer,
+                UserRole = new car.Models.Role { RoleName = "Customer" },
                 Date = DateTime.Now,
                 UserInfo = new UserInfo
                 {
@@ -258,7 +258,7 @@ namespace car.Service.Concrete
             {
                 Name = model.Name,
                 Surname = model.Surname,
-                UserRole = Role.Admin,
+                UserRole = new car.Models.Role { RoleName = "Admin" },
                 Date = DateTime.Now,
                 UserConnections = new UserConnections { Adress = model.Address, Number = model.PhoneNumber },
                 Licence = new Licence { LicenceNumber = model.LicenseNumber }
@@ -272,7 +272,7 @@ namespace car.Service.Concrete
                 Password = hashedPassword // Hashlenmiş şifre
             };
             _userRepository.AddUser(user);
-            var role = new Roles
+            var role = new car.Models.Role
             {
                 UserId = user.Id,
                 RoleName = user.UserRole.ToString()

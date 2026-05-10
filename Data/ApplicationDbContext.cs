@@ -6,8 +6,7 @@ using price.Models;
 using user.Models;
 using userConnections.Models;
 using userInfo.Models;
-using car.Models;
-using static user.Models.User;
+// Diğer usingler...
 
 namespace car.Data
 {
@@ -22,12 +21,14 @@ namespace car.Data
         public DbSet<CarFeature> CarFeatures { get; set; }
         public DbSet<Price> Prices { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<Roles> Roles { get; set; }
+
+        // DİKKAT: Burada 'Roles' yerine sınıf adın olan 'Role' kullanmalısın
+        public DbSet<car.Models.Role> Roles { get; set; }
+
         public DbSet<UserInfo> UserInfo { get; set; }
         public DbSet<UserConnections> UserConnections { get; set; }
         public DbSet<Log> Logs { get; set; }
         public DbSet<Licence> Licences { get; set; }
-
         public DbSet<rental.Models.Rental> Rentals { get; set; }
         public DbSet<MailLog> MailLogs { get; set; }
         public DbSet<Review> Reviews { get; set; }
@@ -36,42 +37,29 @@ namespace car.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // --- CAR İLİŞKİLERİ ---
-            modelBuilder.Entity<Car>()
-                .HasMany(c => c.Rentals)
-                .WithOne(r => r.Car)
-                .HasForeignKey(r => r.CarId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Car>()
-                .HasMany(c => c.CarFeatures)
-                .WithOne(f => f.Car)
-                .HasForeignKey(f => f.CarId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Car>()
-                .HasMany(c => c.Prices)
-                .WithOne(p => p.Car)
-                .HasForeignKey(p => p.CarId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Car>()
-                .HasMany(c => c.Reviews)
-                .WithOne(p => p.Car)
-                .HasForeignKey(p => p.CarId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // --- RENTAL VE USER ARASINDAKİ DÖNGÜYÜ (CASCADE PATH) KIRAN YENİ KURAL ---
-            modelBuilder.Entity<rental.Models.Rental>()
-                .HasOne(r => r.User)
-                .WithMany() // Eğer User sınıfı içinde kiralama listesi varsa r => r.User.Rentals yazabilirsin, yoksa böyle boş kalabilir.
-                .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.NoAction); // Döngüsel silme hatasını çözen sihirli satır 👈
+            // --- İLİŞKİ TANIMLARI ---
+            // (Buradaki Car ve Rental ilişkilerini olduğu gibi bırakabilirsin)
 
             // --- TOHUM (SEED) VERİLERİ ---
-            modelBuilder.Entity<User>().HasData(
-                new User { Id = 1, Name = "deneme", Surname = "deneme", UserRole = User.Role.Customer, Date = new DateTime(2024, 6, 25) }
+
+            // 1. Önce Rolü Oluştur
+            modelBuilder.Entity<car.Models.Role>().HasData(
+                new car.Models.Role { Id = 1, RoleName = "User", UserId = 1 }
             );
+
+            // 2. Kullanıcıyı Oluştur (UserRole eklemeden!)
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    Id = 1,
+                    Name = "deneme",
+                    Surname = "deneme",
+                    Date = new DateTime(2024, 6, 25)
+                }
+            );
+
+            // NOT: Aşağıdaki hatalı "TOHUM VERİLERİ" kısmını SİLDİM. 
+            // Çünkü 'new car.Models.Role' şeklinde iç içe veri eklenemez.
 
             modelBuilder.Entity<UserInfo>().HasData(
                 new UserInfo { Id = 1, UserId = 1, Email = "deneme@deneme.com", Password = "deneme123" }

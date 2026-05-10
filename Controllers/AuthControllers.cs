@@ -175,7 +175,7 @@ public class AuthController : Controller
     {
         new Claim("UserId", user.Id.ToString()),
         new Claim(ClaimTypes.Email, user.UserInfo.Email),
-        new Claim(ClaimTypes.Role, user.UserRole.ToString()),
+       new Claim(ClaimTypes.Role, user.UserRole?.RoleName ?? "Customer"),
         new Claim(ClaimTypes.Name, user.Name),
         new Claim("TC", user.TC ?? "00000000000")
     };
@@ -201,16 +201,18 @@ public class AuthController : Controller
 
         HttpContext.Session.SetInt32("UserId", user.Id);
         HttpContext.Session.SetString("UserName", user.Name);
-        HttpContext.Session.SetString("UserRole", user.UserRole.ToString());
+        // Eğer UserRole null ise "Customer" yaz, değilse RoleName'i yaz.
+        HttpContext.Session.SetString("UserRole", user.UserRole?.RoleName ?? "Customer");
         HttpContext.Session.SetString("UserEmail", user.UserInfo.Email);
         HttpContext.Session.SetString("TC", user.TC ?? "");
 
         Console.WriteLine("DB PASSWORD: " + user.UserInfo.Password);
         Console.WriteLine("GELEN PASSWORD: " + model.Password);
+        Console.WriteLine("ROLE: " + (user.UserRole?.RoleName ?? "Rol Atanmamış"));
         Console.WriteLine("ROLE: " + user.UserRole.ToString());
 
         // --- Yönlendirme ---
-        return user.UserRole == UserEntity.Role.Admin
+        return user.UserRole?.RoleName == "Admin"
             ? RedirectToAction("Index", "Admin")
             : RedirectToAction("Index", "User");
     }

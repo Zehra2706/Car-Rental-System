@@ -11,10 +11,9 @@ namespace user.Models
         public required string Name { get; set; }
 
         public required string Surname { get; set; }
-        public enum Role { Customer, Admin }
-        public required Role UserRole { get; set; }
         public required DateTime Date { get; set; }
 
+        public virtual car.Models.Role UserRole { get; set; }
         public UserInfo? UserInfo { get; set; }
         public UserConnections? UserConnections { get; set; }
 

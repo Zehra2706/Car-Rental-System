@@ -52,7 +52,7 @@ public class AdminController : Controller
         if (!IsAdmin()) return RedirectToAction("Login", "Auth");
 
         var users = _userService.GetAllUsers()
-            .Where(u => u.UserRole == UserModel.Role.Customer)
+            .Where(u => u.UserRole != null && u.UserRole.RoleName == "Customer")
             .ToList();
 
         return View(users);
@@ -63,8 +63,8 @@ public class AdminController : Controller
         if (!IsAdmin()) return RedirectToAction("Login", "Auth");
 
         var admins = _userService.GetAllUsers()
-            .Where(u => u.UserRole == UserModel.Role.Admin)
-            .ToList();
+    .Where(u => u.UserRole != null && u.UserRole.RoleName == "Admin")
+    .ToList();
 
         return View(admins);
     }
@@ -95,16 +95,15 @@ public class AdminController : Controller
         if (!_userService.CanDeleteUser(id))
         {
             TempData["Error"] = "Kullanıcının aktif kiralaması veya kirada aracı var.";
-            return user.UserRole == UserModel.Role.Admin ? RedirectToAction("AdminList") : RedirectToAction("UserList");
+            return user.UserRole?.RoleName == "Admin" ? RedirectToAction("AdminList") : RedirectToAction("UserList");
         }
 
         var role = user.UserRole;
         _userService.DeleteUser(id);
 
         TempData["Success"] = "Kullanıcı başarıyla silindi.";
-        return (role == UserModel.Role.Admin) ? RedirectToAction("AdminList") : RedirectToAction("UserList");
+        return (role?.RoleName == "Admin") ? RedirectToAction("AdminList") : RedirectToAction("UserList");
     }
-
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult AddUser(AdminCreateUserViewModel model)

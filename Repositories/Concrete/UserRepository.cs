@@ -14,13 +14,29 @@ public class UserRepository : IUserRepository
         _context = context;
         _notificationService = notificationService;
     }
+    public User? GetUserWithDetails(string email)
+    {
+        return _context.Users
+            .Include(x => x.UserInfo)
+            .Include(x => x.UserConnections)
+            .Include(x => x.Licence)
+            .Include(x => x.UserRole) // 👈 Bu satırı EKLE
+            .FirstOrDefault(x => x.UserInfo.Email == email);
+    }
 
+    public List<User> GetAllUsers()
+    {
+        return _context.Users
+            .Include(x => x.UserInfo)
+            .Include(x => x.UserRole) // 👈 Admin listesinde hata almamak için EKLE
+            .ToList();
+    }
     public void AddUser(User user)
     {
         _context.Users.Add(user);
         _context.SaveChanges();
 
-        var role = new Roles
+        var role = new car.Models.Role
         {
             UserId = user.Id,
             RoleName = "User"
@@ -33,9 +49,9 @@ public class UserRepository : IUserRepository
     public User GetByEmail(string email)
     {
         return _context.Users
-            .Include(x => x.UserInfo)
-            .Include(x => x.UserConnections)
-            .FirstOrDefault(x => x.UserInfo.Email == email);
+            .Include(u => u.UserInfo)
+            .Include(u => u.UserRole) // <--- İşte bu satır rolü "Dolu" getirir!
+            .FirstOrDefault(u => u.UserInfo.Email == email);
     }
 
     public User GetById(int id)
@@ -68,24 +84,11 @@ public class UserRepository : IUserRepository
     {
         return _context.Users.Any(x => x.TC == tc);
     }
-    public User? GetUserWithDetails(string email)
-    {
-        return _context.Users
-            .Include(x => x.UserInfo)
-            .Include(x => x.UserConnections)
-            .Include(x => x.Licence)
-            .FirstOrDefault(x => x.UserInfo.Email == email);
-    }
+    
     public void DeleteRolesByUserId(int userId)
     {
         var roles = _context.Roles.Where(r => r.UserId == userId);
         _context.Roles.RemoveRange(roles);
-    }
-    public List<User> GetAllUsers()
-    {
-        return _context.Users
-            .Include(x => x.UserInfo)
-            .ToList();
     }
     public void DeleteUser(int userId)
     {
