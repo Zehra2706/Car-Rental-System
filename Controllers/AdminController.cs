@@ -69,7 +69,6 @@ public class AdminController : Controller
         return View(admins);
     }
 
-
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult DeleteUser(int id)
@@ -77,11 +76,9 @@ public class AdminController : Controller
         if (!IsAdmin()) return RedirectToAction("Login", "Auth");
 
         int currentUserId = HttpContext.Session.GetInt32("UserId") ?? 0;
-
         var user = _userService.GetAllUsers().FirstOrDefault(u => u.Id == id);
 
-        if (user == null)
-            return NotFound();
+        if (user == null) return NotFound();
 
         if (user.Id == currentUserId)
         {
@@ -89,24 +86,23 @@ public class AdminController : Controller
             return RedirectToAction("AdminList");
         }
 
-        if (user.UserInfo.Email == "admin@gmail.com")
+        if (user.UserInfo?.Email == "admin@gmail.com")
         {
             TempData["Error"] = "Sistem yöneticisi silinemez!";
             return RedirectToAction("AdminList");
         }
 
-       if (!_userService.CanDeleteUser(id))
+        if (!_userService.CanDeleteUser(id))
         {
             TempData["Error"] = "Kullanıcının aktif kiralaması veya kirada aracı var.";
-            return RedirectToAction("UserList");
+            return user.UserRole == UserModel.Role.Admin ? RedirectToAction("AdminList") : RedirectToAction("UserList");
         }
+
         var role = user.UserRole;
         _userService.DeleteUser(id);
 
-        if (role == Role.Admin)
-            return RedirectToAction("AdminList");
-        else
-            return RedirectToAction("UserList");
+        TempData["Success"] = "Kullanıcı başarıyla silindi.";
+        return (role == UserModel.Role.Admin) ? RedirectToAction("AdminList") : RedirectToAction("UserList");
     }
 
     [HttpPost]
@@ -115,25 +111,20 @@ public class AdminController : Controller
     {
         if (!IsAdmin()) return RedirectToAction("Login", "Auth");
 
-        if (!ModelState.IsValid)
-        {
-            return View(model);
-        }
+        if (!ModelState.IsValid) return View(model);
 
         try
         {
+            // UserService içindeki AddUser metodunda rol ekleme kodun varsa burası tamdır.
             _userService.AddUser(model);
 
-            TempData["Success"] = "Admin başarıyla eklendi!";
+            TempData["Success"] = "İşlem başarıyla tamamlandı!";
             return RedirectToAction("AdminList");
         }
         catch (Exception ex)
         {
-            // Gerçek hatayı logla (console veya db)
-            Console.WriteLine(ex); 
-
-            ModelState.AddModelError("", "Bir hata oluştu. Lütfen tekrar deneyin.");
-
+            // Hata mesajını (Email zaten var vb.) kullanıcıya gösterir
+            ModelState.AddModelError("", ex.Message);
             return View(model);
         }
     }

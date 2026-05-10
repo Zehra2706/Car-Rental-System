@@ -1,3 +1,4 @@
+
 using user.Models;
 using userInfo.Models;
 
@@ -6,6 +7,7 @@ public interface IUserRepository
 {
     void AddUser(User user);
     User GetById(int id);
+    void DeleteRolesByUserId(int userId);
     User GetByEmail(string email);
     public bool TCExists(string tc);
     bool EmailExists(string email);

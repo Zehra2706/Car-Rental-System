@@ -1,4 +1,5 @@
 using car.Data;
+using car.Models;
 using Microsoft.EntityFrameworkCore;
 using user.Models;
 using userInfo.Models;
@@ -17,6 +18,15 @@ public class UserRepository : IUserRepository
     public void AddUser(User user)
     {
         _context.Users.Add(user);
+        _context.SaveChanges();
+
+        var role = new Roles
+        {
+            UserId = user.Id,
+            RoleName = "User"
+        };
+
+        _context.Roles.Add(role);
         _context.SaveChanges();
     }
 
@@ -66,7 +76,11 @@ public class UserRepository : IUserRepository
             .Include(x => x.Licence)
             .FirstOrDefault(x => x.UserInfo.Email == email);
     }
-
+    public void DeleteRolesByUserId(int userId)
+    {
+        var roles = _context.Roles.Where(r => r.UserId == userId);
+        _context.Roles.RemoveRange(roles);
+    }
     public List<User> GetAllUsers()
     {
         return _context.Users
@@ -112,6 +126,7 @@ public class UserRepository : IUserRepository
 
         _context.Prices.RemoveRange(prices);
         _context.CarFeatures.RemoveRange(features);
+
 
         _context.Cars.RemoveRange(cars);
 

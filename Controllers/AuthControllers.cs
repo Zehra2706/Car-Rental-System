@@ -351,7 +351,6 @@ public class AuthController : Controller
 
             _userService.ResetPassword(model.Token, model.Password);
 
-            // 🔥 EN SAĞLAM KİLİT AÇMA (TEKRAR DB'DEN ÇEK)
             var updatedUser = _userService.GetByEmail(user.UserInfo.Email);
 
             updatedUser.AccessFailedCount = 0;

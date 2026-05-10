@@ -182,6 +182,7 @@ namespace car.Controllers
             {
                 TempData["Error"] = "Aktif kiralamanız var, hesap silinemez.";
                 return RedirectToAction("EditProfile");
+                
             }
 
             _userService.DeleteUser(userId.Value);

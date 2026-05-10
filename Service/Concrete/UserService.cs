@@ -58,6 +58,7 @@ namespace car.Service.Concrete
             if (_userRepository.PhoneExists(model.PhoneNumber)) throw new Exception("Bu telefon numarası zaten kayıtlı");
             if (_userRepository.LicenseExists(model.LicenseNumber)) throw new Exception("Bu ehliyet numarası zaten kayıtlı");
             if (_userRepository.TCExists(model.TC)) throw new Exception("Bu TC kimlik numarası zaten kayıtlı");
+
             var user = new User
             {
                 Name = model.Name,
@@ -65,29 +66,24 @@ namespace car.Service.Concrete
                 TC = model.TC,
                 UserRole = Role.Customer,
                 Date = DateTime.Now,
-            };
-            var hashedPassword = _passwordHasher.HashPassword(user, model.Password);
-
-            user.UserInfo = new UserInfo
-            {
-                Email = model.Email,
-                Password = hashedPassword
-            };
-
-            user.UserConnections = new UserConnections
-            {
-                Adress = model.Address,
-                Number = model.PhoneNumber
-            };
-
-            user.Licence = new Licence
-            {
-                LicenceNumber = model.LicenseNumber
+                UserInfo = new UserInfo
+                {
+                    Email = model.Email,
+                    Password = _passwordHasher.HashPassword(null, model.Password)
+                },
+                UserConnections = new UserConnections
+                {
+                    Adress = model.Address,
+                    Number = model.PhoneNumber
+                },
+                Licence = new Licence
+                {
+                    LicenceNumber = model.LicenseNumber
+                }
             };
 
             _userRepository.AddUser(user);
         }
-
         public EditProfileViewModel GetProfileForEdit(string email)
         {
             var user = _userRepository.GetUserWithDetails(email);
@@ -192,7 +188,7 @@ namespace car.Service.Concrete
             else
                 baseAmount = (decimal)totalDays * (decimal)carPrice.daily;
 
-            // 🔥 CEZA HESAPLANIYOR AMA FORECAST'A YAZMIYORUZ
+          
             decimal penalty = 0m;
 
             if (DateTime.Now.Date > rental.ReturnDate.Date)
@@ -245,9 +241,10 @@ namespace car.Service.Concrete
         public List<User> GetAllUsers() => _userRepository.GetAllUsers();
         public void DeleteUser(int userId)
         {
-            if (!CanDeleteUser(userId))
-                throw new Exception("Kullanıcının aktif kiralaması veya kirada aracı var.");
+            _userRepository.DeleteRolesByUserId(userId);
 
+            if (!CanDeleteUser(userId))
+                throw new Exception();
 
             _userRepository.DeleteUser(userId);
         }
@@ -275,6 +272,14 @@ namespace car.Service.Concrete
                 Password = hashedPassword // Hashlenmiş şifre
             };
             _userRepository.AddUser(user);
+            var role = new Roles
+            {
+                UserId = user.Id,
+                RoleName = user.UserRole.ToString()
+            };
+
+            _context.Roles.Add(role);
+            _context.SaveChanges();
         }
 
         public user.Models.User TGetById(int id)
@@ -284,10 +289,7 @@ namespace car.Service.Concrete
                 .Include(u => u.UserConnections)
                 .FirstOrDefault(u => u.Id == id);
         }
-        public void CancelRentalRequest(int rentalId)
-        {
-            throw new NotImplementedException();
-        }
+       
 
 
         public string GeneratePasswordResetToken(string email)
@@ -411,6 +413,7 @@ namespace car.Service.Concrete
                 .FirstOrDefault(u => u.Id == id);
         }
 
+
         public bool CanDeleteUser(int userId)
         {
             // kullanıcının kendi kiralamaları
@@ -436,6 +439,11 @@ namespace car.Service.Concrete
                 return false;
 
             return true;
+        }
+
+        public void CancelRentalRequest(int rentalId)
+        {
+            throw new NotImplementedException();
         }
 
         public void ConfirmReturnAndPayment(int rentalId, double totalPaid)

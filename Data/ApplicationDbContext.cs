@@ -1,11 +1,13 @@
-using Microsoft.EntityFrameworkCore;
 using car.Models;
 using carFeature.Models;
-using price.Models;
 using licence.Models;
+using Microsoft.EntityFrameworkCore;
+using price.Models;
 using user.Models;
 using userConnections.Models;
 using userInfo.Models;
+using car.Models;
+using static user.Models.User;
 
 namespace car.Data
 {
@@ -20,6 +22,7 @@ namespace car.Data
         public DbSet<CarFeature> CarFeatures { get; set; }
         public DbSet<Price> Prices { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Roles> Roles { get; set; }
         public DbSet<UserInfo> UserInfo { get; set; }
         public DbSet<UserConnections> UserConnections { get; set; }
         public DbSet<Log> Logs { get; set; }
