@@ -33,16 +33,25 @@ public class UserRepository : IUserRepository
     }
     public void AddUser(User user)
     {
+        // 1. Kullanıcıyı ekle (Henüz SaveChanges demiyoruz!)
         _context.Users.Add(user);
-        _context.SaveChanges();
+        _context.SaveChanges(); // Önce User oluşsun ki ID'si gelsin.
 
+        // 2. Rolü oluştur
         var role = new car.Models.Role
         {
-            UserId = user.Id,
+            UserId = user.Id, // Az önce oluşan ID'yi verdik
             RoleName = "User"
         };
 
+        // 3. Rolü ekle
         _context.Roles.Add(role);
+        _context.SaveChanges();
+
+        // 4. KRİTİK ADIM: Kullanıcının içindeki UserRole alanını güncelle
+        // Çünkü User tablosu da Rolü bilmek istiyor.
+        user.UserRole = role;
+        _context.Users.Update(user);
         _context.SaveChanges();
     }
 

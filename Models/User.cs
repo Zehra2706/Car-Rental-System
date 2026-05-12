@@ -25,7 +25,7 @@ namespace user.Models
         [Required]
         [StringLength(11)]
         public string TC { get; set; } = "00000000000";
-
+        public virtual ICollection<rental.Models.Rental> Rentals { get; set; } = new List<rental.Models.Rental>();
         public bool IsEmailConfirmed { get; set; } = false;
         public string? EmailConfirmationToken { get; set; }
         public string? EmailVerificationCode { get; set; }

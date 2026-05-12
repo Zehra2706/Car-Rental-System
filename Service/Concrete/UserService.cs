@@ -54,29 +54,13 @@ namespace car.Service.Concrete
 
         public void Register(RegisterViewModel model)
         {
-            // 1. Önce Rolü oluşturup kaydediyoruz
-            var userRole = new car.Models.Role
-            {
-                RoleName = "User"
-            };
-            _context.Roles.Add(userRole);
-            _context.SaveChanges();
-
-            // 2. Şimdi Kullanıcıyı oluşturuyoruz
+            // 1. Önce Kullanıcıyı (User) tüm alt bilgileriyle oluşturuyoruz (Ama henüz Rol yok)
             var user = new User
             {
                 Name = model.Name,
                 Surname = model.Surname,
                 TC = model.TC,
                 Date = DateTime.Now,
-
-                // --- KRİTİK DÜZELTME ---
-                // Veritabanı "UserRole" kolonuna NULL basamazsın diyor.
-                // Eğer User modelinde hem nesne hem de aynı isimde bir alan varsa 
-                // veritabanındaki kolonu elinle doldurmayı dene:
-
-                UserRole = userRole, // Nesne ilişkisi için
-
                 UserInfo = new UserInfo
                 {
                     Email = model.Email,
@@ -93,18 +77,24 @@ namespace car.Service.Concrete
                 }
             };
 
+            // 2. Kullanıcıyı veritabanına ekliyoruz. Bu işlem bize "user.Id"yi verecek.
             _context.Users.Add(user);
+            _context.SaveChanges();
 
-            try
+            // 3. Kullanıcı artık oluştuğuna göre, ona ait Rolü şimdi oluşturabiliriz
+            var userRole = new car.Models.Role
             {
-                _context.SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                // Eğer hata devam ederse, veritabanındaki UserRole kolonunun ismini 
-                // tam olarak karşılayacak bir property ataması gerekebilir.
-                throw;
-            }
+                RoleName = "User",
+                UserId = user.Id // Artık elimizde bir UserId var! SQL artık kızmaz.
+            };
+
+            _context.Roles.Add(userRole);
+            _context.SaveChanges();
+
+            // 4. Eğer User tablosundaki UserRole alanı hala boşsa onu da güncelleyelim
+            user.UserRole = userRole;
+            _context.Update(user);
+            _context.SaveChanges();
         }
         public EditProfileViewModel GetProfileForEdit(string email)
         {
