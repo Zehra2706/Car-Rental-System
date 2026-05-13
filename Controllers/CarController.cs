@@ -18,13 +18,15 @@ namespace car.Controllers
         private readonly IRentalService _rentalService;
         private readonly IReviewService _reviewService;
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public CarController(ICarService carService, IRentalService rentalService, IReviewService reviewService, ApplicationDbContext context)
+        public CarController(ICarService carService, IRentalService rentalService, IReviewService reviewService, ApplicationDbContext context, IConfiguration configuration)
         {
             _carService = carService;
             _rentalService = rentalService;
             _reviewService = reviewService;
             _context = context;
+            _configuration = configuration;
         }
 
         // --- 1. İLANLARIM LİSTESİ ---
@@ -147,18 +149,50 @@ namespace car.Controllers
         }
 
         // --- YARDIMCI METOTLAR ---
+        //private async Task<string> SaveImage(IFormFile imageFile)
+        //{
+        //    var bucketName = _configuration["AWS:BucketName"];
+        //    var region = Amazon.RegionEndpoint.GetBySystemName(_configuration["AWS:Region"]);
+
+        //    using var s3Client = new Amazon.S3.AmazonS3Client(region);
+
+        //    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+        //    string uploadPath = Path.Combine(
+        //        Environment.GetEnvironmentVariable("SYSTEMDRIVE") ?? "C:",
+        //        "inetpub", "AspNetCoreWebApps", "car-rental-app", "wwwroot", "images", "cars"
+        //    );
+
+        //    if (!Directory.Exists(uploadPath))
+        //        Directory.CreateDirectory(uploadPath);
+
+        //    string filePath = Path.Combine(uploadPath, fileName);
+        //    using (var stream = new FileStream(filePath, FileMode.Create))
+        //    {
+        //        await imageFile.CopyToAsync(stream);
+        //    }
+        //    return "/images/cars/" + fileName;
+        //}
         private async Task<string> SaveImage(IFormFile imageFile)
         {
-            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/cars");
-            if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
+            var bucketName = _configuration["AWS:BucketName"];
+            var region = Amazon.RegionEndpoint.GetBySystemName(_configuration["AWS:Region"]);
 
-            string filePath = Path.Combine(uploadPath, fileName);
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            using var s3Client = new Amazon.S3.AmazonS3Client(region);
+
+            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+
+            using var stream = imageFile.OpenReadStream();
+            var request = new Amazon.S3.Model.PutObjectRequest
             {
-                await imageFile.CopyToAsync(stream);
-            }
-            return "/images/cars/" + fileName;
+                BucketName = bucketName,
+                Key = "cars/" + fileName,
+                InputStream = stream,
+                ContentType = imageFile.ContentType
+            };
+
+            await s3Client.PutObjectAsync(request);
+
+            return $"https://{bucketName}.s3.{_configuration["AWS:Region"]}.amazonaws.com/cars/{fileName}";
         }
         [HttpGet]
         public IActionResult EditReview(int id)

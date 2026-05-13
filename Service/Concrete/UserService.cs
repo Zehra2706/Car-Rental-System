@@ -367,7 +367,7 @@ namespace car.Service.Concrete
 
             _userRepository.Update(user);
 
-            var link = $"http://localhost:5054/Auth/ResetPassword?token={token}";
+            var link = $"http://arackiralama-env.eba-qpyhhmb2.eu-north-1.elasticbeanstalk.com/Auth/ResetPassword?token={token}";
 
             var body = $@"
     <div style='font-family: Arial, sans-serif; line-height:1.6; color:#333'>

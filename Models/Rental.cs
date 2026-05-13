@@ -34,6 +34,7 @@ namespace rental.Models
         public bool IsPaid { get; set; } = false;
 
         public bool IsCompleted { get; set; }
+        public string? PaymentToken { get; set; }
 
         // 🚩 EKLEDİĞİMİZ AKILLI DURUM: Ekranda süslü yazılar için
         [NotMapped]
