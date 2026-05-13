@@ -35,11 +35,10 @@ namespace car.Service.Concrete
         }
         public void DeleteCar(int carId)
         {
-            if (_rentalRepository.HasActiveRentalForCar(carId))
+            if (_rentalRepository.IsInvolvedInActiveProcess(null, carId))
             {
-                throw new Exception("Bu araç için aktif veya onaylanmış kiralama bulunduğu için silinemez.");
+                throw new Exception("Bu araç şu an kullanımda, gecikmiş bir iadesi var veya gelecek rezervasyonu mevcut.");
             }
-
             _carRepository.DeleteCar(carId);
         }
         public void AddNewCar(CarCreateViewModel model)

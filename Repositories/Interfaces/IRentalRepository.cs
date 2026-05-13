@@ -22,5 +22,7 @@ namespace Car_reservation_automation_system.Repositories.Interfaces
         bool HasActiveRentalForUser(int userId);
 
         List<Rental> GetRentalsByUserId(int userId);
+
+        public bool IsInvolvedInActiveProcess(int? userId, int? carId);
     }
 }

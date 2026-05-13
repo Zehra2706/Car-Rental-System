@@ -25,13 +25,16 @@ namespace car.Service.Concrete
         private readonly ICarRepository _carRepository;
         private readonly INotificationService _notificationService;
         private readonly PasswordHasher<User> _passwordHasher = new PasswordHasher<User>();
-        public UserService(IUserRepository userRepository, ApplicationDbContext context, EmailService emailService, ICarRepository carRepository, INotificationService notificationService)
+        private readonly IRentalRepository _rentalRepository;
+
+        public UserService(IUserRepository userRepository, ApplicationDbContext context, EmailService emailService, ICarRepository carRepository, INotificationService notificationService, IRentalRepository rentalRepository)
         {
             _userRepository = userRepository;
             _context = context;
             _emailService = emailService;
             _carRepository = carRepository;
             _notificationService = notificationService;
+            _rentalRepository = rentalRepository;
         }
 
         public User? Login(string email, string password)
@@ -418,28 +421,17 @@ namespace car.Service.Concrete
 
         public bool CanDeleteUser(int userId)
         {
-            // kullanıcının kendi kiralamaları
-            var activeRentals = _context.Rentals
-                .Any(r => r.UserId == userId &&
-                (r.Status == "Onaylandı" || r.Status == "OnayBekliyor"));
-
-            if (activeRentals)
+            // Kullanıcının kiracı olduğu durum
+            if (_rentalRepository.IsInvolvedInActiveProcess(userId, null))
                 return false;
 
-            // kullanıcının arabaları
-            var userCarIds = _context.Cars
-                .Where(c => c.UserId == userId)
-                .Select(c => c.Id)
-                .ToList();
-
-            // bu arabaların aktif kiralamaları
-            var carActiveRentals = _context.Rentals
-                .Any(r => userCarIds.Contains(r.CarId) &&
-                (r.Status == "Onaylandı" || r.Status == "OnayBekliyor"));
-
-            if (carActiveRentals)
-                return false;
-
+            // Kullanıcının sahip olduğu araçların durumu
+            var userCarIds = _context.Cars.Where(c => c.UserId == userId).Select(c => c.Id).ToList();
+            foreach (var carId in userCarIds)
+            {
+                if (_rentalRepository.IsInvolvedInActiveProcess(null, carId))
+                    return false;
+            }
             return true;
         }
 

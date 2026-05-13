@@ -140,7 +140,22 @@ namespace Car_reservation_automation_system.Repositories.Concrete
                 .Where(r => r.UserId == userId)
                 .ToList();
         }
-
+        public bool IsInvolvedInActiveProcess(int? userId, int? carId)
+        {
+            var now = DateTime.Now;
+            return _context.Rentals.Any(r =>
+                (userId == null || r.UserId == userId) &&
+                (carId == null || r.CarId == carId) &&
+                (
+                    // Durum 1: Şu an arabayı kullanıyor veya onaylı randevusu var
+                    (r.Status == "Aktif" || r.Status == "Onaylandı") ||
+                    // Durum 2: İade tarihi geçmiş ama hala teslim edilmemiş (Gecikmiş)
+                    (!r.IsReturned && r.ReturnDate < now) ||
+                    // Durum 3: Gelecekteki bir tarihte başlayacak onaylı kiralama
+                    (r.Date > now && r.Status == "Onaylandı")
+                )
+            );
+        }
 
 
     }
