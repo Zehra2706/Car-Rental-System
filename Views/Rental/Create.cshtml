@@ -61,7 +61,7 @@
             <h3 class="fw-bold m-0">Menü</h3>
             <i class="bi bi-x-lg" style="cursor:pointer" onclick="toggleMenu()"></i>
         </div>
-        <a href="/User/Index"><i class="bi bi-house-door me-2"></i> Dashboard</a>
+        <a href="/User/Index"><i class="bi bi-house-door me-2"></i> Ana Sayfa</a>
         <a href="/User/AvailableCars"><i class="bi bi-car-front me-2"></i> Araç Kirala</a>
         <a href="/User/MyRentals"><i class="bi bi-list-check me-2"></i> Kiralamalarım</a>
         <hr class="opacity-25">
@@ -124,14 +124,44 @@
                                         <div class="col-6">
                                             <small class="text-muted d-block font-monospace">Vites Tipi</small>
                                             <span class="fw-bold text-dark">
-                                                @(oz != null ? oz.Transmission.ToString() : "---")
+                                                @if (oz != null) {
+                                                    @if (oz.Transmission.ToString() == "Automatic") { <text>Otomatik</text> }
+                                                    else if (oz.Transmission.ToString() == "Manual") { <text>Manuel</text> }
+                                                    else { @oz.Transmission.ToString() }
+                                                } else {
+                                                    @:---
+                                                }
                                             </span>
                                         </div>
 
                                         <div class="col-6">
                                             <small class="text-muted d-block font-monospace">Yakıt Tipi</small>
                                             <span class="fw-bold text-dark">
-                                                @(oz != null ? oz.fuelType.ToString() : "---")
+                                                @if (oz != null)
+                                                {
+                                                    @switch (oz.fuelType.ToString())
+                                                    {
+                                                        case "Gasoline":
+                                                            @:Benzin
+                                                            break;
+                                                        case "Diesel":
+                                                            @:Dizel
+                                                            break;
+                                                        case "Electric":
+                                                            @:Elektrik
+                                                            break;
+                                                        case "Hybrid":
+                                                            @:Hibrit
+                                                            break;
+                                                        default:
+                                                            @oz.fuelType.ToString()
+                                                            break;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    @:---
+                                                }
                                             </span>
                                         </div>
 
@@ -175,8 +205,7 @@
                                                 @* KONUM VE BİLGİ *@
                                                 <div class="col-12 mt-3">
                                                     <div class="p-3 bg-white rounded-3 border-start border-3 border-primary shadow-sm">
-                                                        <small class="text-muted d-block mb-1 fw-bold text-uppercase">📍 Konum &
-                                                            Bilgi</small>
+                                                        <small class="text-muted d-block mb-1 fw-bold text-uppercase">📍 Konum & Bilgi</small>
                                                             <p class="small mb-1 text-dark fw-bold">
                                                                 <i class="bi bi-geo-alt-fill text-danger"></i> @arac.Location
                                                             </p>
