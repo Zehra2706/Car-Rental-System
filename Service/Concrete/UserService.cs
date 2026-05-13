@@ -3,7 +3,7 @@ using user.Models;
 using userConnections.Models;
 using userInfo.Models;
 using car.ViewModels;
-using static user.Models.User;
+// using static user.Models.User; // removed to avoid ambiguity with nested User.Role
 using car.Data;
 using car.Models;
 using Microsoft.AspNetCore.Identity;
@@ -54,6 +54,8 @@ namespace car.Service.Concrete
 
         public void Register(RegisterViewModel model)
         {
+            var userRole = _context.Roles.FirstOrDefault(r => r.RoleName == "User");
+            if (userRole == null) throw new Exception("User rolü bulunamadı");
             // 1. Önce Kullanıcıyı (User) tüm alt bilgileriyle oluşturuyoruz (Ama henüz Rol yok)
             var user = new User
             {
@@ -61,6 +63,7 @@ namespace car.Service.Concrete
                 Surname = model.Surname,
                 TC = model.TC,
                 Date = DateTime.Now,
+                RoleId = userRole.Id, // direkt ata
                 UserInfo = new UserInfo
                 {
                     Email = model.Email,
@@ -79,21 +82,6 @@ namespace car.Service.Concrete
 
             // 2. Kullanıcıyı veritabanına ekliyoruz. Bu işlem bize "user.Id"yi verecek.
             _context.Users.Add(user);
-            _context.SaveChanges();
-
-            // 3. Kullanıcı artık oluştuğuna göre, ona ait Rolü şimdi oluşturabiliriz
-            var userRole = new car.Models.Role
-            {
-                RoleName = "User",
-                UserId = user.Id // Artık elimizde bir UserId var! SQL artık kızmaz.
-            };
-
-            _context.Roles.Add(userRole);
-            _context.SaveChanges();
-
-            // 4. Eğer User tablosundaki UserRole alanı hala boşsa onu da güncelleyelim
-            user.UserRole = userRole;
-            _context.Update(user);
             _context.SaveChanges();
         }
         public EditProfileViewModel GetProfileForEdit(string email)
@@ -253,7 +241,6 @@ namespace car.Service.Concrete
         public List<User> GetAllUsers() => _userRepository.GetAllUsers();
         public void DeleteUser(int userId)
         {
-            _userRepository.DeleteRolesByUserId(userId);
 
             if (!CanDeleteUser(userId))
                 throw new Exception();
@@ -266,11 +253,14 @@ namespace car.Service.Concrete
             if (_userRepository.PhoneExists(model.PhoneNumber)) throw new Exception("Bu telefon numarası zaten kayıtlı");
             if (_userRepository.LicenseExists(model.LicenseNumber)) throw new Exception("Bu ehliyet numarası zaten kayıtlı");
 
+            var adminRole = _context.Roles.FirstOrDefault(r => r.RoleName == "Admin");
+            if (adminRole == null) throw new Exception("Admin rolü bulunamadı");
+
             var user = new User
             {
                 Name = model.Name,
                 Surname = model.Surname,
-                UserRole = new car.Models.Role { RoleName = "Admin" },
+                RoleId = adminRole.Id, // direkt ata
                 Date = DateTime.Now,
                 UserConnections = new UserConnections { Adress = model.Address, Number = model.PhoneNumber },
                 Licence = new Licence { LicenceNumber = model.LicenseNumber }
@@ -283,14 +273,14 @@ namespace car.Service.Concrete
                 Email = model.Email,
                 Password = hashedPassword // Hashlenmiş şifre
             };
-            _userRepository.AddUser(user);
-            var role = new car.Models.Role
-            {
-                UserId = user.Id,
-                RoleName = user.UserRole.ToString()
-            };
+            //_userRepository.AddUser(user);
+            //var role = new car.Models.Role
+            //{
+            //    UserId = user.Id,
+            //    RoleName = user.UserRole.ToString()
+            //};
 
-            _context.Roles.Add(role);
+            _context.Users.Add(user);
             _context.SaveChanges();
         }
 

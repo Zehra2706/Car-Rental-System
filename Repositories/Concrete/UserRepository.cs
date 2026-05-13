@@ -23,7 +23,7 @@ public class UserRepository : IUserRepository
             .Include(x => x.UserRole) // 👈 Bu satırı EKLE
             .FirstOrDefault(x => x.UserInfo.Email == email);
     }
-   
+
     public List<User> GetAllUsers()
     {
         return _context.Users
@@ -37,22 +37,22 @@ public class UserRepository : IUserRepository
         _context.Users.Add(user);
         _context.SaveChanges(); // Önce User oluşsun ki ID'si gelsin.
 
-        // 2. Rolü oluştur
-        var role = new car.Models.Role
-        {
-            UserId = user.Id, // Az önce oluşan ID'yi verdik
-            RoleName = "User"
-        };
+        //// 2. Rolü oluştur
+        //var role = new car.Models.Role
+        //{
+        //    UserId = user.Id, // Az önce oluşan ID'yi verdik
+        //    RoleName = "User"
+        //};
 
-        // 3. Rolü ekle
-        _context.Roles.Add(role);
-        _context.SaveChanges();
+        //// 3. Rolü ekle
+        //_context.Roles.Add(role);
+        //_context.SaveChanges();
 
-        // 4. KRİTİK ADIM: Kullanıcının içindeki UserRole alanını güncelle
-        // Çünkü User tablosu da Rolü bilmek istiyor.
-        user.UserRole = role;
-        _context.Users.Update(user);
-        _context.SaveChanges();
+        //// 4. KRİTİK ADIM: Kullanıcının içindeki UserRole alanını güncelle
+        //// Çünkü User tablosu da Rolü bilmek istiyor.
+        //user.UserRole = role;
+        //_context.Users.Update(user);
+        //_context.SaveChanges();
     }
 
     public User GetByEmail(string email)
@@ -94,11 +94,11 @@ public class UserRepository : IUserRepository
         return _context.Users.Any(x => x.TC == tc);
     }
     
-    public void DeleteRolesByUserId(int userId)
-    {
-        var roles = _context.Roles.Where(r => r.UserId == userId);
-        _context.Roles.RemoveRange(roles);
-    }
+    //public void DeleteRolesByUserId(int userId)
+    //{
+    //    var roles = _context.Roles.Where(r => r.UserId == userId);
+    //    _context.Roles.RemoveRange(roles);
+    //}
     public void DeleteUser(int userId)
     {
         var user = _context.Users

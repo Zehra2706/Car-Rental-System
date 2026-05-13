@@ -9,6 +9,9 @@
 	<PropertyGroup>
 		<NoWarn>$(NoWarn);NU1901</NoWarn>
 	</PropertyGroup>
+	<PropertyGroup>
+		<StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
+	</PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Iyzipay" Version="2.1.78" />

@@ -16,6 +16,8 @@ namespace user.Models
         public required DateTime Date { get; set; }
 
         // HATALI KISIM BURAYDI - SADECE BU SATIRI BIRAK:
+
+        public int? RoleId { get; set; }
         public virtual car.Models.Role? UserRole { get; set; }
 
         public UserInfo? UserInfo { get; set; }

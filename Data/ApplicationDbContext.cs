@@ -47,6 +47,12 @@ namespace car.Data
                 .WithMany(c => c.Rentals)
                 .HasForeignKey(r => r.CarId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.UserRole)
+                .WithMany()
+                .HasForeignKey(u => u.RoleId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }
