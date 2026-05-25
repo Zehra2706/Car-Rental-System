@@ -338,7 +338,6 @@ public class AuthController : Controller
             return View(model);
         }
 
-        // 🔐 BURAYA KOYUYORSUN
         bool isStrongPassword = Regex.IsMatch(model.Password,
             @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{6,}$");
 
